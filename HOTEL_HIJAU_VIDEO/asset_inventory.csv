@@ -1,0 +1,109 @@
+jenis,fail,segmen/julat,resolusi,fps,tempoh_s,audio,kandungan,sync_ke_vid1_s,kegunaan_dalam_video
+video_asal,vid sintaksis 1.MOV,penuh,854x480 hevc,60/1,2891.35,aac 44100Hz 2ch,"Kamera wide statik (belakang kelas) - keseluruhan PdP 48 min, 3 guru; audio induk",rujukan,Rakaman induk + audio dialog semua babak; latar kredit
+video_asal,vid sintaksis 2.MOV,penuh,1280x720 h264,30/1,1500.1,aac 44100Hz 2ch,"Himpunan B-roll pegang tangan (eksport CapCut, 74 klip; logo CapCut 2 s di hujung)",lihat segmen,Cutaway/B-roll tersegerak (gambar + audio mikrofon dekat)
+video_asal,vid3.mp4,penuh,1280x720 h264,30/1,28.6,aac 48000Hz 2ch,"Murid membaca ayat aktif -> pasif, 'Betulkah, kelas?' 'Betul!', tepukan",2784.3,Babak 9 rumusan (28:01-28:30)
+broll_segmen,vid sintaksis 2.MOV,seg0: 0.0-4.7,1280x720,30,4.7,aac,"Papan putih: SP 5.3.3, objektif",tidak pasti,Masa akhir: 00:12.0 (montaj)
+broll_segmen,vid sintaksis 2.MOV,seg1: 4.7-18.9,1280x720,30,14.2,aac,Guru 1 + slaid Selamat Datang ke Hotel Hijau,21.20,Masa akhir: 00:32.2
+broll_segmen,vid sintaksis 2.MOV,seg2: 18.9-43.7,1280x720,30,24.8,aac,Guru 1 panggil-sahut Pengawal Bahasa / Sedia cikgu,63.88,Masa akhir: 01:14.9; 28:48.0 (montaj)
+broll_segmen,vid sintaksis 2.MOV,seg3: 43.7-53.1,1280x720,30,9.4,aac,"Wide kelas, slaid kuning",95.58,Masa akhir: 01:46.6
+broll_segmen,vid sintaksis 2.MOV,seg4: 53.1-64.6,1280x720,30,11.5,aac,Gambar HOTEL HIJAU di skrin,117.90,Masa akhir: 00:16.4 (montaj); 02:08.9
+broll_segmen,vid sintaksis 2.MOV,seg5: 64.6-72.4,1280x720,30,7.8,aac,Murid menonton,140.27,Masa akhir: 02:31.3
+broll_segmen,vid sintaksis 2.MOV,seg6: 72.4-85.9,1280x720,30,13.5,aac,Guru menulis di papan putih,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg7: 85.9-90.8,1280x720,30,4.9,aac,Murid (reaksi),218.95,Masa akhir: 00:23.4 (montaj)
+broll_segmen,vid sintaksis 2.MOV,seg8: 90.8-136.0,1280x720,30,45.2,aac,Murid menulis jawapan di papan putih,294.95,Masa akhir: 04:49.5
+broll_segmen,vid sintaksis 2.MOV,seg9: 136.0-152.9,1280x720,30,16.9,aac,Guru 1 di papan putih,373.32,Masa akhir: 05:38.5
+broll_segmen,vid sintaksis 2.MOV,seg10: 152.9-158.1,1280x720,30,5.2,aac,Wide kelas,419.81,Masa akhir: 06:24.4
+broll_segmen,vid sintaksis 2.MOV,seg11: 158.1-169.7,1280x720,30,11.6,aac,Murid menulis di papan putih,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg12: 169.7-184.0,1280x720,30,14.3,aac,Guru 1 + slaid kuning,462.31,Masa akhir: 06:47.4
+broll_segmen,vid sintaksis 2.MOV,seg13: 184.0-216.4,1280x720,30,32.4,aac,Guru 1 menerangkan objektif,489.51,Masa akhir: 07:14.6; 07:45.0
+broll_segmen,vid sintaksis 2.MOV,seg14: 216.4-228.2,1280x720,30,11.8,aac,Kumpulan murid,570.89,Masa akhir: 08:35.9
+broll_segmen,vid sintaksis 2.MOV,seg15: 228.2-234.0,1280x720,30,5.8,aac,Close-up tablet,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg16: 234.0-237.4,1280x720,30,3.4,aac,Close-up tablet (Minecraft),tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg17: 237.4-245.4,1280x720,30,8.0,aac,Guru 2 di skrin HOTEL HIJAU (Minecraft),688.36,Masa akhir: 10:33.5
+broll_segmen,vid sintaksis 2.MOV,seg18: 245.4-250.5,1280x720,30,5.1,aac,Kumpulan,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg19: 250.5-260.0,1280x720,30,9.5,aac,Guru 2 di skrin Minecraft,987.54,Masa akhir: 14:05.7; 28:54.0 (montaj)
+broll_segmen,vid sintaksis 2.MOV,seg20: 260.0-267.6,1280x720,30,7.6,aac,Wide kelas,1005.41,Masa akhir: 14:23.6
+broll_segmen,vid sintaksis 2.MOV,seg21: 267.6-275.2,1280x720,30,7.6,aac,Guru 2 di skrin,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg22: 275.2-282.6,1280x720,30,7.4,aac,Close-up tablet Minecraft,1048.06,Masa akhir: 15:06.2
+broll_segmen,vid sintaksis 2.MOV,seg23: 282.6-287.5,1280x720,30,4.9,aac,Close-up tablet Minecraft,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg24: 287.5-307.2,1280x720,30,19.7,aac,Guru 2 di skrin,1085.41,Masa akhir: 15:43.6
+broll_segmen,vid sintaksis 2.MOV,seg25: 307.2-312.2,1280x720,30,5.0,aac,Wide kumpulan,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg26: 312.2-316.0,1280x720,30,3.8,aac,Guru 2 membimbing kumpulan,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg27: 316.0-328.7,1280x720,30,12.7,aac,Guru 2 membimbing kumpulan,1147.66,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg28: 328.7-341.2,1280x720,30,12.5,aac,Wide kelas,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg29: 341.2-349.0,1280x720,30,7.8,aac,Wide kelas,1249.04,Masa akhir: 16:28.2
+broll_segmen,vid sintaksis 2.MOV,seg30: 349.0-357.5,1280x720,30,8.5,aac,Guru 2 di skrin Minecraft,1260.20,Masa akhir: 16:39.4
+broll_segmen,vid sintaksis 2.MOV,seg31: 357.5-363.4,1280x720,30,5.9,aac,Skrin Minecraft (teks),tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg32: 363.4-368.1,1280x720,30,4.7,aac,Kabur,tidak pasti,DIKECUALIKAN (kabur)
+broll_segmen,vid sintaksis 2.MOV,seg33: 368.1-375.4,1280x720,30,7.3,aac,Murid dengan tablet,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg34: 375.4-390.1,1280x720,30,14.7,aac,Close-up wajah tersenyum,1377.57,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg35: 390.1-400.0,1280x720,30,9.9,aac,Guru 2 menerangkan teks situasi,1449.94,Masa akhir: 18:45.1
+broll_segmen,vid sintaksis 2.MOV,seg36: 400.0-402.4,1280x720,30,2.4,aac,Guru 2 membimbing kumpulan,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg37: 402.4-405.7,1280x720,30,3.3,aac,Guru 2 berjalan,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg38: 405.7-410.2,1280x720,30,4.5,aac,Wide kelas,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg39: 410.2-679.7,1280x720,30,269.5,aac,"Guru 3 + Ruang Guru, murid menghantar jawapan, perbincangan ayat (4.5 min)",1760.08,Masa akhir: 20:27.1; 22:25.1
+broll_segmen,vid sintaksis 2.MOV,seg40: 679.7-715.9,1280x720,30,36.2,aac,Galeri jawapan (hamparan) di skrin,2151.28,Masa akhir: 23:31.4
+broll_segmen,vid sintaksis 2.MOV,seg41: 715.9-764.9,1280x720,30,49.0,aac,Close-up galeri jawapan,2205.70,Masa akhir: 24:25.8
+broll_segmen,vid sintaksis 2.MOV,seg42: 764.9-956.0,1280x720,30,191.1,aac,Tiket refleksi (3 min),2473.10,Masa akhir: 25:59.1; 27:16.1; 28:30.0 (montaj)
+broll_segmen,vid sintaksis 2.MOV,seg43: 956.0-971.2,1280x720,30,15.2,aac,Kabur,tidak pasti,DIKECUALIKAN (kabur)
+broll_segmen,vid sintaksis 2.MOV,seg44: 971.2-978.4,1280x720,30,7.2,aac,Murid berbincang,219.46,Masa akhir: 03:50.5
+broll_segmen,vid sintaksis 2.MOV,seg45: 978.4-979.2,1280x720,30,0.8,aac,Wide,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg46: 979.2-1011.3,1280x720,30,32.1,aac,Murid menulis di papan putih,353.88,Masa akhir: 05:27.4; 05:30.5
+broll_segmen,vid sintaksis 2.MOV,seg47: 1011.3-1026.2,1280x720,30,14.9,aac,Kumpulan dengan tablet,620.93,Masa akhir: 09:26.0
+broll_segmen,vid sintaksis 2.MOV,seg48: 1026.2-1032.6,1280x720,30,6.4,aac,Kumpulan,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg49: 1032.6-1042.8,1280x720,30,10.2,aac,Kumpulan dengan tablet,678.39,Masa akhir: 10:23.4
+broll_segmen,vid sintaksis 2.MOV,seg50: 1042.8-1061.4,1280x720,30,18.6,aac,Kumpulan dengan tablet,891.54,Masa akhir: 12:29.7
+broll_segmen,vid sintaksis 2.MOV,seg51: 1061.4-1071.9,1280x720,30,10.5,aac,Murid menggunakan tablet,915.86,Masa akhir: 12:54.0
+broll_segmen,vid sintaksis 2.MOV,seg52: 1071.9-1086.4,1280x720,30,14.5,aac,Close-up tablet,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg53: 1086.4-1110.3,1280x720,30,23.9,aac,Kumpulan,1297.79,Masa akhir: 17:16.9
+broll_segmen,vid sintaksis 2.MOV,seg54: 1110.3-1180.7,1280x720,30,70.4,aac,Close-up menaip ayat dalam Minecraft,1323.83,Masa akhir: 17:19.1
+broll_segmen,vid sintaksis 2.MOV,seg55: 1180.7-1195.5,1280x720,30,14.8,aac,Close-up tablet Minecraft,1406.95,Masa akhir: 18:02.1
+broll_segmen,vid sintaksis 2.MOV,seg56: 1195.5-1204.3,1280x720,30,8.8,aac,Kumpulan,1468.63,Masa akhir: 19:03.8
+broll_segmen,vid sintaksis 2.MOV,seg57: 1204.3-1249.2,1280x720,30,44.9,aac,Klip menegak,tidak pasti,DIKECUALIKAN (klip menegak)
+broll_segmen,vid sintaksis 2.MOV,seg58: 1249.2-1287.3,1280x720,30,38.1,aac,Borang Ruang Guru - NAMA MURID kelihatan,tidak pasti,DIKECUALIKAN (privasi: nama murid)
+broll_segmen,vid sintaksis 2.MOV,seg59: 1287.3-1319.8,1280x720,30,32.5,aac,Guru 3 di skrin Ruang Guru,1871.16,Masa akhir: 21:46.3; 28:59.0 (montaj)
+broll_segmen,vid sintaksis 2.MOV,seg60: 1319.8-1328.8,1280x720,30,9.0,aac,Close-up menaip,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg61: 1328.8-1335.5,1280x720,30,6.7,aac,Komputer riba,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg62: 1335.5-1376.3,1280x720,30,40.8,aac,Kelas wide,2197.06,Masa akhir: 24:17.2
+broll_segmen,vid sintaksis 2.MOV,seg63: 1376.3-1377.3,1280x720,30,1.0,aac,Kelas,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg64: 1377.3-1422.5,1280x720,30,45.2,aac,Interaksi guru-murid,2361.67,Masa akhir: 25:20.1; 28:36.0 (montaj)
+broll_segmen,vid sintaksis 2.MOV,seg65: 1422.5-1437.4,1280x720,30,14.9,aac,Wajah tersenyum,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg66: 1437.4-1451.2,1280x720,30,13.8,aac,Tiket refleksi,2537.69,Masa akhir: 27:03.7
+broll_segmen,vid sintaksis 2.MOV,seg67: 1451.2-1460.6,1280x720,30,9.4,aac,Tiket refleksi + tablet,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg68: 1460.6-1466.7,1280x720,30,6.1,aac,Tiket refleksi,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg69: 1466.7-1474.0,1280x720,30,7.3,aac,Tiket refleksi,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg70: 1474.0-1486.2,1280x720,30,12.2,aac,Tiket refleksi,2593.72,Masa akhir: 27:59.7
+broll_segmen,vid sintaksis 2.MOV,seg71: 1486.2-1492.4,1280x720,30,6.2,aac,Kumpulan,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg72: 1492.4-1498.1,1280x720,30,5.7,aac,Tiket refleksi,tidak pasti,simpanan (tidak digunakan)
+broll_segmen,vid sintaksis 2.MOV,seg73: 1498.1-1500.1,1280x720,30,2.0,aac,Logo CapCut,tidak pasti,DIKECUALIKAN (logo CapCut)
+grafik,chapter_01.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,chapter_02.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,chapter_03.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,chapter_04.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,chapter_05.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,chapter_06.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,credits_1.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,credits_2.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,credits_3.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,end_title.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,lt_ar.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,lt_baca.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,lt_galeri.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,lt_papan.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,lt_video.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,opening_title.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,popup_guru1.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,popup_guru2.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,popup_guru3.mov,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,progress_fill.png,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+grafik,progress_track.png,,1920x1080 RGBA,30,,,Motion graphics (graphics.py),,overlay
+audio,mus_closing.wav,,,,,48kHz stereo,Muzik/SFX asli dijana (music.py) - bebas hak cipta,,muzik latar / kesan bunyi
+audio,mus_intro.wav,,,,,48kHz stereo,Muzik/SFX asli dijana (music.py) - bebas hak cipta,,muzik latar / kesan bunyi
+audio,mus_motiv.wav,,,,,48kHz stereo,Muzik/SFX asli dijana (music.py) - bebas hak cipta,,muzik latar / kesan bunyi
+audio,mus_opening.wav,,,,,48kHz stereo,Muzik/SFX asli dijana (music.py) - bebas hak cipta,,muzik latar / kesan bunyi
+audio,mus_piano.wav,,,,,48kHz stereo,Muzik/SFX asli dijana (music.py) - bebas hak cipta,,muzik latar / kesan bunyi
+audio,mus_tech.wav,,,,,48kHz stereo,Muzik/SFX asli dijana (music.py) - bebas hak cipta,,muzik latar / kesan bunyi
+audio,mus_upbeat.wav,,,,,48kHz stereo,Muzik/SFX asli dijana (music.py) - bebas hak cipta,,muzik latar / kesan bunyi
+audio,sfx_impact.wav,,,,,48kHz stereo,Muzik/SFX asli dijana (music.py) - bebas hak cipta,,muzik latar / kesan bunyi
+audio,sfx_reveal.wav,,,,,48kHz stereo,Muzik/SFX asli dijana (music.py) - bebas hak cipta,,muzik latar / kesan bunyi
+audio,sfx_whoosh.wav,,,,,48kHz stereo,Muzik/SFX asli dijana (music.py) - bebas hak cipta,,muzik latar / kesan bunyi

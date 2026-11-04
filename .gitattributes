@@ -1,0 +1,3 @@
+HOTEL_HIJAU_VIDEO/05_GRAPHICS/*.mov filter=lfs diff=lfs merge=lfs -text
+HOTEL_HIJAU_VIDEO/08_PREVIEW/*.mp4 filter=lfs diff=lfs merge=lfs -text
+HOTEL_HIJAU_VIDEO/09_FINAL_EXPORT/*.mp4 filter=lfs diff=lfs merge=lfs -text

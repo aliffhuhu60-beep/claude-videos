@@ -1,0 +1,8 @@
+# fail asal (besar) — simpan di Google Drive
+HOTEL_HIJAU_VIDEO/01_RAW_VIDEO/*
+!HOTEL_HIJAU_VIDEO/01_RAW_VIDEO/.gitkeep
+HOTEL_HIJAU_VIDEO/07_PROJECT_FILES/_work/
+HOTEL_HIJAU_VIDEO/05_GRAPHICS/_tmp/
+HOTEL_HIJAU_VIDEO/02_AUDIO/*.wav
+__pycache__/
+*.tmp.mkv
