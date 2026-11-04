@@ -307,8 +307,9 @@ def do_final(preview=False):
     fc.append(f"[pb0][fil]overlay={gx0}:{gy}:shortest=1:enable='between(t,{p0 + 6},{p1})'[pb1]")
     last = "[pb1]"; k = 3
     for name, t0 in ev:
-        inputs += ["-i", os.path.join(GFX, name + ".mov")]
-        fc.append(f"[{k}:v]setpts=PTS-STARTPTS+{t0:.3f}/TB[g{k}]")
+        # -itsoffset: grafik bermula pada masa t0 di peringkat demux (elak penimbalan bingkai awal)
+        inputs += ["-itsoffset", f"{t0:.3f}", "-i", os.path.join(GFX, name + ".mov")]
+        fc.append(f"[{k}:v]format=rgba[g{k}]")
         fc.append(f"{last}[g{k}]overlay=0:0:eof_action=pass:repeatlast=0[o{k}]")
         last = f"[o{k}]"; k += 1
     # ---- audio ----
@@ -330,7 +331,7 @@ def do_final(preview=False):
         fc.append(f"[{k}:a]volume={g}dB,adelay={int(t0 * 1000)}|{int(t0 * 1000)},apad[s{i}]")
         sf.append(f"[s{i}]"); k += 1
     fc.append("[dlg][musd]" + "".join(sf) + f"amix=inputs={2 + len(sf)}:normalize=0:duration=first,"
-              "loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,atrim=0:1800[aout]")
+              "loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,afade=t=out:st=1796.5:d=3.5,atrim=0:1800[aout]")
     fc.append(f"{last}fade=t=out:st=1798:d=2,format=yuv420p[vout]")
     fcs = ";\n".join(fc)
     with open(os.path.join(ROOT, "07_PROJECT_FILES", "final_filtergraph.txt"), "w") as f: f.write(fcs)
