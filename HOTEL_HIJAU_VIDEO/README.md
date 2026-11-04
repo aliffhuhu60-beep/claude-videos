@@ -63,6 +63,9 @@ python3 07_PROJECT_FILES/build_video.py rough
 # 5. Video akhir (grafik + muzik + ducking + loudnorm)
 python3 07_PROJECT_FILES/build_video.py final            # 1080p → 09_FINAL_EXPORT
 python3 07_PROJECT_FILES/build_video.py final --preview  # 720p pantas → 08_PREVIEW
+
+# 6. Semakan kualiti (tempoh, skrin hitam, loudness, lembaran visual)
+python3 07_PROJECT_FILES/qc_check.py 09_FINAL_EXPORT/MISI_PENGAWAL_BAHASA_Hotel_Hijau_1080p.mp4 08_PREVIEW/qc
 ```
 Fail sementara klip disimpan dalam `07_PROJECT_FILES/_work/` (atau `$HH_WORK`).
 
