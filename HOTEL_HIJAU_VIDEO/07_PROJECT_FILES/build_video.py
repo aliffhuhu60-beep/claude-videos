@@ -472,6 +472,17 @@ def do_subs():
         cues.append([a, b, txt])
     for v1a, v1b, txt in SUBS_EXTRA:
         cues.append([t_of_v1(v1a), t_of_v1(v1b), txt])
+    # Transkripsi padat (transcribe_dense.py): hanya baris yang DISEMAK & diluluskan dalam transcript_dense_edits.json
+    dp, dep = os.path.join(HERE, "transcript_dense_raw.json"), os.path.join(HERE, "transcript_dense_edits.json")
+    if os.path.exists(dp) and os.path.exists(dep):
+        dense, dedits = json.load(open(dp)), json.load(open(dep))
+        for k, v in dedits.items():
+            if k.startswith("_") or not v: continue
+            if isinstance(v, list): txt, a, b = v[0], dense[int(k)]["s"], dense[int(v[1])]["e"]
+            else: txt, a, b = v, dense[int(k)]["s"], dense[int(k)]["e"]
+            if a < markers["set_induksi"] or a >= markers["credits"]: continue
+            if any(a < c[1] - 0.3 and c[0] < b - 0.3 for c in cues): continue  # baris semakan asal diutamakan
+            cues.append([a, b, txt])
     cues.sort(key=lambda c: c[0])
     for c in cues: c[1] = max(c[0] + 1.0, min(c[1], c[0] + min(7.0, 1.2 + 0.075 * len(c[2]))))  # tempoh ikut kelajuan bacaan
     for j in range(len(cues) - 1): cues[j][1] = min(cues[j][1], cues[j + 1][0] - 0.05)
