@@ -39,6 +39,14 @@ SYNC = {
 }
 # Dikecualikan: seg40 & v2 553-566 (nama penuh murid pada skrin), seg58 (nama murid), seg34 (close-up jurukamera), seg73 (logo CapCut)
 V3_OFFSET = 2784.3
+# Penyelarasan cebisan (piecewise_sync.py): vid2 ialah kompilasi bersambung — setiap babak (antara potongan scdet)
+# mempunyai offset sendiri. SYNC di atas menentukan JULAT vid2 yang dipilih; offset sebenar diambil daripada PIECES.
+# Julat vid2 yang tidak boleh digunakan: orang/objek rapat di depan kamera, muka jurukamera, hayunan kamera laju
+EXCLUDE_V2 = [(766.3, 770.4), (1182.3, 1186.3), (1338.6, 1341.1)]
+import csv as _csv
+PIECES = [(float(r["v2_start"]), float(r["v2_end"]), float(r["v1_offset"]) - float(r["v2_start"]))
+          for r in _csv.DictReader(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "broll_sync_v2.csv")))
+          if float(r["r"]) >= 0.6]
 
 # Kolam cutaway (v2) — aktiviti murid/peranti tanpa wajah bercakap; digunakan apabila kamera induk terhalang
 CUTAWAY = {
@@ -112,10 +120,10 @@ clips = []; markers = {}; _pool = {}
 def nframes(): return sum(c["frames"] for c in clips)
 def now(): return nframes() / FPS
 def F(t): return int(round(t * FPS))
-def add(src, start, frames, crop=None, audio="own", zoom=None, blur=False, tag="", label=""):
+def add(src, start, frames, crop=None, audio="own", zoom=None, blur=False, tag="", label="", v1d=None):
     if frames <= 0: return
     clips.append(dict(src=src, start=round(start, 4), frames=frames, crop=crop, audio=audio, zoom=zoom, blur=blur,
-                      tag=tag, label=label, t_final=now()))
+                      tag=tag, label=label, t_final=now(), v1d=v1d))
 def mark(n): markers[n] = now()
 
 def take_cutaway(tag, need):
@@ -143,22 +151,37 @@ def v1_piece(p0, p1, tag):
                 add("v1", t, F(b) - F(t), crop=best, tag=tag)
 
 def span(a, b, inserts=(), tag=""):
+    # Kembangkan setiap sisipan (seg, x0, x1) kepada cebisan vid2 yang betul-betul selari dengan vid1
+    subs = []
+    def cutx(q0, q1):  # buang julat vid2 yang terhalang (EXCLUDE_V2)
+        out = [(q0, q1)]
+        for e0, e1 in EXCLUDE_V2:
+            out = [z for a0, a1 in out for z in ((a0, min(a1, e0)), (max(a0, e1), a1)) if z[1] - z[0] > 0]
+        return out
+    for seg, x0, x1 in inserts:
+        s0, s1, off = SYNC[seg]; old_d = off - s0
+        for p0, p1, d in PIECES:
+            for q0, q1 in cutx(max(p0 + 0.05, s0), min(p1 - 0.05, s1)):
+                if q1 - q0 < 1.0: continue
+                lo, hi = (x0, x1) if abs(d - old_d) < 0.3 else (a, b)  # julat asal sah hanya jika offset lama betul
+                v0, v1e = max(q0 + d, lo, a), min(q1 + d, hi, b)
+                if v1e - v0 >= 1.0: subs.append((v0, v1e, d, seg))
     t = a
-    for seg, x0, x1 in sorted(inserts, key=lambda z: z[1]):
-        s0, s1, off = SYNC[seg]
-        x0 = max(x0, off, a); x1 = min(x1, off + (s1 - s0) - 0.05, b)
-        if 0 < x0 - t < 1.0: x0 = t if off <= t else t + 1.0
-        if 0 < b - x1 < 1.0: x1 = b if off + (s1 - s0) - 0.05 >= b else b - 1.0
+    for x0, x1, d, seg in sorted(subs):
+        if x0 < t: x0 = t
+        ok = lambda v: any(p0 <= v - d < p1 for p0, p1, dd in PIECES if abs(dd - d) < 1e-6) and not any(e0 <= v - d < e1 for e0, e1 in EXCLUDE_V2)
+        if 0 < x0 - t < 1.0: x0 = t if ok(t) and ok((t + x0) / 2) else t + 1.0
+        if 0 < b - x1 < 1.0: x1 = b if ok(b - 0.01) and ok((x1 + b) / 2) else b - 1.0
         if x1 - x0 < 1.0: continue
         if x0 > t: v1_piece(t, x0, tag)
-        add("v2", s0 + (x0 - off), F(x1) - F(x0), tag=tag, label=f"seg{seg}@v1:{x0:.1f}")
+        add("v2", x0 - d, F(x1) - F(x0), tag=tag, label=f"seg{seg}@v1:{x0:.1f}", v1d=d)
         t = x1
     if b > t: v1_piece(t, b, tag)
 
 # Rancangan kandungan (masa vid1). Fasa: Set Induksi (Guru 1) · Langkah 1 (Guru 2) · Langkah 2 + Penutup (Guru 3)
 PLAN = [
     ("set_induksi", [
-        (17.0, 108.0, [(1, 21.2, 35.4), (2, 63.9, 88.7), (3, 95.6, 104.9)]),
+        (15.1, 108.0, [(1, 21.2, 35.4), (2, 63.9, 88.7), (3, 95.6, 104.9)]),
         (118.0, 245.0, [(4, 118.0, 129.4), (5, 140.3, 148.1), (44, 219.5, 226.6)]),
         (316.0, 357.0, [(8, 316.0, 340.0), (46, 345.0, 357.0)]),
         (366.0, 400.0, [(46, 366.0, 373.0), (9, 373.4, 390.0)]),
@@ -216,7 +239,7 @@ def t_of_v1(v1t):
         if c["src"] == "v1" and c["audio"] == "own" and c["start"] <= v1t < c["start"] + d:
             return c["t_final"] + (v1t - c["start"])
         if c["src"] == "v2" and c["label"].startswith("seg"):
-            seg = int(c["label"][3:].split("@")[0]); s0, s1, off = SYNC[seg]; v1s = off + (c["start"] - s0)
+            v1s = c["start"] + c["v1d"]
             if v1s <= v1t < v1s + d: return c["t_final"] + (v1t - v1s)
         if c["src"] == "v2" and isinstance(c["audio"], (list, tuple)):
             v1s = c["audio"][1]
@@ -235,7 +258,7 @@ def overlay_events():
     return [
         ("title_open", 0.0),
         ("phase_set_induksi", M["set_induksi"] + 1.2),
-        ("popup_guru1", t_of_v1(23.0)),
+        ("popup_guru1", t_of_v1(17.5)),  # close-up Guru 1 memberi salam
         ("phase_langkah_1", M["langkah_1"] + 0.3),
         ("popup_guru2", t_of_v1(987.9)),  # close-up Guru 2 di sebelah skrin Minecraft
         ("steps_misi1", t_of_v1(994.6)),
@@ -244,7 +267,8 @@ def overlay_events():
         ("phase_langkah_2", M["langkah_2"] + 0.3),
         ("popup_guru3", t_of_v1(1769.0)),  # close-up Guru 3 di hadapan kelas
         ("steps_ar", t_of_v1(1872.0)),
-        ("ayat_galeri", t_of_v1(2216.0)),
+        ("ayat_galeri1", t_of_v1(2215.3)),  # Cikgu 3 membincangkan ayat Situasi 2 (menuai)
+        ("ayat_galeri2", t_of_v1(2367.3)),  # "Okey, semua baca" — ayat Situasi 3 (memasang)
         ("phase_penutup", M["penutup"] + 0.3),
         ("ayat_rumusan", v3 + 7.4),
         ("credits_1", M["credits"] + 0.0), ("credits_2", M["credits"] + 10.0), ("credits_3", M["credits"] + 19.0),
@@ -266,7 +290,7 @@ VOICE = ("highpass=f=100,equalizer=f=250:t=q:w=1.0:g=-2,equalizer=f=3000:t=q:w=1
 AF_V2 = "highpass=f=80,afftdn=nr=8:nf=-35,dynaudnorm=f=300:g=21:p=0.8:m=8"
 
 # Kawasan dikaburkan pada B-roll (masa vid2, pecahan lebar x0..x1): lajur "Nama" murid pada Galeri Jawapan
-PRIVACY_MASKS = [(724.0, 746.5, 0.0, 0.30), (757.0, 765.0, 0.0, 0.30)]
+PRIVACY_MASKS = []  # v3: kaburan dibuang atas permintaan guru (Galeri Jawapan dipaparkan penuh)
 
 def privacy_mask(c):
     if c["src"] != "v2": return []
@@ -368,13 +392,53 @@ def do_rough():
 # ------------------------------------------------------------------
 # Muzik & SFX
 # ------------------------------------------------------------------
+# B-roll murid (masa vid2): suara murid/jurukamera DISENYAPKAN dan diganti muzik latar (maklum balas v3).
+# Sepanjang sesi PdP (guru mengajar) TIADA muzik.
+STUDENT_BROLL_V2 = [(971.2, 978.5), (979.2, 982.5), (216.4, 228.3), (1011.3, 1026.3), (1032.5, 1042.8), (1042.8, 1061.4),
+                    (1061.4, 1071.9), (275.2, 282.6), (341.2, 349.1), (1110.3, 1126.5), (1335.4, 1341.1), (770.4, 829.5),
+                    (842.7, 885.5), (1437.4, 1451.3), (1473.9, 1486.3)]
+PHASE_MUSIC = {"set_induksi": "mus_intro.wav", "langkah_1": "mus_upbeat.wav", "langkah_2": "mus_tech.wav", "penutup": "mus_piano.wav"}
+BED_GAIN_DB = -7.0
+
+def music_windows():
+    """Selang masa akhir (t0, t1, fasa) bagi klip B-roll murid yang audio asalnya digunakan."""
+    w = []
+    for c in clips:
+        if c["src"] != "v2" or c["audio"] != "own": continue
+        a, d = c["start"], c["frames"] / FPS
+        ov = sum(max(0, min(a + d, r1) - max(a, r0)) for r0, r1 in STUDENT_BROLL_V2)
+        if ov >= 0.5 * d:
+            t0, t1 = c["t_final"], c["t_final"] + d
+            if w and t0 - w[-1][1] < 0.6 and w[-1][2] == c["tag"]: w[-1] = (w[-1][0], t1, c["tag"])
+            else: w.append((t0, t1, c["tag"]))
+    return [x for x in w if x[1] - x[0] >= 5.0]  # selang terlalu pendek: kekalkan audio asal (elak muzik terputus-putus)
+
+def build_music_bed():
+    """Trek muzik 30 min: muzik fasa hanya dalam music_windows() (fade 0.8 s), senyap di tempat lain."""
+    import numpy as np, wave
+    SR = 48000; bed = np.zeros((int(TOTAL * SR), 2), np.float32); cache = {}
+    def load(fn):
+        if fn not in cache:
+            w = wave.open(os.path.join(AUD, fn)); cache[fn] = np.frombuffer(w.readframes(w.getnframes()), np.int16).reshape(-1, 2).astype(np.float32) / 32768
+        return cache[fn]
+    g = 10 ** (BED_GAIN_DB / 20); fd = int(0.8 * SR)
+    for t0, t1, ph in music_windows():
+        m = load(PHASE_MUSIC[ph]); n = int((t1 - t0) * SR); off = int((t0 - markers[ph]) * SR) % (len(m) - n)
+        seg = m[off:off + n].copy() * g; f = min(fd, n // 3); ramp = np.linspace(0, 1, f)[:, None]
+        seg[:f] *= ramp; seg[-f:] *= ramp[::-1]
+        a = int(t0 * SR); bed[a:a + n] += seg[: len(bed) - a]
+    out = os.path.join(WORK, "music_bed.wav"); w = wave.open(out, "wb"); w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
+    w.writeframes((np.clip(bed, -1, 1) * 32767).astype(np.int16).tobytes()); w.close(); return out
+
+def dialog_mute_expr():
+    """Ungkapan volume ffmpeg: 0 dalam music_windows() (ramp 0.25 s), 1 di tempat lain."""
+    parts = [f"clip((t-{a:.3f})/0.25,0,1)*clip(({b:.3f}-t)/0.25,0,1)" for a, b, _ in music_windows()]
+    return "1-(" + "+".join(parts) + ")" if parts else "1"
+
 def music_plan():
     M = markers
     return [("mus_opening.wav", 0.0, M["set_induksi"] + 3.0, 0.0, -3.0),
-            ("mus_intro.wav", M["set_induksi"] - 1.0, M["langkah_1"] + 1.0, 0.0, -22.0),
-            ("mus_upbeat.wav", M["langkah_1"] - 1.0, M["langkah_2"] + 1.0, 0.0, -23.5),
-            ("mus_tech.wav", M["langkah_2"] - 1.0, M["penutup"] + 1.0, 0.0, -23.0),
-            ("mus_piano.wav", M["penutup"] - 1.0, M["credits"] + 1.0, 0.0, -22.0),
+            (os.path.join(WORK, "music_bed.wav"), 0.0, M["credits"] + 1.0, 0.0, 0.0),
             ("mus_closing.wav", M["credits"] - 1.0, TOTAL, 0.0, -5.0)]
 
 def sfx_plan():
@@ -429,6 +493,42 @@ SUBS_EXTRA = [  # baris dikenal pasti daripada transkripsi mikrofon dekat (masa 
 def lines_of(t):
     return t.split("\\N") if "\\N" in t else wrap2(t)
 
+def remap_cues(cues):
+    """Transkripsi (transcript_raw/dense) dibuat pada garis masa EDL lama (subs_timebase_edl.json). Petakan setiap baris:
+    masa lama -> masa sumber sebenar (vid1, guna penyelarasan cebisan) -> masa dalam EDL semasa. Baris berulang dibuang."""
+    import difflib
+    old = json.load(open(os.path.join(HERE, "subs_timebase_edl.json")))
+    def src_time(t):
+        for c in old["clips"]:
+            if c["t_final"] <= t < c["t_final"] + c["frames"] / FPS:
+                dt = t - c["t_final"]
+                if isinstance(c["audio"], (list, tuple)): return ("v1", c["audio"][1] + dt)
+                if c["src"] == "v1": return ("v1", c["start"] + dt)
+                if c["src"] == "v3": return ("v3", c["start"] + dt)
+                if c["src"] == "v2":
+                    v2t = c["start"] + dt
+                    for p0, p1, d in PIECES:
+                        if p0 <= v2t < p1: return ("v1", v2t + d)
+                return None
+        return None
+    def new_time(st):
+        if st is None: return None
+        if st[0] == "v1":
+            try: return t_of_v1(st[1])
+            except ValueError: return None
+        for c in clips:
+            if c["src"] == "v3" and c["start"] <= st[1] < c["start"] + c["frames"] / FPS: return c["t_final"] + st[1] - c["start"]
+    out = []
+    for a, b, txt in cues:
+        na = new_time(src_time(a))
+        if na is None: continue
+        out.append([na, na + (b - a), txt])
+    out.sort(key=lambda c: c[0]); res = []
+    for c in out:
+        if any(abs(c[0] - p[0]) < 4.0 and difflib.SequenceMatcher(None, c[2].lower(), p[2].lower()).ratio() > 0.6 for p in res): continue
+        res.append(c)
+    return res
+
 def do_subs():
     build_edl()
     wav = os.path.join(WORK, "dialog.wav")
@@ -470,17 +570,20 @@ def do_subs():
         prev = txt; a = s["s"]
         if a >= markers["credits"] or a < markers["set_induksi"]: continue
         cues.append([a, b, txt])
+    cues = remap_cues(cues)  # transkripsi dibuat pada garis masa lama -> garis masa semasa
     for v1a, v1b, txt in SUBS_EXTRA:
         cues.append([t_of_v1(v1a), t_of_v1(v1b), txt])
     # Transkripsi padat (transcribe_dense.py): hanya baris yang DISEMAK & diluluskan dalam transcript_dense_edits.json
     dp, dep = os.path.join(HERE, "transcript_dense_raw.json"), os.path.join(HERE, "transcript_dense_edits.json")
     if os.path.exists(dp) and os.path.exists(dep):
-        dense, dedits = json.load(open(dp)), json.load(open(dep))
+        dense, dedits = json.load(open(dp)), json.load(open(dep)); dcues = []
         for k, v in dedits.items():
             if k.startswith("_") or not v: continue
             if isinstance(v, list): txt, a, b = v[0], dense[int(k)]["s"], dense[int(v[1])]["e"]
             else: txt, a, b = v, dense[int(k)]["s"], dense[int(k)]["e"]
             if a < markers["set_induksi"] or a >= markers["credits"]: continue
+            dcues.append([a, b, txt])
+        for a, b, txt in remap_cues(dcues):
             if any(a < c[1] - 0.3 and c[0] < b - 0.3 for c in cues): continue  # baris semakan asal diutamakan
             cues.append([a, b, txt])
     cues.sort(key=lambda c: c[0])
@@ -520,7 +623,9 @@ def do_final(preview=False):
         fc.append(f"{last}[g{k}]overlay={g['x']}:{g['y']}:eof_action=pass:repeatlast=0[o{k}]"); last = f"[o{k}]"; k += 1
     ass = os.path.join(ROOT, "06_SUBTITLES", "MISI_PENGAWAL_BAHASA_Hotel_Hijau.ms.ass")
     fc.append(f"{last}ass='{ass}':fontsdir=/usr/share/fonts/opentype/inter[subs]"); last = "[subs]"
-    fc.append("[0:a]aformat=sample_rates=48000:channel_layouts=stereo," + VOICE + ",asplit=2[dlg][key]")
+    build_music_bed()
+    fc.append("[0:a]aformat=sample_rates=48000:channel_layouts=stereo," + VOICE +
+              ",volume=volume='" + dialog_mute_expr() + "':eval=frame,asplit=2[dlg][key]")
     mus = []
     for i, (fn, a, b, off, g) in enumerate(music_plan()):
         inputs += ["-i", os.path.join(AUD, fn)]; d = b - a

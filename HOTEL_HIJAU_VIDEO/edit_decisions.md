@@ -1,3 +1,14 @@
+# Keputusan Suntingan — Versi 4
+
+## Perubahan versi 4 (maklum balas ke atas versi 3)
+| # | Permintaan | Pelaksanaan |
+|---|---|---|
+| 1 | Babak berulang dua kali di awal sebelum pengenalan guru | Punca: `vid sintaksis 2.MOV` ialah kompilasi yang sudah dipotong (80 potongan babak), tetapi sebelum ini setiap segmen diselaraskan dengan **satu** offset → sesetengah cebisan terlari 6–17 s (salam "Baiklah, assalamualaikum" didengar dua kali). Kini **setiap babak** vid2 diselaraskan berasingan (`piecewise_sync.py`, `v2_cuts.txt` daripada `scdet`, `broll_sync_v2.csv`). Set Induksi bermula pada salam (vid1 00:15). Sari kata dipetakan semula ke garis masa baharu (`remap_cues`, rujukan `subs_timebase_edl.json`); baris berulang dibuang. |
+| 2 | Tiada kaburan semasa Cikgu 3 menerangkan ayat murid | Kaburan Galeri Jawapan **dibuang** (`PRIVACY_MASKS = []`). ⚠️ Lajur nama murid pada skrin kini kelihatan — pastikan kebenaran. |
+| 3 | Paparan ayat lebih tepat, jelas & lengkap | Panel ayat direka semula: lebih besar (font 42), ayat aktif **dan** pasif dipaparkan penuh (tidak terpotong), ayat pasif muncul **ketika disebut**. Panel Galeri kini mengikut perbincangan sebenar Cikgu 3: **22:10** *Amin menuai pokok jagung di ladang organik → Pokok jagung dituai oleh Amin di ladang organik* (semakan sistem: Salah — "Nyatakan objek…"); **23:00** *Amin memasang lampu di lobi hotel → Lampu dipasang di lobi hotel oleh Amin* (Betul). Teks disalin tepat daripada Galeri Jawapan. |
+| 4 | Suara murid/jurukamera pada B-roll disenyapkan + muzik; tiada muzik semasa PdP | 12 selang B-roll murid (`STUDENT_BROLL_V2`, ≥5 s, jumlah ~3.7 min): audio asal **disenyapkan**, diganti muzik fasa (`build_music_bed`). Muzik **dibuang** sepenuhnya semasa guru mengajar; hanya tajuk pembukaan & kredit penutup mengekalkan muzik. |
+| 5 | (semakan tambahan) | Shot muka jurukamera rapat ke lensa (vid2 1338.6–1341.1) & babak terhalang lain dikecualikan secara kekal (`EXCLUDE_V2`). |
+
 # Keputusan Suntingan — Versi 3
 
 ## Perubahan versi 3 (maklum balas ke atas versi 2)

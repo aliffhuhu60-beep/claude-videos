@@ -27,11 +27,11 @@ import build_video as bv
 bv.build_edl(); ev = dict(bv.overlay_events())
 moments = {k: ev[k] + (2.5 if not k.startswith(("title", "credits", "end")) else 4.5) for k in
            ["title_open", "phase_set_induksi", "popup_guru1", "popup_guru2", "steps_misi1", "steps_misi2", "ayat_misi2", "popup_guru3",
-            "steps_ar", "ayat_galeri", "phase_penutup", "ayat_rumusan", "credits_1", "credits_2", "credits_3", "end_title"]}
+            "steps_ar", "ayat_galeri1", "ayat_galeri2", "phase_penutup", "ayat_rumusan", "credits_1", "credits_2", "credits_3", "end_title"]}
 for k, t in moments.items():
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(t), "-i", src, "-frames:v", "1", "-vf", "scale=640:-2",
                     os.path.join(out, f"qc_{t:07.1f}_{k}.jpg")], check=True)
 subprocess.run(["ffmpeg", "-v", "error", "-y", "-pattern_type", "glob", "-i", os.path.join(out, "qc_*.jpg"),
-                "-vf", "tile=4x4", "-frames:v", "1", os.path.join(out, "qc_contact_sheet.jpg")], check=True)
+                "-vf", "tile=4x5", "-frames:v", "1", os.path.join(out, "qc_contact_sheet.jpg")], check=True)
 open(os.path.join(out, "qc_report.md"), "w").write("# Laporan QC\n\n" + "\n".join(rep) + "\n")
 print("\n".join(rep[1:]))

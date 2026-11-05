@@ -66,27 +66,30 @@ STEPS = {
 
 # ---- Ayat murid (disalin daripada Galeri Jawapan & rakaman) ----
 # setiap ayat: senarai segmen (teks, penting?)
+# Panel ayat: (tajuk, [item], tempoh_setiap_item). item = dict(tag, kind, s1, s2=None, note=None, reveal=saat ayat pasif muncul)
+# Ayat disalin TEPAT daripada skrin (Minecraft / Galeri Jawapan) dan ucapan murid dalam rakaman.
 SENTENCES = {
     "ayat_misi2": ("ARAHAN MISI 2 · SITUASI LADANG ORGANIK", [
-        ("Tukar kepada ayat aktif", "PASIF",
-         [("Sayur-sayuran ", 0), ("dituai", 1), (" oleh tukang kebun di ladang organik.", 0)], None),
-    ]),
-    "ayat_galeri": ("AYAT YANG DIBINA MURID · GALERI JAWAPAN", [
-        ("Situasi 1 · kata kerja: mengasingkan", "AKTIF",
-         [("Amin ", 0), ("mengasingkan", 1), (" sampah mengikut tong warna kitar semula.", 0)],
-         [("Sampah ", 0), ("diasingkan", 1), (" oleh Amin mengikut tong warna kitar semula.", 0)]),
-        ("Situasi 3 · kata kerja: memasang", "AKTIF",
-         [("Ali ", 0), ("memasang", 1), (" lampu itu.", 0)],
-         [("Lampu itu ", 0), ("dipasang", 1), (" oleh Ali.", 0)]),
-        ("Situasi 3 · kata kerja: memasang", "AKTIF",
-         [("Pelayan hotel sedang ", 0), ("memasang", 1), (" lampu di lobi hotel.", 0)],
-         [("Lampu ", 0), ("dipasang", 1), (" oleh pelayan hotel di lobi hotel.", 0)]),
-    ]),
+        dict(tag="Tukar kepada ayat aktif", kind="PASIF",
+             s1=[("Sayur-sayuran ", 0), ("dituai", 1), (" oleh tukang kebun di ladang organik.", 0)]),
+    ], 9.0),
+    "ayat_galeri1": ("AYAT YANG DIBINA MURID · GALERI JAWAPAN", [
+        dict(tag="Situasi 2 · Ladang organik · kata kerja: menuai", kind="AKTIF",
+             s1=[("Amin ", 0), ("menuai", 1), (" pokok jagung di ladang organik.", 0)],
+             s2=[("Pokok jagung ", 0), ("dituai", 1), (" oleh Amin di ladang organik.", 0)],
+             note="Semakan sistem: Salah — “Nyatakan objek (contoh: sayur) selepas kata kerja.”", reveal=7.0),
+    ], 37.0),
+    "ayat_galeri2": ("AYAT YANG DIBINA MURID · GALERI JAWAPAN", [
+        dict(tag="Situasi 3 · Lobi hotel · kata kerja: memasang", kind="AKTIF",
+             s1=[("Amin ", 0), ("memasang", 1), (" lampu di lobi hotel.", 0)],
+             s2=[("Lampu ", 0), ("dipasang", 1), (" di lobi hotel oleh Amin.", 0)],
+             note="Semakan sistem: Betul — semua ciri dipenuhi.", reveal=29.0),
+    ], 40.0),
     "ayat_rumusan": ("RUMUSAN · MURID MEMBACAKAN AYAT", [
-        ("Ayat murid", "AKTIF",
-         [("Saya ", 0), ("mempelajari", 1), (" tajuk ayat aktif dan pasif.", 0)],
-         [("Tajuk ayat aktif dan pasif saya ", 0), ("pelajari", 1), (".", 0)]),
-    ]),
+        dict(tag="Ayat murid", kind="AKTIF",
+             s1=[("Saya ", 0), ("mempelajari", 1), (" tajuk ayat aktif dan pasif.", 0)],
+             s2=[("Tajuk ayat aktif dan pasif saya ", 0), ("pelajari", 1), (".", 0)], reveal=8.5),
+    ], 15.0),
 }
 
 # ---- Easing / util ----
@@ -329,44 +332,54 @@ def _rich(d, x, y, segs, f_n, f_b, col_n, col_b, maxw):
         d.text((cx, cy), wd, font=f, fill=col_b if key else col_n)
         cx += ww + (f_n.getlength(" ") if sp else 0)
     return cy + lh - y
-def sentence_panel(key, per=6.5):
-    title, items = SENTENCES[key]
-    f_k = F("Inter-Bold.otf", 21); f_tag = F("Inter-SemiBold.otf", 25); f_chip = F("Inter-Bold.otf", 22)
-    f_n = F("Inter-Medium.otf", 38); f_b = F("Inter-ExtraBold.otf", 38)
-    pw = u(1480); pad = u(44); ph = u(285) if any(it[3] is not None for it in items) else u(200)
+def sentence_panel(key):
+    title, items, per = SENTENCES[key]
+    f_k = F("Inter-Bold.otf", 22); f_tag = F("Inter-SemiBold.otf", 27); f_chip = F("Inter-Bold.otf", 23)
+    f_n = F("Inter-Medium.otf", 42); f_b = F("Inter-ExtraBold.otf", 42); f_note = F("Inter-Medium.otf", 26)
+    pw = u(1600); pad = u(46)
+    def chip(d, x, y, label, col):
+        w = int(f_chip.getlength(label) + u(30)); d.rounded_rectangle([x, y, x + w, y + u(42)], u(21), fill=col + (255,))
+        d.text((x + u(15), y + u(8)), label, font=f_chip, fill=FOREST2); return w
+    def layout(d, it, k2, k3):
+        """Lukis satu item; pulang y bawah. k2 = kelegapan ayat pasif, k3 = nota."""
+        d.text((pad, u(76)), it["tag"], font=f_tag, fill=SOFT)
+        y = u(134); col = GOLD if it["kind"] == "AKTIF" else GREEN_L
+        cw = chip(d, pad, y + u(8), "AYAT " + it["kind"], col)
+        y += max(_rich(d, pad + cw + u(22), y, it["s1"], f_n, f_b, WHITE, col, pw - 2 * pad - cw - u(22)), u(60)) + u(16)
+        if it.get("s2") is not None:
+            lay = Image.new("RGBA", (pw, u(700))); dd = ImageDraw.Draw(lay)
+            dd.text((pad + u(10), y - u(4)), "↓", font=F("Inter-Bold.otf", 40), fill=GOLD_L); y += u(52)
+            cw2 = chip(dd, pad, y + u(8), "AYAT PASIF", GREEN_L)
+            y += max(_rich(dd, pad + cw2 + u(22), y, it["s2"], f_n, f_b, WHITE, GREEN_L, pw - 2 * pad - cw2 - u(22)), u(60)) + u(10)
+            layer_pasif.append((lay, k2))
+        if it.get("note"):
+            ny = y + u(6); layer_note.append((ny, it["note"], k3)); y = ny + u(44)
+        return y + u(28)
+    # ukur tinggi panel (item paling tinggi, semua bahagian kelihatan)
+    layer_pasif, layer_note = [], []
+    ph = max(layout(ImageDraw.Draw(Image.new("RGBA", (pw, u(900)))), it, 1, 1) for it in items)
     dur = 0.8 + per * len(items) + 0.6
-    Wc, Hc = pw + u(80), ph + u(80); x0, y0 = (W - Wc) // 2, u(110)
-    base, bmask = card(pw, ph, fill=FOREST + (236,)); bd = ImageDraw.Draw(base)
+    Wc, Hc = pw + u(80), ph + u(80); x0, y0 = (W - Wc) // 2, u(100)
+    base, bmask = card(pw, ph, fill=FOREST + (240,)); bd = ImageDraw.Draw(base)
     bd.rounded_rectangle([0, 0, pw - 1, u(8)], u(4), fill=GOLD + (255,))
     dtext(bd, (pad, u(30)), title, f_k, GOLD_L, 5)
-    def chip(d, x, y, label, col):
-        w = int(f_chip.getlength(label) + u(28)); d.rounded_rectangle([x, y, x + w, y + u(40)], u(20), fill=col + (255,))
-        d.text((x + u(14), y + u(7)), label, font=f_chip, fill=FOREST2); return w
     def fr(t):
         img = Image.new("RGBA", (Wc, Hc)); p = ease_out(prog(t, 0, 0.6))
         c = base.copy()
-        i = min(len(items) - 1, int(max(0, t - 0.6) // per)); ti = t - 0.6 - i * per
-        tag, kind, s1, s2 = items[i]
+        i = min(len(items) - 1, int(max(0, t - 0.6) // per)); ti = t - 0.6 - i * per; it = items[i]
         a_in = ease_out(prog(ti, 0.0, 0.6)) if i > 0 or t > 0.6 else ease_out(prog(t, 0.3, 0.9))
         a_out = 1 - ease_io(prog(ti, per - 0.5, per)) if i < len(items) - 1 else 1.0
-        k = min(a_in, a_out)
+        k = min(a_in, a_out); rv = it.get("reveal", 1.6)
+        k2 = ease_out(prog(ti, rv, rv + 0.7)); k3 = ease_out(prog(ti, rv + 1.5, rv + 2.2))
         tl = Image.new("RGBA", (pw, ph)); d = ImageDraw.Draw(tl)
-        d.text((pad, u(74)), tag, font=f_tag, fill=SOFT)
-        if len(items) > 1: d.text((pw - pad - f_tag.getlength(f"{i + 1}/{len(items)}"), u(74)), f"{i + 1}/{len(items)}", font=f_tag, fill=GOLD_L)
-        y = u(130)
-        cw = chip(d, pad, y + u(6), "AYAT " + kind if s2 is not None else "AYAT " + kind, GOLD if kind == "AKTIF" else GREEN_L)
-        h1 = _rich(d, pad + cw + u(20), y, s1, f_n, f_b, WHITE, GOLD if kind == "AKTIF" else GREEN_L, pw - 2 * pad - cw - u(20))
-        y += max(h1, u(56)) + u(18)
-        k2 = ease_out(prog(ti, 1.6, 2.3))
-        if s2 is not None and k2 > 0:
-            d2 = Image.new("RGBA", (pw, ph)); dd = ImageDraw.Draw(dd_img := d2)
-            dd.text((pad + u(8), y - u(6)), "↓", font=F("Inter-Bold.otf", 40), fill=GOLD_L)
-            y2 = y + u(50)
-            cw2 = chip(dd, pad, y2 + u(6), "AYAT PASIF", GREEN_L)
-            _rich(dd, pad + cw2 + u(20), y2, s2, f_n, f_b, WHITE, GREEN_L, pw - 2 * pad - cw2 - u(20))
-            tl.alpha_composite(alpha(d2, k2))
-        elif s2 is None:
-            d.text((pad, y + u(10)), tag if False else "", font=f_tag, fill=SOFT)
+        layer_pasif.clear(); layer_note.clear(); layout(d, it, k2, k3)
+        for lay, kk in layer_pasif:
+            if kk > 0: tl.alpha_composite(alpha(lay.crop((0, 0, pw, ph)), kk))
+        for ny, note, kk in layer_note:
+            if kk > 0:
+                nl = Image.new("RGBA", (pw, ph)); nd = ImageDraw.Draw(nl)
+                nd.rounded_rectangle([pad, ny, pad + int(f_note.getlength(note)) + u(30), ny + u(40)], u(8), fill=(255, 255, 255, 28))
+                nd.text((pad + u(15), ny + u(5)), note, font=f_note, fill=(225, 236, 228)); tl.alpha_composite(alpha(nl, kk))
         c.alpha_composite(alpha(tl, k))
         img.alpha_composite(alpha(c, p), (u(40), u(30) + int(u(30) * (1 - p))))
         return alpha(img, 1 - ease_io(prog(t, dur - 0.6, dur)))
