@@ -72,24 +72,24 @@ SENTENCES = {
     "ayat_misi2": ("ARAHAN MISI 2 · SITUASI LADANG ORGANIK", [
         dict(tag="Tukar kepada ayat aktif", kind="PASIF",
              s1=[("Sayur-sayuran ", 0), ("dituai", 1), (" oleh tukang kebun di ladang organik.", 0)]),
-    ], 9.0),
+    ], 7.0),
     "ayat_galeri1": ("AYAT YANG DIBINA MURID · GALERI JAWAPAN", [
         dict(tag="Situasi 2 · Ladang organik · kata kerja: menuai", kind="AKTIF",
              s1=[("Amin ", 0), ("menuai", 1), (" pokok jagung di ladang organik.", 0)],
              s2=[("Pokok jagung ", 0), ("dituai", 1), (" oleh Amin di ladang organik.", 0)],
-             note="Semakan sistem: Salah — “Nyatakan objek (contoh: sayur) selepas kata kerja.”", reveal=7.0),
-    ], 37.0),
+             note="Semakan sistem: Salah — “Nyatakan objek (contoh: sayur) selepas kata kerja.”", reveal=5.0),
+    ], 14.0),
     "ayat_galeri2": ("AYAT YANG DIBINA MURID · GALERI JAWAPAN", [
         dict(tag="Situasi 3 · Lobi hotel · kata kerja: memasang", kind="AKTIF",
              s1=[("Amin ", 0), ("memasang", 1), (" lampu di lobi hotel.", 0)],
              s2=[("Lampu ", 0), ("dipasang", 1), (" di lobi hotel oleh Amin.", 0)],
-             note="Semakan sistem: Betul — semua ciri dipenuhi.", reveal=29.0),
-    ], 40.0),
+             note="Semakan sistem: Betul — semua ciri dipenuhi.", reveal=8.0),
+    ], 13.0),
     "ayat_rumusan": ("RUMUSAN · MURID MEMBACAKAN AYAT", [
         dict(tag="Ayat murid", kind="AKTIF",
              s1=[("Saya ", 0), ("mempelajari", 1), (" tajuk ayat aktif dan pasif.", 0)],
-             s2=[("Tajuk ayat aktif dan pasif saya ", 0), ("pelajari", 1), (".", 0)], reveal=8.5),
-    ], 15.0),
+             s2=[("Tajuk ayat aktif dan pasif saya ", 0), ("pelajari", 1), (".", 0)], reveal=4.5),
+    ], 10.0, 760),  # panel sempit di atas-kiri: murid yang membaca berdiri di tengah
 }
 
 # ---- Easing / util ----
@@ -333,10 +333,10 @@ def _rich(d, x, y, segs, f_n, f_b, col_n, col_b, maxw):
         cx += ww + (f_n.getlength(" ") if sp else 0)
     return cy + lh - y
 def sentence_panel(key):
-    title, items, per = SENTENCES[key]
+    title, items, per, *wd = SENTENCES[key]
     f_k = F("Inter-Bold.otf", 22); f_tag = F("Inter-SemiBold.otf", 27); f_chip = F("Inter-Bold.otf", 23)
-    f_n = F("Inter-Medium.otf", 42); f_b = F("Inter-ExtraBold.otf", 42); f_note = F("Inter-Medium.otf", 26)
-    pw = u(1600); pad = u(46)
+    f_n = F("Inter-Medium.otf", 38); f_b = F("Inter-ExtraBold.otf", 38); f_note = F("Inter-Medium.otf", 23)
+    pw = u(wd[0] if wd else 1180); pad = u(40)  # v4: panel padat — diletakkan di ruang kosong supaya tidak menutup muka (lihat PANEL_POS)
     def chip(d, x, y, label, col):
         w = int(f_chip.getlength(label) + u(30)); d.rounded_rectangle([x, y, x + w, y + u(42)], u(21), fill=col + (255,))
         d.text((x + u(15), y + u(8)), label, font=f_chip, fill=FOREST2); return w

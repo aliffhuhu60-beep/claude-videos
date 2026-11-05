@@ -126,16 +126,26 @@ def add(src, start, frames, crop=None, audio="own", zoom=None, blur=False, tag="
                       tag=tag, label=label, t_final=now(), v1d=v1d))
 def mark(n): markers[n] = now()
 
+_active_pools = {}
 def take_cutaway(tag, need):
-    """Ambil cutaway daripada kolam fasa. Pulang senarai (v2_start, tempoh)."""
-    pool = CUTAWAY[tag]; i, off = _pool.get(tag, (0, 0.0)); got = []
-    tries = 0
-    while need > 0.05 and tries < len(pool):
-        a, b = pool[i % len(pool)]; avail = (b - a) - off
-        if avail < 1.0: i += 1; off = 0.0; tries += 1; continue
+    """Ambil cutaway daripada kolam fasa (tanpa ulangan: setiap saat vid2 digunakan sekali sahaja).
+    Pulang senarai (v2_start, tempoh)."""
+    pool = _active_pools.get(tag, CUTAWAY[tag]); i, off = _pool.get(tag, (0, 0.0)); got = []
+    while need > 0.05 and i < len(pool):
+        a, b = pool[i]; avail = (b - a) - off
+        if avail < 1.0: i += 1; off = 0.0; continue
         d = min(need, avail); got.append((a + off, d)); need -= d; off += d
         if off >= (b - a) - 1.0: i += 1; off = 0.0
     _pool[tag] = (i, off); return got
+
+def _subtract(ranges, used):
+    out = []
+    for a, b in ranges:
+        segs = [(a, b)]
+        for u0, u1 in used:
+            segs = [z for s0, s1 in segs for z in ((s0, min(s1, u0)), (max(s0, u1), s1)) if z[1] - z[0] >= 1.0]
+        out += segs
+    return out
 
 def v1_piece(p0, p1, tag):
     for a, b, cr in frame_plan(p0, p1):
@@ -213,6 +223,15 @@ PLAN = [
 FLEX = ("langkah_2", 5)  # span yang dipendekkan/dipanjangkan supaya jumlah tepat 30:00
 
 def build_edl():
+    """Dua laluan: (1) tentukan B-roll selari yang digunakan; (2) bina semula dengan kolam cutaway yang TIDAK
+    bertindih dengan B-roll itu atau julat terkecuali — supaya tiada klip vid2 dipaparkan dua kali."""
+    _active_pools.clear(); _build_edl()
+    used = [(c["start"] - 0.2, c["start"] + c["frames"] / FPS + 0.2) for c in clips if c["src"] == "v2" and c["label"].startswith("seg")]
+    used += EXCLUDE_V2
+    for tag, pool in CUTAWAY.items(): _active_pools[tag] = _subtract(pool, used)
+    return _build_edl()
+
+def _build_edl():
     clips.clear(); markers.clear(); _pool.clear()
     plan = json.loads(json.dumps(PLAN))
     # kira tempoh kandungan & laraskan span FLEX
@@ -268,9 +287,9 @@ def overlay_events():
         ("popup_guru3", t_of_v1(1769.0)),  # close-up Guru 3 di hadapan kelas
         ("steps_ar", t_of_v1(1872.0)),
         ("ayat_galeri1", t_of_v1(2215.3)),  # Cikgu 3 membincangkan ayat Situasi 2 (menuai)
-        ("ayat_galeri2", t_of_v1(2367.3)),  # "Okey, semua baca" — ayat Situasi 3 (memasang)
+        ("ayat_galeri2", t_of_v1(2388.9)),  # "Jadi, bila ayat ini dipasifkan, apa ayatnya?" — ayat Situasi 3 (memasang)
         ("phase_penutup", M["penutup"] + 0.3),
-        ("ayat_rumusan", v3 + 7.4),
+        ("ayat_rumusan", v3 + 11.0),  # selepas murid membaca ayat aktif; pasif muncul ketika disebut
         ("credits_1", M["credits"] + 0.0), ("credits_2", M["credits"] + 10.0), ("credits_3", M["credits"] + 19.0),
         ("end_title", M["credits"] + 29.0),
     ]
@@ -610,6 +629,17 @@ def do_subs():
 # ------------------------------------------------------------------
 # Akhir
 # ------------------------------------------------------------------
+# Kedudukan panel ayat (dipilih supaya tidak menutup muka guru/murid dalam babak itu):
+# tc = atas-tengah, br = bawah-kanan (di atas zon sari kata), tl = atas-kiri
+PANEL_POS = {"ayat_misi2": "br", "ayat_galeri1": "tc", "ayat_galeri2": "br", "ayat_rumusan": "tl"}
+def panel_xy(name, g):
+    pos = PANEL_POS.get(name)
+    if pos is None: return {}
+    s = OW / 1920.0; m40, m50 = round(40 * s), round(50 * s)  # bingkai kad dalam kanvas grafik: kiri u(40), atas u(30), bawah u(50)
+    if pos == "br": return {"x": OW - 60 - (g["w"] - m40), "y": 1190 - (g["h"] - m50)}
+    if pos == "tl": return {"x": 60 - m40, "y": 50 - round(30 * s)}
+    return {"x": (OW - g["w"]) // 2, "y": 60}
+
 def do_final(preview=False):
     build_edl(); M = markers
     joined = os.path.join(WORK, "joined.mkv")
@@ -617,7 +647,7 @@ def do_final(preview=False):
     man = json.load(open(os.path.join(GFX, "manifest.json")))
     inputs = ["-i", joined]; fc = []; last = "[0:v]"; k = 1
     for name, t0 in overlay_events():
-        g = man[name]
+        g = dict(man[name]); g.update(panel_xy(name, g))
         inputs += ["-itsoffset", f"{t0:.3f}", "-i", os.path.join(GFX, name + ".mov")]
         fc.append(f"[{k}:v]format=rgba[g{k}]")
         fc.append(f"{last}[g{k}]overlay={g['x']}:{g['y']}:eof_action=pass:repeatlast=0[o{k}]"); last = f"[o{k}]"; k += 1
