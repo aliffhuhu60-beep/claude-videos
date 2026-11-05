@@ -263,19 +263,18 @@ AF_V1 = "highpass=f=90,lowpass=f=9000,afftdn=nr=10:nf=-30,dynaudnorm=f=300:g=21:
 AF_V2 = "highpass=f=80,afftdn=nr=8:nf=-35,dynaudnorm=f=300:g=21:p=0.8:m=8"
 
 def vfilter(c):
+    # Gred warna pada resolusi sumber (pantas), kemudian skala Lanczos ke 1440p, kemudian penajaman pada resolusi akhir
     f = ["fps=30"]
     if c["src"] == "v1":
         x0, y0, w = CROPS[c["crop"] or "wide"]
         f.append(f"crop=trunc(iw*{w}/2)*2:trunc(ih*{w}/2)*2:trunc(iw*{x0}):trunc(ih*{y0})")
         f.append("hqdn3d=2:1.5:3:3")
-    if c["zoom"]:
-        z0, z1 = c["zoom"]; n = max(1, c["frames"] - 1)
-        f.append(f"scale={OW * 2}:{OH * 2}:flags=lanczos,zoompan=z='{z0}+({z1}-{z0})*on/{n}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s={OW}x{OH}:fps=30")
+    f.append(GRADE_V1 if c["src"] == "v1" else GRADE_V2)
+    if c["blur"]:
+        f.append(f"scale={OW // 4}:{OH // 4},boxblur=8:2,eq=brightness=-0.06,scale={OW}:{OH}:flags=bicubic")
     else:
         f.append(f"scale={OW}:{OH}:flags=lanczos")
-    f.append(GRADE_V1 if c["src"] == "v1" else GRADE_V2)
-    f.append(SHARP_V1 if c["src"] == "v1" else SHARP_V2)
-    if c["blur"]: f.append("boxblur=32:2,eq=brightness=-0.06")
+        f.append(SHARP_V1 if c["src"] == "v1" else SHARP_V2)
     f.append("setsar=1,format=yuv420p")
     return ",".join(f)
 
@@ -311,7 +310,7 @@ def render_clip(i, c, force=False):
     else:
         vin = ["-ss", f"{c['start']:.4f}", "-i", SRC[c["src"]]]; vf = vfilter(c)
     cmd = ["ffmpeg", "-v", "error", "-y"] + vin + ["-i", aw, "-map", "0:v:0", "-map", "1:a:0", "-vf", vf,
-           "-frames:v", str(c["frames"]), "-c:v", "libx264", "-preset", "veryfast", "-crf", "16", "-g", "30",
+           "-frames:v", str(c["frames"]), "-c:v", "libx264", "-preset", "veryfast", "-crf", "17", "-g", "30",
            "-c:a", "pcm_s16le", "-ar", "48000", "-ac", "2", out + ".tmp.mkv"]
     subprocess.run(cmd, check=True); os.replace(out + ".tmp.mkv", out); return out
 
@@ -505,7 +504,7 @@ def do_final(preview=False):
         out = os.environ.get("HH_OUT") or os.path.join(ROOT, "08_PREVIEW", "PREVIEW_Hotel_Hijau_720p.mp4"); venc = ["-s", "1280x720", "-c:v", "libx264", "-preset", "veryfast", "-crf", "24"]
     else:
         out = os.path.join(ROOT, "09_FINAL_EXPORT", "SIMULASI_PENGAJARAN_MIKRO_Hotel_Hijau_1440p.mp4")
-        venc = ["-c:v", "libx264", "-preset", "fast", "-crf", "19", "-profile:v", "high", "-level", "5.1", "-maxrate", "16M", "-bufsize", "32M"]
+        venc = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-profile:v", "high", "-level", "5.1", "-maxrate", "16M", "-bufsize", "32M"]
     cmd = ["ffmpeg", "-v", "error", "-stats", "-y"] + inputs + ["-filter_complex_script", fg, "-map", "[vout]", "-map", "[aout]",
            "-r", "30", "-frames:v", str(TOTAL_FRAMES)] + venc + ["-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
            "-ac", "2", "-movflags", "+faststart", out]
