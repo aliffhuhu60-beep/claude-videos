@@ -39,7 +39,7 @@ for c in b.clips:
 for i in range(len(cuts) - 1):
     s, e = cuts[i], cuts[i + 1]; sy = b.SYNC.get(i)
     if i in EXCL: u = "DIKECUALIKAN (" + EXCL[i] + ")"
-    elif i in used: u = "Masa akhir: " + "; ".join(used[i])
+    elif i in used: u = "Masa akhir (v2): " + "; ".join(used[i])
     else: u = "simpanan (tidak digunakan)"
     rows.append(["broll_segmen", "vid sintaksis 2.MOV", f"seg{i}: {s:.1f}-{e:.1f}", "1280x720", "30", round(e - s, 1), "aac", desc.get(i, ""), f"{sy[2]:.2f}" if sy else "tidak pasti", u])
 for f in sorted(os.listdir("05_GRAPHICS")):

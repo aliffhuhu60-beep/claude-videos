@@ -22,9 +22,12 @@ rep.append("- Segmen hitam (≥0.5 s): " + (", ".join(f"{float(a):.1f}–{float(
 summ = r[r.rfind("Summary:"):]
 I = re.search(r"I:\s+(-?[\d.]+) LUFS", summ); LRA = re.search(r"LRA:\s+([\d.]+) LU", summ); TP = re.search(r"Peak:\s+(-?[\d.]+) dBFS", summ)
 rep.append(f"- Loudness bersepadu: **{I.group(1)} LUFS**, LRA {LRA.group(1)} LU, true peak **{TP.group(1)} dBTP**")
-moments = {"opening": 6, "popup_g1": 36.5, "lt_video": 154, "chapter02": 467.5, "popup_g2": 603.5, "chapter04": 970.5,
-           "lt_ar": 1042.5, "popup_g3": 1203.5, "galeri": 1414.5, "refleksi": 1561, "baca": 1700, "close": 1735,
-           "credits1": 1751, "credits2": 1761, "credits3": 1771.5, "end": 1786}
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import build_video as bv
+bv.build_edl(); ev = dict(bv.overlay_events())
+moments = {k: ev[k] + (2.5 if not k.startswith(("title", "credits", "end")) else 4.5) for k in
+           ["title_open", "phase_set_induksi", "popup_guru1", "popup_guru2", "steps_misi1", "steps_misi2", "ayat_misi2", "popup_guru3",
+            "steps_ar", "ayat_galeri", "phase_penutup", "ayat_rumusan", "credits_1", "credits_2", "credits_3", "end_title"]}
 for k, t in moments.items():
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(t), "-i", src, "-frames:v", "1", "-vf", "scale=640:-2",
                     os.path.join(out, f"qc_{t:07.1f}_{k}.jpg")], check=True)

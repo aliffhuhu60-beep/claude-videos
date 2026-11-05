@@ -1,0 +1,102 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 2560
+PlayResY: 1440
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Inter SemiBold,64,&H00FFFFFF,&H000000FF,&H5A0E2A1F,&H96000000,0,0,0,0,100,100,0,0,3,16,0,2,160,160,64,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:14.32,0:00:17.20,Default,,0,0,0,,Baiklah, assalamualaikum semua.
+Dialogue: 0,0:00:20.18,0:00:21.36,Default,,0,0,0,,Waalaikumussalam.
+Dialogue: 0,0:00:38.68,0:00:42.96,Default,,0,0,0,,Jadi, masing-masing tahu tak peranan apa?
+Dialogue: 0,0:00:54.39,0:00:58.89,Default,,0,0,0,,Jadi, cikgu berlakon sebagai Pengurus Hotel,
+Dialogue: 0,0:01:08.14,0:01:11.31,Default,,0,0,0,,dan kalian semua akan menjadi {\b1\c&H37AFD4&}Pengawal Bahasa{\b0\c&HFFFFFF&}.
+Dialogue: 0,0:01:11.36,0:01:13.71,Default,,0,0,0,,Jadi, bila cikgu sebut "{\b1\c&H37AFD4&}Pengawal Bahasa{\b0\c&HFFFFFF&}!",
+Dialogue: 0,0:01:13.76,0:01:15.17,Default,,0,0,0,,kamu kena sebut "{\b1\c&H37AFD4&}Sedia, cikgu!{\b0\c&HFFFFFF&}"
+Dialogue: 0,0:01:15.22,0:01:16.56,Default,,0,0,0,,{\b1\c&H37AFD4&}Sedia, cikgu!{\b0\c&HFFFFFF&}
+Dialogue: 0,0:01:19.38,0:01:21.78,Default,,0,0,0,,{\b1\c&H37AFD4&}Pengawal Bahasa{\b0\c&HFFFFFF&}!
+Dialogue: 0,0:01:43.55,0:01:46.48,Default,,0,0,0,,Kita ulang lagi sekali.
+Dialogue: 0,0:01:58.94,0:02:04.12,Default,,0,0,0,,Mari kita terokai kawasan\Nhotel yang serba hijau ini.
+Dialogue: 0,0:02:06.80,0:02:09.22,Default,,0,0,0,,Panel solar membekalkan tenaga bersih.
+Dialogue: 0,0:02:18.52,0:02:20.38,Default,,0,0,0,,Jom terokai dunia hijau kita!
+Dialogue: 0,0:02:28.65,0:02:32.68,Default,,0,0,0,,Jadi, cikgu nak bahagikan kepada dua kumpulan.
+Dialogue: 0,0:02:32.73,0:02:35.00,Default,,0,0,0,,Berdasarkan video tadi,
+Dialogue: 0,0:02:35.05,0:02:37.78,Default,,0,0,0,,cikgu nak kumpulan yang belah kiri cikgu
+Dialogue: 0,0:02:37.83,0:02:41.12,Default,,0,0,0,,terangkan {\b1\c&H37AFD4&}ciri-ciri{\b0\c&HFFFFFF&} apa\Nyang ada dalam video itu.
+Dialogue: 0,0:02:41.17,0:02:43.10,Default,,0,0,0,,Kumpulan belakang cikgu pula
+Dialogue: 0,0:02:43.15,0:02:47.89,Default,,0,0,0,,akan terangkan aktiviti apa\Nyang nampak dalam video tadi.
+Dialogue: 0,0:02:50.82,0:02:51.96,Default,,0,0,0,,Boleh berbincang ke, cikgu?
+Dialogue: 0,0:02:52.26,0:02:53.74,Default,,0,0,0,,Ha, boleh berbincang.
+Dialogue: 0,0:02:58.10,0:03:00.95,Default,,0,0,0,,Okey, cikgu bagi masa.
+Dialogue: 0,0:03:54.64,0:03:56.88,Default,,0,0,0,,Kita dah senaraikan {\b1\c&H37AFD4&}ciri-ciri{\b0\c&HFFFFFF&} tadi.
+Dialogue: 0,0:03:59.26,0:04:02.26,Default,,0,0,0,,Cikgu nak kita sama-sama
+Dialogue: 0,0:05:05.05,0:05:07.76,Default,,0,0,0,,ulang balik {\b1\c&H37AFD4&}ciri-ciri{\b0\c&HFFFFFF&} dan aktiviti
+Dialogue: 0,0:05:07.81,0:05:10.99,Default,,0,0,0,,yang rakan-rakan kita telah senaraikan.
+Dialogue: 0,0:05:12.57,0:05:13.68,Default,,0,0,0,,Sama-sama kita baca.
+Dialogue: 0,0:05:13.73,0:05:15.37,Default,,0,0,0,,{\b1\c&H37AFD4&}Ciri-ciri{\b0\c&HFFFFFF&} yang utama,
+Dialogue: 0,0:05:17.57,0:05:20.42,Default,,0,0,0,,Banyak tumbuhan hijau.
+Dialogue: 0,0:05:32.39,0:05:33.71,Default,,0,0,0,,Tanam pokok.
+Dialogue: 0,0:05:36.56,0:05:37.88,Default,,0,0,0,,Baiklah, terima kasih semua.
+Dialogue: 0,0:05:40.36,0:05:44.18,Default,,0,0,0,,Di sini, cikgu akan menerangkan\N{\b1\c&H37AFD4&}objektif{\b0\c&HFFFFFF&} pelajaran kita.
+Dialogue: 0,0:05:44.70,0:05:47.24,Default,,0,0,0,,Jadi, pada akhir pengajaran dan pembelajaran,
+Dialogue: 0,0:05:47.68,0:05:52.89,Default,,0,0,0,,cikgu nak murid dapat membina sekurang-kurangnya\Nsatu {\b1\c&H37AFD4&}ayat aktif{\b0\c&HFFFFFF&} dan {\b1\c&H84D696&}ayat pasif{\b0\c&HFFFFFF&}
+Dialogue: 0,0:05:52.94,0:05:56.31,Default,,0,0,0,,berdasarkan konteks {\b1\c&H84D696&}Hotel Hijau{\b0\c&HFFFFFF&}
+Dialogue: 0,0:05:56.36,0:06:00.57,Default,,0,0,0,,dalam Augmented Reality ({\b1\c&H84D696&}AR{\b0\c&HFFFFFF&}) dengan {\b1\c&H84D696&}betul{\b0\c&HFFFFFF&}.
+Dialogue: 0,0:06:00.62,0:06:03.60,Default,,0,0,0,,Jadi, cikgu harap {\b1\c&H37AFD4&}objektif{\b0\c&HFFFFFF&}\Nini semua dapat capai.
+Dialogue: 0,0:06:14.36,0:06:19.54,Default,,0,0,0,,Baiklah, sebelum cikgu\Nmulakan aktiviti yang pertama,
+Dialogue: 0,0:06:21.24,0:06:25.96,Default,,0,0,0,,cikgu nak bahagikan dulu\Nkepada empat kumpulan.
+Dialogue: 0,0:06:26.24,0:06:32.76,Default,,0,0,0,,Kumpulan pertama, kumpulan kedua,\Nkumpulan ketiga dan kumpulan keempat.
+Dialogue: 0,0:06:33.75,0:06:37.35,Default,,0,0,0,,Setiap kumpulan ada empat orang.
+Dialogue: 0,0:06:40.66,0:06:44.38,Default,,0,0,0,,Jadi, kumpulan satu kita\Nnamakan sebagai Merah,
+Dialogue: 0,0:06:48.56,0:06:51.06,Default,,0,0,0,,Biru, Hijau dan Kuning.
+Dialogue: 0,0:06:53.22,0:06:54.72,Default,,0,0,0,,Baiklah, sekarang ni
+Dialogue: 0,0:06:55.08,0:06:59.66,Default,,0,0,0,,cikgu akan beri peranti pada setiap kumpulan.
+Dialogue: 0,0:11:13.36,0:11:13.77,Default,,0,0,0,,{\b1\c&H84D696&}Betul{\b0\c&HFFFFFF&} tak?
+Dialogue: 0,0:11:13.82,0:11:14.82,Default,,0,0,0,,{\b1\c&H84D696&}Betul{\b0\c&HFFFFFF&}.
+Dialogue: 0,0:11:22.54,0:11:23.54,Default,,0,0,0,,Soalan yang kedua.
+Dialogue: 0,0:12:47.26,0:12:48.26,Default,,0,0,0,,{\b1\c&H84D696&}Betul{\b0\c&HFFFFFF&}.
+Dialogue: 0,0:14:36.03,0:14:37.17,Default,,0,0,0,,Ayat ni apa?
+Dialogue: 0,0:14:56.97,0:14:59.50,Default,,0,0,0,,Tukar ayat tersebut kepada {\b1\c&H84D696&}ayat pasif{\b0\c&HFFFFFF&}.
+Dialogue: 0,0:14:59.55,0:15:00.38,Default,,0,0,0,,Okey.
+Dialogue: 0,0:15:00.43,0:15:03.02,Default,,0,0,0,,Nampak tak buku ni?
+Dialogue: 0,0:15:03.50,0:15:04.50,Default,,0,0,0,,Nampak.
+Dialogue: 0,0:18:39.60,0:18:46.60,Default,,0,0,0,,Jadi, sekarang, tadi awak semua dah belajar\Ntentang {\b1\c&H37AFD4&}ayat aktif{\b0\c&HFFFFFF&} dengan {\b1\c&H84D696&}ayat pasif{\b0\c&HFFFFFF&}, kan?
+Dialogue: 0,0:18:47.60,0:18:48.70,Default,,0,0,0,,Ya!
+Dialogue: 0,0:20:05.62,0:20:08.61,Default,,0,0,0,,Bina satu {\b1\c&H37AFD4&}ayat aktif{\b0\c&HFFFFFF&} dan satu {\b1\c&H84D696&}ayat pasif{\b0\c&HFFFFFF&}
+Dialogue: 0,0:20:08.66,0:20:10.45,Default,,0,0,0,,berdasarkan {\b1\c&H84D696&}situasi{\b0\c&HFFFFFF&}.
+Dialogue: 0,0:20:10.50,0:20:12.61,Default,,0,0,0,,Jadi, ada empat {\b1\c&H84D696&}situasi{\b0\c&HFFFFFF&}.
+Dialogue: 0,0:20:12.66,0:20:14.89,Default,,0,0,0,,Cikgu bagi kumpulan satu,
+Dialogue: 0,0:20:14.94,0:20:17.25,Default,,0,0,0,,{\b1\c&H84D696&}situasi{\b0\c&HFFFFFF&} pusat {\b1\c&H84D696&}kitar semula{\b0\c&HFFFFFF&}.
+Dialogue: 0,0:20:17.30,0:20:18.53,Default,,0,0,0,,Kumpulan dua,
+Dialogue: 0,0:20:18.58,0:20:20.45,Default,,0,0,0,,{\b1\c&H84D696&}situasi{\b0\c&HFFFFFF&} ladang organik.
+Dialogue: 0,0:20:20.50,0:20:21.84,Default,,0,0,0,,Kumpulan tiga,
+Dialogue: 0,0:20:24.36,0:20:26.02,Default,,0,0,0,,{\b1\c&H84D696&}situasi{\b0\c&HFFFFFF&} lobi hotel.
+Dialogue: 0,0:20:43.84,0:20:46.62,Default,,0,0,0,,Cikgu akan tunjukkan.
+Dialogue: 0,0:20:56.82,0:20:58.91,Default,,0,0,0,,Di sini, kita ada {\b1\c&H37AFD4&}kata kerja{\b0\c&HFFFFFF&},
+Dialogue: 0,0:20:58.96,0:21:01.11,Default,,0,0,0,,{\b1\c&H37AFD4&}kata kerja{\b0\c&HFFFFFF&} {\b1\c&H37AFD4&}mengasingkan{\b0\c&HFFFFFF&}.
+Dialogue: 0,0:21:01.16,0:21:02.64,Default,,0,0,0,,Jadi, untuk ayat ini,
+Dialogue: 0,0:21:04.20,0:21:09.23,Default,,0,0,0,,Ali {\b1\c&H37AFD4&}mengasingkan{\b0\c&HFFFFFF&} sampah ke\Ndalam tong {\b1\c&H84D696&}kitar semula{\b0\c&HFFFFFF&}.
+Dialogue: 0,0:21:12.16,0:21:15.54,Default,,0,0,0,,Jadi, kalau untuk {\b1\c&H84D696&}ayat pasif{\b0\c&HFFFFFF&},
+Dialogue: 0,0:21:17.32,0:21:18.32,Default,,0,0,0,,macam mana semua?
+Dialogue: 0,0:21:20.64,0:21:23.94,Default,,0,0,0,,Macam mana untuk {\b1\c&H84D696&}ayat pasif{\b0\c&HFFFFFF&}?
+Dialogue: 0,0:21:31.14,0:21:33.47,Default,,0,0,0,,{\b1\c&H84D696&}Betul{\b0\c&HFFFFFF&} ke semua?
+Dialogue: 0,0:24:47.28,0:24:50.14,Default,,0,0,0,,Lepas tu, awak kena letak apa\Nyang awak pelajari hari ni.
+Dialogue: 0,0:24:51.33,0:24:54.69,Default,,0,0,0,,Cikgu nak apa yang awak pelajari\Nhari ni tu letak dalam ayat.
+Dialogue: 0,0:24:55.10,0:24:58.48,Default,,0,0,0,,Nanti cikgu akan pilih beberapa\Norang untuk pasifkan ayat tersebut.
+Dialogue: 0,0:24:59.25,0:25:00.25,Default,,0,0,0,,Faham semua?
+Dialogue: 0,0:25:02.48,0:25:05.22,Default,,0,0,0,,Saya memahami pelajaran hari ni.
+Dialogue: 0,0:25:08.63,0:25:09.63,Default,,0,0,0,,Faham semua?
+Dialogue: 0,0:25:09.97,0:25:10.97,Default,,0,0,0,,Faham.
+Dialogue: 0,0:26:02.64,0:26:03.61,Default,,0,0,0,,Faham semua?
+Dialogue: 0,0:26:03.66,0:26:04.66,Default,,0,0,0,,Faham.
+Dialogue: 0,0:26:05.33,0:26:08.65,Default,,0,0,0,,Saya memahami pelajaran hari ini.
+Dialogue: 0,0:28:55.33,0:28:59.64,Default,,0,0,0,,Saya {\b1\c&H37AFD4&}mempelajari{\b0\c&HFFFFFF&} tajuk {\b1\c&H37AFD4&}ayat aktif{\b0\c&HFFFFFF&} dan {\b1\c&H84D696&}pasif{\b0\c&HFFFFFF&}.
+Dialogue: 0,0:28:59.69,0:29:03.19,Default,,0,0,0,,Okey, boleh ke … pasifkan ayat tersebut?
+Dialogue: 0,0:29:04.00,0:29:11.00,Default,,0,0,0,,Kalau {\b1\c&H37AFD4&}dipasifkan{\b0\c&HFFFFFF&}, ayatnya akan menjadi:\NTajuk {\b1\c&H37AFD4&}ayat aktif{\b0\c&HFFFFFF&} dan {\b1\c&H84D696&}pasif{\b0\c&HFFFFFF&} saya pelajari.
+Dialogue: 0,0:29:11.72,0:29:12.86,Default,,0,0,0,,Betulkah, kelas?
+Dialogue: 0,0:29:13.24,0:29:14.24,Default,,0,0,0,,{\b1\c&H84D696&}Betul!{\b0\c&HFFFFFF&}
