@@ -16,7 +16,7 @@ Penutup mengandungi penghargaan kepada **DR. RASIDAYANTY BINTI SAION (Pensyarah 
 | 1 | Storyboard lengkap | `storyboard.md` |
 | 2 | Senarai semua klip & aset | `asset_inventory.csv`, `07_PROJECT_FILES/edl.csv` (133 potongan, masa akhir ↔ masa sumber, framing) |
 | 3 | Video rough cut (tanpa grafik/muzik, 720p) | `08_PREVIEW/ROUGH_CUT_Hotel_Hijau_720p.mp4` |
-| 4 | **Video akhir MP4** (1440p30, H.264, AAC 48 kHz stereo, sari kata dibakar) | `09_FINAL_EXPORT/SIMULASI_PENGAJARAN_MIKRO_Hotel_Hijau_1440p.mp4` |
+| 4 | **Video akhir MP4** (1440p30, H.264, AAC 48 kHz stereo, sari kata dibakar) | `09_FINAL_EXPORT/SIMULASI_PENGAJARAN_MIKRO_Hotel_Hijau_1440p_v4.mp4` |
 | 5 | Sari kata (SRT + ASS berwarna) | `06_SUBTITLES/` — semakan manual: `07_PROJECT_FILES/transcript_edits.json` |
 | 6 | Skrip penyuntingan FFmpeg/Python | `07_PROJECT_FILES/*.py` |
 | 7 | Aset motion graphics | `05_GRAPHICS/` (*.mov ber-alpha + *_still.png) |
@@ -68,7 +68,7 @@ python3 07_PROJECT_FILES/build_video.py final            # -> 09_FINAL_EXPORT (1
 python3 07_PROJECT_FILES/build_video.py final --preview  # -> 08_PREVIEW (720p)
 
 # 6. Semakan kualiti
-python3 07_PROJECT_FILES/qc_check.py 09_FINAL_EXPORT/SIMULASI_PENGAJARAN_MIKRO_Hotel_Hijau_1440p.mp4 08_PREVIEW/qc
+python3 07_PROJECT_FILES/qc_check.py 09_FINAL_EXPORT/SIMULASI_PENGAJARAN_MIKRO_Hotel_Hijau_1440p_v4.mp4 08_PREVIEW/qc
 ```
 Fail sementara klip disimpan dalam `07_PROJECT_FILES/_work/` (atau `$HH_WORK`).
 

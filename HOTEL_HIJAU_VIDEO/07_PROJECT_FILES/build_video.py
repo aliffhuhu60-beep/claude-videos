@@ -642,9 +642,9 @@ def do_final(preview=False):
     fc.append(f"{last}fade=t=out:st={TOTAL - 2}:d=2,format=yuv420p[vout]")
     fg = os.path.join(HERE, "final_filtergraph.txt"); open(fg, "w").write(";\n".join(fc))
     if preview:
-        out = os.environ.get("HH_OUT") or os.path.join(ROOT, "08_PREVIEW", "PREVIEW_Hotel_Hijau_720p.mp4"); venc = ["-s", "1280x720", "-c:v", "libx264", "-preset", "veryfast", "-crf", "24"]
+        out = os.environ.get("HH_OUT") or os.path.join(ROOT, "08_PREVIEW", "PREVIEW_Hotel_Hijau_720p_v4.mp4"); venc = ["-s", "1280x720", "-c:v", "libx264", "-preset", "veryfast", "-crf", "24"]
     else:
-        out = os.path.join(ROOT, "09_FINAL_EXPORT", "SIMULASI_PENGAJARAN_MIKRO_Hotel_Hijau_1440p.mp4")
+        out = os.path.join(ROOT, "09_FINAL_EXPORT", "SIMULASI_PENGAJARAN_MIKRO_Hotel_Hijau_1440p_v4.mp4")
         venc = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-profile:v", "high", "-level", "5.1", "-maxrate", "8M", "-bufsize", "16M"]
     cmd = ["ffmpeg", "-v", "error", "-stats", "-y"] + inputs + ["-filter_complex_script", fg, "-map", "[vout]", "-map", "[aout]",
            "-r", "30", "-frames:v", str(TOTAL_FRAMES)] + venc + ["-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
