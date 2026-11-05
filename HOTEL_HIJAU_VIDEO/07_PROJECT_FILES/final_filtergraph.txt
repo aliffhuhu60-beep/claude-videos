@@ -48,7 +48,7 @@
 [26:a]volume=-14.0dB,adelay=7400|7400,apad[s1];
 [27:a]volume=-15.0dB,adelay=14000|14000,apad[s2];
 [28:a]volume=-12.0dB,adelay=581600|581600,apad[s3];
-[29:a]volume=-14.0dB,adelay=583900|583900,apad[s4];
+[29:a]volume=-14.0dB,adelay=659000|659000,apad[s4];
 [30:a]volume=-12.0dB,adelay=1092600|1092600,apad[s5];
 [31:a]volume=-14.0dB,adelay=1094899|1094899,apad[s6];
 [32:a]volume=-13.0dB,adelay=1547000|1547000,apad[s7];
