@@ -171,19 +171,19 @@ PLAN = [
         (911.0, 1120.0, [(51, 915.9, 926.2), (19, 987.6, 996.9), (20, 1005.5, 1012.9), (22, 1048.1, 1055.5), (24, 1085.5, 1105.0)]),
         (1140.0, 1180.0, [(27, 1147.7, 1160.2)]),
         (1229.0, 1340.0, [(29, 1249.1, 1256.9), (30, 1260.3, 1268.6), (53, 1297.8, 1321.5), (54, 1323.9, 1340.0)]),
-        (1400.0, 1470.0, [(55, 1407.0, 1421.5), (35, 1450.0, 1459.9), (56, 1468.7, 1470.0)]),
+        (1400.0, 1470.0, [(55, 1412.4, 1421.5), (35, 1450.0, 1459.9), (56, 1468.7, 1470.0)]),
         (1625.0, 1706.0, []),
     ]),
     ("langkah_2", [
         (1735.0, 1830.0, [(39, 1762.0, 1830.0)]),
         (1860.0, 1910.0, [(59, 1871.2, 1903.5)]),
         (1960.0, 2025.0, [(39, 1960.0, 2025.0)]),
-        (2190.0, 2260.0, [(62, 2190.0, 2205.7), (41, 2215.0, 2254.5)]),
+        (2190.0, 2260.0, [(62, 2190.0, 2200.3), (41, 2215.0, 2254.5)]),
         (2362.0, 2400.0, [(64, 2362.0, 2400.0)]),
         (2400.0, 2472.0, []),
     ]),
     ("penutup", [
-        (2473.0, 2600.0, [(42, 2473.2, 2537.6), (66, 2537.8, 2551.0), (42, 2551.0, 2593.6), (70, 2593.8, 2600.0)]),
+        (2473.0, 2600.0, [(42, 2478.8, 2537.6), (66, 2537.8, 2551.0), (42, 2551.0, 2593.6), (70, 2593.8, 2600.0)]),
         (2716.0, 2770.0, []),
     ]),
 ]
@@ -237,8 +237,8 @@ def overlay_events():
         ("phase_set_induksi", M["set_induksi"] + 1.2),
         ("popup_guru1", t_of_v1(23.0)),
         ("phase_langkah_1", M["langkah_1"] + 0.3),
-        ("popup_guru2", M["langkah_1"] + 1.8),
-        ("steps_misi1", t_of_v1(988.5)),
+        ("popup_guru2", t_of_v1(987.9)),  # close-up Guru 2 di sebelah skrin Minecraft
+        ("steps_misi1", t_of_v1(994.6)),
         ("steps_misi2", t_of_v1(1261.0)),
         ("ayat_misi2", t_of_v1(1450.5)),
         ("phase_langkah_2", M["langkah_2"] + 0.3),
@@ -262,6 +262,14 @@ SHARP_V2 = "cas=strength=0.55"
 AF_V1 = "highpass=f=90,lowpass=f=9000,afftdn=nr=10:nf=-30,dynaudnorm=f=300:g=21:p=0.8:m=12"
 AF_V2 = "highpass=f=80,afftdn=nr=8:nf=-35,dynaudnorm=f=300:g=21:p=0.8:m=8"
 
+# Kawasan dikaburkan pada B-roll (masa vid2, pecahan lebar x0..x1): lajur "Nama" murid pada Galeri Jawapan
+PRIVACY_MASKS = [(724.0, 746.5, 0.0, 0.30), (757.0, 765.0, 0.0, 0.30)]
+
+def privacy_mask(c):
+    if c["src"] != "v2": return []
+    a, b = c["start"], c["start"] + c["frames"] / FPS
+    return [(round(max(t0, a) - a, 3), round(min(t1, b) - a, 3), x0, x1) for t0, t1, x0, x1 in PRIVACY_MASKS if t0 < b and t1 > a]
+
 def vfilter(c):
     # Gred warna pada resolusi sumber (pantas), kemudian skala Lanczos ke 1440p, kemudian penajaman pada resolusi akhir
     f = ["fps=30"]
@@ -270,6 +278,12 @@ def vfilter(c):
         f.append(f"crop=trunc(iw*{w}/2)*2:trunc(ih*{w}/2)*2:trunc(iw*{x0}):trunc(ih*{y0})")
         f.append("hqdn3d=2:1.5:3:3")
     f.append(GRADE_V1 if c["src"] == "v1" else GRADE_V2)
+    pm = privacy_mask(c)
+    if pm:
+        x0 = min(m[2] for m in pm); x1 = max(m[3] for m in pm)
+        en = "+".join(f"between(t,{a},{b})" for a, b, _, _ in pm)
+        f.append(f"split=2[pm0][pm1];[pm1]crop=trunc(iw*{x1 - x0}/2)*2:ih:trunc(iw*{x0}/2)*2:0,boxblur=28:4[pmb];"
+                 f"[pm0][pmb]overlay=x=trunc(W*{x0}/2)*2:y=0:enable='{en}'")
     if c["blur"]:
         f.append(f"scale={OW // 4}:{OH // 4},boxblur=8:2,eq=brightness=-0.06,scale={OW}:{OH}:flags=bicubic")
     else:
@@ -289,7 +303,15 @@ def afilter(base, vol, d):
     return (f"aresample=48000,aformat=channel_layouts=stereo,{base},volume={vol},"
             f"afade=t=in:d={fade},afade=t=out:st={d - fade:.4f}:d={fade},apad,atrim=0:{d:.4f}")
 
-def clip_path(i, kind="clips"): return os.path.join(WORK, kind, f"c{i:03d}." + ("mkv" if kind == "clips" else "wav"))
+def clip_key(c):
+    """Kunci kandungan klip (cache ikut kandungan, bukan indeks — selamat apabila EDL berubah)."""
+    import hashlib
+    k = {f: c[f] for f in ("src", "start", "frames", "crop", "audio", "zoom", "blur")}
+    k["mask"] = privacy_mask(c)
+    return hashlib.sha1(json.dumps(k, sort_keys=True).encode()).hexdigest()[:12]
+
+def clip_path(i, kind="clips"):
+    return os.path.join(WORK, kind, f"k_{clip_key(clips[i])}." + ("mkv" if kind == "clips" else "wav"))
 
 def render_audio(i, c, force=False):
     out = clip_path(i, "audio"); d = c["frames"] / FPS

@@ -37,8 +37,9 @@ Latar hijau hutan legap dengan sinar cahaya lembut — **tiada rakaman/preview**
 ## 09:42 — LANGKAH 1 (Guru 2): Misi Pengawal Bahasa dalam Minecraft
 | Masa | Kandungan | Grafik |
 |---|---|---|
-| 09:42 | Guru 1 beredar → **Guru 2 di hadapan skrin Minecraft** | Kad fasa **LANGKAH 1** + **Pop-up GURU 02** |
-| 10:59 | Guru 2 menerangkan **Misi 1** (stesen) | **Panel langkah: MISI 1 · STESEN MINECRAFT** (5 langkah) |
+| 09:42 | Guru 1 beredar → Guru 2 mengambil alih | Kad fasa **LANGKAH 1** |
+| 10:59 | Close-up **Guru 2 di sebelah skrin Minecraft** | **Pop-up GURU 02** |
+| 11:05 | Guru 2 menerangkan **Misi 1** (stesen) | **Panel langkah: MISI 1 · STESEN MINECRAFT** (5 langkah) |
 | 11–14 | Kumpulan menggunakan tablet, Guru 2 membimbing | |
 | 14:23 | Guru 2 menerangkan **Misi 2** | **Panel langkah: MISI 2 · TUKAR AYAT** |
 | 16:32 | Skrin Misi 2 – Situasi Ladang Organik | **Panel ayat:** *Sayur-sayuran **dituai** oleh tukang kebun di ladang organik.* (tukar kepada ayat aktif) |
@@ -53,7 +54,7 @@ Latar hijau hutan legap dengan sinar cahaya lembut — **tiada rakaman/preview**
 | ~18:30 | "Tadi awak semua dah belajar tentang ayat aktif dengan ayat pasif, kan?" | sari kata |
 | 20:00 | Guru 3 di skrin aplikasi AR *Misi Pengawal Bahasa* | **Panel langkah: AKTIVITI AR** (isi nama → pilih situasi → animasi AR → bina ayat aktif & pasif → hantar) |
 | 20–22 | Murid menggunakan aplikasi AR pada tablet | |
-| 22:09 | **Galeri Jawapan** di skrin | **Panel ayat murid (aktif → pasif):** *Amin mengasingkan… → Sampah diasingkan oleh Amin…*, *Ali memasang lampu itu → Lampu itu dipasang oleh Ali*, *Pelayan hotel sedang memasang lampu… → Lampu dipasang oleh pelayan hotel…* |
+| 22:09 | **Galeri Jawapan** di skrin (lajur nama murid dikaburkan) | **Panel ayat murid (aktif → pasif):** *Amin mengasingkan… → Sampah diasingkan oleh Amin…*, *Ali memasang lampu itu → Lampu itu dipasang oleh Ali*, *Pelayan hotel sedang memasang lampu… → Lampu dipasang oleh pelayan hotel…* |
 | 23–25 | Bimbingan guru, perbincangan | |
 
 ## 25:47 — PENUTUP (REFLEKSI)

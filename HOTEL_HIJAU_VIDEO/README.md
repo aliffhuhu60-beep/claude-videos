@@ -87,7 +87,7 @@ python3 07_PROJECT_FILES/sync_broll.py v1.wav v2.wav 07_PROJECT_FILES/broll_cuts
 - **Masa grafik:** `overlay_events()`; **muzik:** `music_plan()`; **SFX:** `sfx_plan()`.
 
 ## Muat turun video
-Video akhir ~2 GB (1440p). Jika repositori menggunakan Git LFS, `git lfs pull` akan memuat turun fail MP4. Jika fail dipecahkan kepada bahagian (`*.mp4.part-aa`, `-ab`, …), cantumkan semula:
+Video akhir ~1.8 GB (1440p, ≤ 8 Mbps). Jika repositori menggunakan Git LFS, `git lfs pull` akan memuat turun fail MP4. Jika fail dipecahkan kepada bahagian (`*.mp4.part-aa`, `-ab`, …), cantumkan semula:
 ```bash
 cat 09_FINAL_EXPORT/*.mp4.part-* > video.mp4
 ```

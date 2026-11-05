@@ -87,8 +87,8 @@
 85,14:59.900,15:23.600,vid sintaksis 2.MOV,18:06.410,23.700,711,,own,langkah_1,seg53@v1:1297.8
 86,15:23.600,15:26.000,vid sintaksis 2.MOV,17:56.190,2.400,72,,vid1@22:01.500,langkah_1,cutaway@v1:1321.5
 87,15:26.000,15:42.100,vid sintaksis 2.MOV,18:30.370,16.100,483,,own,langkah_1,seg54@v1:1323.9
-88,15:42.100,15:49.100,vid sintaksis 1.MOV,23:20.000,7.000,210,front,own,langkah_1,
-89,15:49.100,16:03.600,vid sintaksis 2.MOV,19:40.750,14.500,435,,own,langkah_1,seg55@v1:1407.0
+88,15:42.100,15:54.500,vid sintaksis 1.MOV,23:20.000,12.400,372,front,own,langkah_1,
+89,15:54.500,16:03.600,vid sintaksis 2.MOV,19:46.150,9.100,273,,own,langkah_1,seg55@v1:1412.4
 90,16:03.600,16:07.100,vid sintaksis 1.MOV,23:41.500,3.500,105,wide,own,langkah_1,
 91,16:07.100,16:10.100,vid sintaksis 2.MOV,17:58.590,3.000,90,,vid1@23:45.000,langkah_1,cutaway@v1:1425.0
 92,16:10.100,16:32.100,vid sintaksis 1.MOV,23:48.000,22.000,660,wide,own,langkah_1,
@@ -106,8 +106,8 @@
 104,20:31.600,20:38.100,vid sintaksis 2.MOV,07:32.000,6.500,195,,vid1@31:43.500,langkah_2,cutaway@v1:1903.5
 105,20:38.100,21:43.100,vid sintaksis 2.MOV,10:10.120,65.000,1950,,own,langkah_2,seg39@v1:1960.0
 106,21:43.100,21:50.167,vid sintaksis 1.MOV,36:30.000,7.067,212,left,own,langkah_2,
-107,21:50.167,21:58.800,vid sintaksis 2.MOV,22:15.500,8.633,259,,own,langkah_2,seg62@v1:2197.1
-108,21:58.800,22:08.100,vid sintaksis 1.MOV,36:45.700,9.300,279,left,own,langkah_2,
+107,21:50.167,21:53.400,vid sintaksis 2.MOV,22:15.500,3.233,97,,own,langkah_2,seg62@v1:2197.1
+108,21:53.400,22:08.100,vid sintaksis 1.MOV,36:40.300,14.700,441,left,own,langkah_2,
 109,22:08.100,22:47.600,vid sintaksis 2.MOV,12:05.200,39.500,1185,,own,langkah_2,seg41@v1:2215.0
 110,22:47.600,22:53.100,vid sintaksis 1.MOV,37:34.500,5.500,165,left,own,langkah_2,
 111,22:53.100,23:31.100,vid sintaksis 2.MOV,22:57.630,38.000,1140,,own,langkah_2,seg64@v1:2362.0
@@ -115,8 +115,8 @@
 113,25:17.100,25:43.100,vid sintaksis 1.MOV,41:46.000,26.000,780,left,own,langkah_2,
 114,25:43.100,25:46.100,vid sintaksis 2.MOV,07:38.500,3.000,90,,vid1@42:12.000,langkah_2,cutaway@v1:2532.0
 115,25:46.100,25:47.500,vid sintaksis 1.MOV,42:15.000,1.400,42,left,own,langkah_2,
-116,25:47.500,25:48.500,vid sintaksis 1.MOV,41:13.000,1.000,30,wide,own,penutup,
-117,25:48.500,26:52.100,vid sintaksis 2.MOV,12:45.800,63.600,1908,,own,penutup,seg42@v1:2474.0
+116,25:47.500,25:53.300,vid sintaksis 1.MOV,41:13.000,5.800,174,wide,own,penutup,
+117,25:53.300,26:52.100,vid sintaksis 2.MOV,12:50.600,58.800,1764,,own,penutup,seg42@v1:2478.8
 118,26:52.100,26:53.100,vid sintaksis 2.MOV,23:57.600,1.000,30,,vid1@42:17.600,penutup,cutaway@v1:2537.6
 119,26:53.100,27:05.500,vid sintaksis 2.MOV,23:58.310,12.400,372,,own,penutup,seg66@v1:2538.6
 120,27:05.500,27:48.100,vid sintaksis 2.MOV,14:02.800,42.600,1278,,own,penutup,seg42@v1:2551.0
