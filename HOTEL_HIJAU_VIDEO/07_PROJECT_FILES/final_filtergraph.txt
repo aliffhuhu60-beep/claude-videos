@@ -13,7 +13,7 @@
 [7:v]format=rgba[g7];
 [o6][g7]overlay=1440:200:eof_action=pass:repeatlast=0[o7];
 [8:v]format=rgba[g8];
-[o7][g8]overlay=160:133:eof_action=pass:repeatlast=0[o8];
+[o7][g8]overlay=873:777:eof_action=pass:repeatlast=0[o8];
 [9:v]format=rgba[g9];
 [o8][g9]overlay=107:93:eof_action=pass:repeatlast=0[o9];
 [10:v]format=rgba[g10];
@@ -21,13 +21,13 @@
 [11:v]format=rgba[g11];
 [o10][g11]overlay=1440:200:eof_action=pass:repeatlast=0[o11];
 [12:v]format=rgba[g12];
-[o11][g12]overlay=160:133:eof_action=pass:repeatlast=0[o12];
+[o11][g12]overlay=440:60:eof_action=pass:repeatlast=0[o12];
 [13:v]format=rgba[g13];
-[o12][g13]overlay=160:133:eof_action=pass:repeatlast=0[o13];
+[o12][g13]overlay=873:604:eof_action=pass:repeatlast=0[o13];
 [14:v]format=rgba[g14];
 [o13][g14]overlay=107:93:eof_action=pass:repeatlast=0[o14];
 [15:v]format=rgba[g15];
-[o14][g15]overlay=160:133:eof_action=pass:repeatlast=0[o15];
+[o14][g15]overlay=7:10:eof_action=pass:repeatlast=0[o15];
 [16:v]format=rgba[g16];
 [o15][g16]overlay=0:0:eof_action=pass:repeatlast=0[o16];
 [17:v]format=rgba[g17];
@@ -37,7 +37,7 @@
 [19:v]format=rgba[g19];
 [o18][g19]overlay=0:0:eof_action=pass:repeatlast=0[o19];
 [o19]ass='/home/user/claude-videos/HOTEL_HIJAU_VIDEO/06_SUBTITLES/MISI_PENGAWAL_BAHASA_Hotel_Hijau.ms.ass':fontsdir=/usr/share/fonts/opentype/inter[subs];
-[0:a]aformat=sample_rates=48000:channel_layouts=stereo,highpass=f=100,equalizer=f=250:t=q:w=1.0:g=-2,equalizer=f=3000:t=q:w=1.2:g=5,acompressor=threshold=-24dB:ratio=3:attack=8:release=250:makeup=5dB,alimiter=limit=0.95,volume=volume='1-(clip((t-202.400)/0.25,0,1)*clip((209.500-t)/0.25,0,1)+clip((t-428.833)/0.25,0,1)*clip((440.500-t)/0.25,0,1)+clip((t-463.900)/0.25,0,1)*clip((478.600-t)/0.25,0,1)+clip((t-521.300)/0.25,0,1)*clip((531.400-t)/0.25,0,1)+clip((t-564.500)/0.25,0,1)*clip((582.900-t)/0.25,0,1)+clip((t-588.800)/0.25,0,1)*clip((599.100-t)/0.25,0,1)+clip((t-721.033)/0.25,0,1)*clip((728.267-t)/0.25,0,1)+clip((t-853.000)/0.25,0,1)*clip((860.733-t)/0.25,0,1)+clip((t-927.800)/0.25,0,1)*clip((943.900-t)/0.25,0,1)+clip((t-1553.200)/0.25,0,1)*clip((1612.000-t)/0.25,0,1)+clip((t-1613.000)/0.25,0,1)*clip((1668.000-t)/0.25,0,1)+clip((t-1669.000)/0.25,0,1)*clip((1674.400-t)/0.25,0,1))':eval=frame,asplit=2[dlg][key];
+[0:a]aformat=sample_rates=48000:channel_layouts=stereo,highpass=f=100,equalizer=f=250:t=q:w=1.0:g=-2,equalizer=f=3000:t=q:w=1.2:g=5,acompressor=threshold=-24dB:ratio=3:attack=8:release=250:makeup=5dB,alimiter=limit=0.95,volume=volume='1-(clip((t-183.837)/0.25,0,1)*clip((235.507-t)/0.25,0,1)+clip((t-245.127)/0.25,0,1)*clip((302.900-t)/0.25,0,1)+clip((t-428.833)/0.25,0,1)*clip((440.500-t)/0.25,0,1)+clip((t-457.900)/0.25,0,1)*clip((582.900-t)/0.25,0,1)+clip((t-588.800)/0.25,0,1)*clip((598.300-t)/0.25,0,1)+clip((t-721.033)/0.25,0,1)*clip((728.267-t)/0.25,0,1)+clip((t-792.900)/0.25,0,1)*clip((876.830-t)/0.25,0,1)+clip((t-879.970)/0.25,0,1)*clip((893.900-t)/0.25,0,1)+clip((t-927.800)/0.25,0,1)*clip((943.900-t)/0.25,0,1)+clip((t-1013.900)/0.25,0,1)*clip((1088.900-t)/0.25,0,1)+clip((t-1412.900)/0.25,0,1)*clip((1472.900-t)/0.25,0,1)+clip((t-1553.200)/0.25,0,1)*clip((1612.000-t)/0.25,0,1)+clip((t-1613.000)/0.25,0,1)*clip((1728.400-t)/0.25,0,1))':eval=frame,asplit=2[dlg][key];
 [20:a]atrim=0.0:11.0,asetpts=PTS-STARTPTS,volume=-3.0dB,afade=t=in:d=2,afade=t=out:st=8.0:d=3,adelay=0|0,apad[m0];
 [21:a]atrim=0.0:1758.0,asetpts=PTS-STARTPTS,volume=0.0dB,afade=t=in:d=2,afade=t=out:st=1755.0:d=3,adelay=0|0,apad[m1];
 [22:a]atrim=0.0:44.0,asetpts=PTS-STARTPTS,volume=-5.0dB,afade=t=in:d=2,afade=t=out:st=41.0:d=3,adelay=1756000|1756000,apad[m2];
