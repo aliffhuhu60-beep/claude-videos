@@ -7932,7 +7932,7 @@
 {
 "s": 1220.85,
 "e": 1229.83,
-"t": "Kumpulan tiga, dekat kumpulan Anil tu, situasi lobby hotel. Kumpulan empat, akan buat situasi takin air.",
+"t": "Kumpulan tiga, dekat kumpulan … tu, situasi lobby hotel. Kumpulan empat, akan buat situasi takin air.",
 "lp": -0.599,
 "ns": 0.0,
 "cr": 1.31,
@@ -7960,7 +7960,7 @@
 [
 1223.13,
 1223.57,
-" Anil"
+" …"
 ],
 [
 1223.57,
@@ -8037,7 +8037,7 @@
 {
 "s": 1241.25,
 "e": 1243.71,
-"t": "Tak nampak, Anil masih berani.",
+"t": "Tak nampak, … masih berani.",
 "lp": -0.599,
 "ns": 0.0,
 "cr": 1.31,
@@ -8055,7 +8055,7 @@
 [
 1242.97,
 1243.11,
-" Anil"
+" …"
 ],
 [
 1243.11,
@@ -8427,7 +8427,7 @@
 {
 "s": 1321.95,
 "e": 1323.43,
-"t": "Jawapan Fatih.",
+"t": "Jawapan ….",
 "lp": -0.494,
 "ns": 0.0,
 "cr": 1.73,
@@ -8440,14 +8440,14 @@
 [
 1322.83,
 1323.43,
-" Fatih."
+" …."
 ]
 ]
 },
 {
 "s": 1326.07,
 "e": 1327.97,
-"t": "Fatih dah kesituasi apa?",
+"t": "… dah kesituasi apa?",
 "lp": -0.494,
 "ns": 0.0,
 "cr": 1.73,
@@ -8455,7 +8455,7 @@
 [
 1326.07,
 1326.95,
-" Fatih"
+" …"
 ],
 [
 1326.95,
@@ -8547,7 +8547,7 @@
 {
 "s": 1333.23,
 "e": 1334.71,
-"t": "Kata kerjanya apa Fatih?",
+"t": "Kata kerjanya apa …?",
 "lp": -0.494,
 "ns": 0.0,
 "cr": 1.73,
@@ -8570,7 +8570,7 @@
 [
 1334.27,
 1334.71,
-" Fatih?"
+" …?"
 ]
 ]
 },
@@ -8607,7 +8607,7 @@
 {
 "s": 1336.69,
 "e": 1338.79,
-"t": "Jadi Fatih buat air apa tu?",
+"t": "Jadi … buat air apa tu?",
 "lp": -0.494,
 "ns": 0.0,
 "cr": 1.73,
@@ -8620,7 +8620,7 @@
 [
 1336.93,
 1338.07,
-" Fatih"
+" …"
 ],
 [
 1338.07,
@@ -8727,7 +8727,7 @@
 {
 "s": 1347.55,
 "e": 1348.89,
-"t": "Pandai, Madi.",
+"t": "Pandai, ….",
 "lp": -0.687,
 "ns": 0.0,
 "cr": 1.36,
@@ -8740,14 +8740,14 @@
 [
 1348.47,
 1348.89,
-" Madi."
+" …."
 ]
 ]
 },
 {
 "s": 1354.67,
 "e": 1358.51,
-"t": "Madi, kelas ayat yang lengkap kena ada?",
+"t": "…, kelas ayat yang lengkap kena ada?",
 "lp": -0.687,
 "ns": 0.0,
 "cr": 1.36,
@@ -8755,7 +8755,7 @@
 [
 1354.67,
 1355.51,
-" Madi,"
+" …,"
 ],
 [
 1356.07,
@@ -8822,7 +8822,7 @@
 {
 "s": 1368.85,
 "e": 1372.39,
-"t": "Madi, ayat yang tiga boleh ke semua masakan?",
+"t": "…, ayat yang tiga boleh ke semua masakan?",
 "lp": -0.687,
 "ns": 0.0,
 "cr": 1.36,
@@ -8830,7 +8830,7 @@
 [
 1368.85,
 1369.69,
-" Madi,"
+" …,"
 ],
 [
 1370.21,
@@ -8872,7 +8872,7 @@
 {
 "s": 1373.21,
 "e": 1376.49,
-"t": "Memasak, Madi ayat tektif yang Syairah buat?",
+"t": "Memasak, … ayat tektif yang … buat?",
 "lp": -0.687,
 "ns": 0.0,
 "cr": 1.36,
@@ -8885,7 +8885,7 @@
 [
 1374.25,
 1374.43,
-" Madi"
+" …"
 ],
 [
 1374.43,
@@ -8905,7 +8905,7 @@
 [
 1375.77,
 1376.27,
-" Syairah"
+" …"
 ],
 [
 1376.27,
@@ -10947,7 +10947,7 @@
 {
 "s": 1656.12,
 "e": 1657.42,
-"t": "Anish, boleh boleh boleh",
+"t": "…, boleh boleh boleh",
 "lp": -0.626,
 "ns": 0.0,
 "cr": 2.81,
@@ -10955,7 +10955,7 @@
 [
 1656.12,
 1656.8,
-" Anish,"
+" …,"
 ],
 [
 1656.92,
@@ -11272,7 +11272,7 @@
 {
 "s": 1740.04,
 "e": 1743.22,
-"t": "Okey, bolehkah Ainef pasifkan ayat tersebut?",
+"t": "Okey, bolehkah … pasifkan ayat tersebut?",
 "lp": -0.291,
 "ns": 0.0,
 "cr": 1.61,
@@ -11290,7 +11290,7 @@
 [
 1741.46,
 1741.92,
-" Ainef"
+" …"
 ],
 [
 1741.92,
