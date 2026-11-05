@@ -1,3 +1,12 @@
+# Keputusan Suntingan — Versi 5
+
+## Perubahan versi 5 (maklum balas ke atas versi 4)
+| # | Permintaan | Pelaksanaan |
+|---|---|---|
+| 1 | Paparan ayat jangan terlalu lama & jangan tutup muka guru/murid | Panel ayat dipendekkan (7–14 s, sebelum ini sehingga 40 s), dikecilkan (lebar 1180/760 unit) dan diletakkan di ruang kosong babak itu (`PANEL_POS`): Misi 2 bawah-kanan, Galeri (menuai) atas skrin Galeri, Galeri (memasang) bawah-kanan, Rumusan atas-kiri (murid yang membaca di tengah). Kedudukan disemak pada bingkai sebenar. |
+| 2 | Jangan ulang klip | Ditemui 9 ulangan (kolam cutaway mengambil semula rakaman B-roll yang sudah dipaparkan). EDL kini dibina dua laluan: kolam cutaway/aktiviti ditolak julat B-roll yang digunakan + tiada pusingan semula kolam. Semakan: **0 pertindihan** rakaman vid2. |
+| 3 | Kurangkan babak kerja kumpulan panjang (kekal 30:00) | Transkripsi penuh vid1 & bahagian vid2 yang belum digunakan menunjukkan **tiada lagi rakaman penerangan guru yang belum digunakan**. Maka 12 julat kerja kumpulan (`GROUPWORK_V1`, ~11 min) dijadikan **montaj aktiviti**: shot kelas ≤5 s berselang close-up aktiviti murid ≤7 s yang belum pernah digunakan (`ACTIVITY`: menulis di papan putih, Minecraft di tablet, aplikasi AR, tiket refleksi); sembang murid disenyapkan + muzik fasa. Ucapan guru yang bersari kata dalam julat itu **tidak** disenyapkan. |
+
 # Keputusan Suntingan — Versi 4
 
 ## Perubahan versi 4 (maklum balas ke atas versi 3)

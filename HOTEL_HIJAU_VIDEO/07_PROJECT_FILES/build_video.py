@@ -57,6 +57,18 @@ CUTAWAY = {
     "penutup": [(1437.6, 1451.0), (1451.4, 1460.4), (1460.8, 1466.5), (1466.9, 1473.8), (1486.4, 1492.2), (1492.6, 1497.8), (800.0, 840.0)],
 }
 
+# v5: KERJA KUMPULAN PANJANG (masa vid1, tiada penerangan guru yang dapat ditranskripsi) -> montaj aktiviti:
+# shot kelas pendek (<=5 s) berselang close-up aktiviti murid (<=7 s), sembang murid disenyapkan + muzik.
+GROUPWORK_V1 = [(196.0, 245.0), (316.0, 357.0), (366.0, 400.0), (615.0, 700.0), (870.0, 908.0), (1140.0, 1180.0),
+                (1229.0, 1290.0), (1625.0, 1700.0), (1781.0, 1824.0), (2400.0, 2460.0), (2540.0, 2600.0), (2716.0, 2770.0)]
+# Close-up aktiviti yang belum digunakan (masa vid2; disemak visual — tiada wajah bercakap/kabur/potret)
+ACTIVITY = {
+    "set_induksi": [(72.5, 85.8), (90.8, 115.0), (998.5, 1011.2), (982.5, 991.2), (152.9, 158.4)],
+    "langkah_1": [(1126.7, 1180.8), (364.5, 375.3), (357.6, 364.0), (307.3, 315.9), (328.7, 341.1), (267.7, 275.1), (245.6, 250.4), (400.0, 405.5)],
+    "langkah_2": [(566.2, 609.9), (488.0, 499.8), (1319.9, 1335.3)],
+    "penutup": [(1415.8, 1438.1), (885.6, 899.5), (904.0, 919.0), (924.0, 932.0), (829.6, 842.6), (1466.0, 1474.7), (1480.5, 1497.8)],
+}
+
 # Pilihan framing kamera induk (x0, y0, lebar) dalam pecahan bingkai (nisbah 16:9 dikekalkan)
 CROPS = {"wide": (0.02, 0.02, 0.96), "front": (0.15, 0.06, 0.74), "right": (0.30, 0.04, 0.70),
          "left": (0.06, 0.04, 0.70), "center": (0.20, 0.10, 0.64)}
@@ -147,7 +159,36 @@ def _subtract(ranges, used):
         out += segs
     return out
 
+def take_activity(tag, need):
+    pool = _active_pools.get("act_" + tag, ACTIVITY.get(tag, [])); i, off = _pool.get("act_" + tag, (0, 0.0)); got = []
+    while need > 0.05 and i < len(pool):
+        a, b = pool[i]; avail = (b - a) - off
+        if avail < 2.0: i += 1; off = 0.0; continue
+        d = min(need, avail); got.append((a + off, d)); need -= d; off += d
+        if off >= (b - a) - 2.0: i += 1; off = 0.0
+    _pool["act_" + tag] = (i, off); return got
+
 def v1_piece(p0, p1, tag):
+    # pecahkan mengikut GROUPWORK_V1: bahagian kerja kumpulan -> montaj aktiviti
+    cuts = sorted({p0, p1} | {x for g in GROUPWORK_V1 for x in g if p0 < x < p1})
+    for a, b in zip(cuts, cuts[1:]):
+        if any(g0 <= a and b <= g1 for g0, g1 in GROUPWORK_V1) and b - a > 6.0: _montage(a, b, tag)
+        else: _v1_piece(a, b, tag)
+
+def _montage(p0, p1, tag):
+    t = p0; k = 0
+    while p1 - t > 0.05:
+        if k % 2 == 0 or p1 - t < 3.0:
+            d = min(5.0, p1 - t) if p1 - t - 5.0 >= 2.0 or p1 - t <= 5.0 else p1 - t
+            _v1_piece(t, t + d, tag); t += d
+        else:
+            got = take_activity(tag, min(7.0, p1 - t - 2.0 if p1 - t > 9.0 else p1 - t))
+            if not got: _v1_piece(t, p1, tag); return
+            for vs, d in got:
+                fr = F(t + d) - F(t); add("v2", vs, fr, audio=("v1", t), tag=tag, label=f"aktiviti@v1:{t:.1f}"); t += d
+        k += 1
+
+def _v1_piece(p0, p1, tag):
     for a, b, cr in frame_plan(p0, p1):
         if cr is not None:
             add("v1", a, F(b) - F(a), crop=cr, tag=tag)
@@ -229,6 +270,8 @@ def build_edl():
     used = [(c["start"] - 0.2, c["start"] + c["frames"] / FPS + 0.2) for c in clips if c["src"] == "v2" and c["label"].startswith("seg")]
     used += EXCLUDE_V2
     for tag, pool in CUTAWAY.items(): _active_pools[tag] = _subtract(pool, used)
+    allcut = [r for p in CUTAWAY.values() for r in p]
+    for tag, pool in ACTIVITY.items(): _active_pools["act_" + tag] = _subtract(pool, used + allcut)
     return _build_edl()
 
 def _build_edl():
@@ -423,13 +466,25 @@ def music_windows():
     """Selang masa akhir (t0, t1, fasa) bagi klip B-roll murid yang audio asalnya digunakan."""
     w = []
     for c in clips:
-        if c["src"] != "v2" or c["audio"] != "own": continue
+        if c["src"] in ("black", "v3") or c["tag"] == "credits": continue
         a, d = c["start"], c["frames"] / FPS
-        ov = sum(max(0, min(a + d, r1) - max(a, r0)) for r0, r1 in STUDENT_BROLL_V2)
-        if ov >= 0.5 * d:
+        stud = c["src"] == "v2" and c["audio"] == "own" and \
+            sum(max(0, min(a + d, r1) - max(a, r0)) for r0, r1 in STUDENT_BROLL_V2) >= 0.5 * d
+        v1a = c["audio"][1] if isinstance(c["audio"], (list, tuple)) else (a if c["src"] == "v1" else (a + c["v1d"] if c.get("v1d") is not None else None))
+        grp = v1a is not None and any(g0 - 0.05 <= v1a and v1a + d <= g1 + 0.05 for g0, g1 in GROUPWORK_V1)
+        if stud or grp:
             t0, t1 = c["t_final"], c["t_final"] + d
             if w and t0 - w[-1][1] < 0.6 and w[-1][2] == c["tag"]: w[-1] = (w[-1][0], t1, c["tag"])
             else: w.append((t0, t1, c["tag"]))
+    # jangan senyapkan ucapan guru yang bersari kata (±1 s)
+    srt = os.path.join(ROOT, "06_SUBTITLES", "MISI_PENGAWAL_BAHASA_Hotel_Hijau.ms.srt")
+    if os.path.exists(srt):
+        def ts(x): h, m, z = x.replace(",", ".").split(":"); return int(h) * 3600 + int(m) * 60 + float(z)
+        cues = [(ts(a) - 1.0, ts(b) + 1.0) for a, b in re.findall(r"(\S+) --> (\S+)", open(srt, encoding="utf-8").read())]
+        w2 = []
+        for t0, t1, ph in w:
+            for a, b in _subtract([(t0, t1)], cues): w2.append((a, b, ph))
+        w = w2
     return [x for x in w if x[1] - x[0] >= 5.0]  # selang terlalu pendek: kekalkan audio asal (elak muzik terputus-putus)
 
 def build_music_bed():
@@ -672,9 +727,9 @@ def do_final(preview=False):
     fc.append(f"{last}fade=t=out:st={TOTAL - 2}:d=2,format=yuv420p[vout]")
     fg = os.path.join(HERE, "final_filtergraph.txt"); open(fg, "w").write(";\n".join(fc))
     if preview:
-        out = os.environ.get("HH_OUT") or os.path.join(ROOT, "08_PREVIEW", "PREVIEW_Hotel_Hijau_720p_v4.mp4"); venc = ["-s", "1280x720", "-c:v", "libx264", "-preset", "veryfast", "-crf", "24"]
+        out = os.environ.get("HH_OUT") or os.path.join(ROOT, "08_PREVIEW", "PREVIEW_Hotel_Hijau_720p_v5.mp4"); venc = ["-s", "1280x720", "-c:v", "libx264", "-preset", "veryfast", "-crf", "24"]
     else:
-        out = os.path.join(ROOT, "09_FINAL_EXPORT", "SIMULASI_PENGAJARAN_MIKRO_Hotel_Hijau_1440p_v4.mp4")
+        out = os.path.join(ROOT, "09_FINAL_EXPORT", "SIMULASI_PENGAJARAN_MIKRO_Hotel_Hijau_1440p_v5.mp4")
         venc = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-profile:v", "high", "-level", "5.1", "-maxrate", "8M", "-bufsize", "16M"]
     cmd = ["ffmpeg", "-v", "error", "-stats", "-y"] + inputs + ["-filter_complex_script", fg, "-map", "[vout]", "-map", "[aout]",
            "-r", "30", "-frames:v", str(TOTAL_FRAMES)] + venc + ["-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
