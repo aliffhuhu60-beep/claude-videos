@@ -1,3 +1,13 @@
+# Keputusan Suntingan — Versi 3
+
+## Perubahan versi 3 (maklum balas ke atas versi 2)
+| # | Permintaan | Pelaksanaan |
+|---|---|---|
+| 1 | Pop-up guru jangan terlalu besar | Pop-up dikecilkan kepada **66%** saiz asal (≈1200×310 px pada 1440p, sudut bawah-kiri), dipaparkan **7 s**. |
+| 2 | Pop-up Guru 2 & 3 tidak kelihatan | Pop-up dipindahkan ke **shot close-up** guru: Guru 1 **00:14**, Guru 2 **10:59** (sebelah skrin Minecraft), Guru 3 **18:47** (berdiri di hadapan kelas; sebelum ini 18:15 pada shot luas di mana Guru 3 kelihatan kecil). |
+| 3 | Suara guru lebih kuat | Penguat suara (`VOICE`): high-pass 100 Hz, −2 dB @250 Hz, **+5 dB @3 kHz** (kejelasan), pemampat 3:1 + gandaan 5 dB; muzik latar **−4 dB**; ducking lebih kuat (ambang 0.02, nisbah 8:1); loudness akhir **−14 LUFS** (sebelum ini −16). |
+| 4 | Sari kata semasa guru bercakap | Transkripsi padat baharu (`transcribe_dense.py`, tetingkap 30 s tanpa VAD) → **38 baris tambahan disemak manual** (`transcript_dense_edits.json`); jumlah **127 baris** (sebelum ini 89). Baris yang tidak jelas/halusinasi/nama murid tidak dimasukkan. |
+
 # Keputusan Suntingan — Versi 2
 
 ## Perubahan berbanding versi 1 (mengikut maklum balas)

@@ -1,4 +1,4 @@
-# Storyboard Teknikal (Versi 2) — SIMULASI PENGAJARAN MIKRO (MICRO TEACHING)
+# Storyboard Teknikal (Versi 3) — SIMULASI PENGAJARAN MIKRO (MICRO TEACHING)
 ### Misi Pengawal Bahasa: Hotel Hijau · Bahasa Melayu Tahun 5 · Ayat Aktif dan Ayat Pasif (SP 5.3.3)
 
 **Tempoh:** 30:00 tepat · **Eksport:** 2560 × 1440 (1440p), 30 fps, H.264 / AAC 48 kHz stereo · **Sari kata:** dibakar ke dalam video (key point berwarna & bold)
@@ -50,7 +50,8 @@ Latar hijau hutan legap dengan sinar cahaya lembut — **tiada rakaman/preview**
 ## 18:13 — LANGKAH 2 (Guru 3): Aktiviti AR & Galeri Jawapan
 | Masa | Kandungan | Grafik |
 |---|---|---|
-| 18:13 | Guru 3 di hadapan kelas, murid mengangkat tangan | Kad fasa **LANGKAH 2** + **Pop-up GURU 03** |
+| 18:13 | Guru 3 di hadapan kelas, murid mengangkat tangan | Kad fasa **LANGKAH 2** |
+| 18:47 | Close-up Guru 3 di hadapan kelas | **Pop-up GURU 03** |
 | ~18:30 | "Tadi awak semua dah belajar tentang ayat aktif dengan ayat pasif, kan?" | sari kata |
 | 20:00 | Guru 3 di skrin aplikasi AR *Misi Pengawal Bahasa* | **Panel langkah: AKTIVITI AR** (isi nama → pilih situasi → animasi AR → bina ayat aktif & pasif → hantar) |
 | 20–22 | Murid menggunakan aplikasi AR pada tablet | |
@@ -72,5 +73,5 @@ Latar hijau hutan legap dengan sinar cahaya lembut — **tiada rakaman/preview**
 ## Sistem visual
 - **Palet:** hijau hutan `#0B3B2C`, putih, emas `#D4AF37`, hijau semula jadi `#6EB062`. **Font:** Inter / Inter Display.
 - **Sari kata:** bawah-tengah, kotak hijau gelap separa lut sinar; **ayat aktif / kata kerja = emas bold**, **ayat pasif / Hotel Hijau / Betul = hijau bold**.
-- **Pop-up guru:** bawah-kiri (di atas zon sari kata), 5 s. **Kad fasa:** atas-kiri. **Panel langkah:** kanan. **Panel ayat:** atas-tengah.
+- **Pop-up guru:** bawah-kiri (di atas zon sari kata), saiz kecil (66%), 7 s, pada shot close-up guru. **Kad fasa:** atas-kiri. **Panel langkah:** kanan. **Panel ayat:** atas-tengah.
 - **Tiada** label GURU 01/02/03 atau bar kemajuan di bawah skrin.
