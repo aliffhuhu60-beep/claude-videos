@@ -230,7 +230,9 @@ def phase_card(key, dur=5.0):
 # =====================================================================
 # 3. POP-UP PENGENALAN GURU — bawah-kiri (di atas zon sari kata), 5 s
 # =====================================================================
-def teacher_popup(i, mins, dur=5.0):
+POPUP_SCALE = 0.66  # pop-up dikecilkan supaya tidak menutup skrin (maklum balas v2)
+
+def teacher_popup(i, mins, dur=7.0):
     T = TEACHERS[i]
     f_no = F("InterDisplay-Black.otf", 150); f_lab = F("Inter-Bold.otf", 22); f_role = F("Inter-SemiBold.otf", 30); f_info = F("Inter-Medium.otf", 24)
     size = 46
@@ -268,7 +270,9 @@ def teacher_popup(i, mins, dur=5.0):
             if k > 0:
                 tl = Image.new("RGBA", (Wc, Hc)); draw(ImageDraw.Draw(tl), k); img.alpha_composite(alpha(tl, k))
         return alpha(img, 1 - ease_io(prog(t, dur - 0.7, dur)))
-    return fr, int(dur * FPS), (Wc, Hc), (x0, y0)
+    K = POPUP_SCALE; Ws, Hs = int(Wc * K) // 2 * 2, int(Hc * K) // 2 * 2
+    def frs(t): return fr(t).resize((Ws, Hs), Image.LANCZOS)
+    return frs, int(dur * FPS), (Ws, Hs), (x0, y0 + Hc - Hs)
 
 # =====================================================================
 # 4. PANEL LANGKAH AKTIVITI — kanan, langkah muncul satu demi satu
@@ -304,7 +308,9 @@ def steps_panel(key, step_gap=1.6, hold=6.0):
                 d.rounded_rectangle([pad - u(8), y - u(6), pw - pad + u(8), y + u(52)], u(10), outline=GOLD_L + (180,), width=max(2, u(2)))
         img.alpha_composite(alpha(c, p), (min(x, Wc - 1), u(40)))
         return alpha(img, 1 - ease_io(prog(t, dur - 0.7, dur)))
-    return fr, int(dur * FPS), (Wc, Hc), (x0, y0)
+    K = POPUP_SCALE; Ws, Hs = int(Wc * K) // 2 * 2, int(Hc * K) // 2 * 2
+    def frs(t): return fr(t).resize((Ws, Hs), Image.LANCZOS)
+    return frs, int(dur * FPS), (Ws, Hs), (x0, y0 + Hc - Hs)
 
 # =====================================================================
 # 5. PANEL AYAT MURID (AKTIF → PASIF) — tengah atas

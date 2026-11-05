@@ -242,7 +242,7 @@ def overlay_events():
         ("steps_misi2", t_of_v1(1261.0)),
         ("ayat_misi2", t_of_v1(1450.5)),
         ("phase_langkah_2", M["langkah_2"] + 0.3),
-        ("popup_guru3", M["langkah_2"] + 1.8),
+        ("popup_guru3", t_of_v1(1769.0)),  # close-up Guru 3 di hadapan kelas
         ("steps_ar", t_of_v1(1872.0)),
         ("ayat_galeri", t_of_v1(2216.0)),
         ("phase_penutup", M["penutup"] + 0.3),
@@ -260,6 +260,9 @@ GRADE_V2 = "eq=contrast=1.04:brightness=-0.01:saturation=1.04:gamma=0.98,curves=
 SHARP_V1 = "cas=strength=0.8,unsharp=5:5:0.6:5:5:0"
 SHARP_V2 = "cas=strength=0.55"
 AF_V1 = "highpass=f=90,lowpass=f=9000,afftdn=nr=10:nf=-30,dynaudnorm=f=300:g=21:p=0.8:m=12"
+# Penguat suara guru (adunan akhir): buang dengung rendah, tonjolkan julat kejelasan 2–4 kHz, mampatan lembut + gandaan
+VOICE = ("highpass=f=100,equalizer=f=250:t=q:w=1.0:g=-2,equalizer=f=3000:t=q:w=1.2:g=5,"
+         "acompressor=threshold=-24dB:ratio=3:attack=8:release=250:makeup=5dB,alimiter=limit=0.95")
 AF_V2 = "highpass=f=80,afftdn=nr=8:nf=-35,dynaudnorm=f=300:g=21:p=0.8:m=8"
 
 # Kawasan dikaburkan pada B-roll (masa vid2, pecahan lebar x0..x1): lajur "Nama" murid pada Galeri Jawapan
@@ -368,10 +371,10 @@ def do_rough():
 def music_plan():
     M = markers
     return [("mus_opening.wav", 0.0, M["set_induksi"] + 3.0, 0.0, -3.0),
-            ("mus_intro.wav", M["set_induksi"] - 1.0, M["langkah_1"] + 1.0, 0.0, -18.0),
-            ("mus_upbeat.wav", M["langkah_1"] - 1.0, M["langkah_2"] + 1.0, 0.0, -19.5),
-            ("mus_tech.wav", M["langkah_2"] - 1.0, M["penutup"] + 1.0, 0.0, -19.0),
-            ("mus_piano.wav", M["penutup"] - 1.0, M["credits"] + 1.0, 0.0, -18.0),
+            ("mus_intro.wav", M["set_induksi"] - 1.0, M["langkah_1"] + 1.0, 0.0, -22.0),
+            ("mus_upbeat.wav", M["langkah_1"] - 1.0, M["langkah_2"] + 1.0, 0.0, -23.5),
+            ("mus_tech.wav", M["langkah_2"] - 1.0, M["penutup"] + 1.0, 0.0, -23.0),
+            ("mus_piano.wav", M["penutup"] - 1.0, M["credits"] + 1.0, 0.0, -22.0),
             ("mus_closing.wav", M["credits"] - 1.0, TOTAL, 0.0, -5.0)]
 
 def sfx_plan():
@@ -506,20 +509,20 @@ def do_final(preview=False):
         fc.append(f"{last}[g{k}]overlay={g['x']}:{g['y']}:eof_action=pass:repeatlast=0[o{k}]"); last = f"[o{k}]"; k += 1
     ass = os.path.join(ROOT, "06_SUBTITLES", "MISI_PENGAWAL_BAHASA_Hotel_Hijau.ms.ass")
     fc.append(f"{last}ass='{ass}':fontsdir=/usr/share/fonts/opentype/inter[subs]"); last = "[subs]"
-    fc.append("[0:a]aformat=sample_rates=48000:channel_layouts=stereo,asplit=2[dlg][key]")
+    fc.append("[0:a]aformat=sample_rates=48000:channel_layouts=stereo," + VOICE + ",asplit=2[dlg][key]")
     mus = []
     for i, (fn, a, b, off, g) in enumerate(music_plan()):
         inputs += ["-i", os.path.join(AUD, fn)]; d = b - a
         fc.append(f"[{k}:a]atrim={off}:{off + d},asetpts=PTS-STARTPTS,volume={g}dB,afade=t=in:d=2,afade=t=out:st={d - 3}:d=3,"
                   f"adelay={int(a * 1000)}|{int(a * 1000)},apad[m{i}]"); mus.append(f"[m{i}]"); k += 1
     fc.append("".join(mus) + f"amix=inputs={len(mus)}:normalize=0:duration=longest,atrim=0:{TOTAL}[musraw]")
-    fc.append("[musraw][key]sidechaincompress=threshold=0.04:ratio=5:attack=30:release=600:makeup=1[musd]")
+    fc.append("[musraw][key]sidechaincompress=threshold=0.02:ratio=8:attack=20:release=700:makeup=1[musd]")
     sf = []
     for i, (fn, t0, g) in enumerate(sfx_plan()):
         inputs += ["-i", os.path.join(AUD, fn)]
         fc.append(f"[{k}:a]volume={g}dB,adelay={int(t0 * 1000)}|{int(t0 * 1000)},apad[s{i}]"); sf.append(f"[s{i}]"); k += 1
     fc.append("[dlg][musd]" + "".join(sf) + f"amix=inputs={2 + len(sf)}:normalize=0:duration=first,"
-              f"loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,afade=t=out:st={TOTAL - 3.5}:d=3.5,atrim=0:{TOTAL}[aout]")
+              f"loudnorm=I=-14:TP=-1.5:LRA=9,aresample=48000,afade=t=out:st={TOTAL - 3.5}:d=3.5,atrim=0:{TOTAL}[aout]")
     fc.append(f"{last}fade=t=out:st={TOTAL - 2}:d=2,format=yuv420p[vout]")
     fg = os.path.join(HERE, "final_filtergraph.txt"); open(fg, "w").write(";\n".join(fc))
     if preview:
