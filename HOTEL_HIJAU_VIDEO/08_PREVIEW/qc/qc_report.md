@@ -22,11 +22,11 @@
  ],
  "format": {
   "duration": "1800.000000",
-  "size": "1811227811",
-  "bit_rate": "8049901"
+  "size": "1811153323",
+  "bit_rate": "8049570"
  }
 }
 ```
 - Tempoh: **1800.000 s** (30:00.000) — ✅ 30:00
 - Segmen hitam (≥0.5 s): 1799.3–1800.0s
-- Loudness bersepadu: **-16.3 LUFS**, LRA 8.3 LU, true peak **-1.2 dBTP**
+- Loudness bersepadu: **-14.0 LUFS**, LRA 5.5 LU, true peak **-0.9 dBTP**
