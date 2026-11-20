@@ -110,6 +110,11 @@ for it in items:
     pantun = txt.startswith('PANTUN:')
     body = txt[7:] if pantun else txt
     chunks = [c.strip() for c in body.split('|') if c.strip()]
+    # keep highlight markup balanced inside each subtitle chunk
+    for mk in ('*', '~'):
+        for k in range(len(chunks)):
+            if chunks[k].count(mk) % 2 == 1 and k + 1 < len(chunks):
+                chunks[k] = chunks[k] + mk; chunks[k+1] = mk + chunks[k+1]
     ws = [wd for wd in WORDS if wd[0] >= s - 0.3 and wd[0] < e - 0.05]
     nw = [len(re.sub(r'[*~]', '', c).split()) for c in chunks]
     tot = sum(nw); acc = 0

@@ -148,17 +148,23 @@ def fmt_srt(t):
     return f"{h:02d}:{m:02d}:{s:02d},{r:03d}"
 YEL, PNK = '&H004AD5FF&', '&H00C6B6F4&'
 def ass_text(t):
+    W_ = '{\\c&H00FFFFFF&}'
+    def pinkify(x, base):
+        out = ''; i = 0
+        for m in re.finditer(r'~([^~]+)~', x):
+            out += x[i:m.start()] + '{\\c' + PNK + '}' + m.group(1).upper() + base; i = m.end()
+        return out + x[i:]
     out = ''; i = 0
-    for m in re.finditer(r'\*([^*]+)\*|~([^~]+)~', t):
-        out += t[i:m.start()].replace('~', '')
-        if m.group(1) is not None:
-            inner = m.group(1)
-            # nested pink inside yellow -> keep yellow, strip tildes
-            out += '{\\c' + YEL + '}' + inner.replace('~', '').upper() + '{\\c&H00FFFFFF&}'
-        else:
-            out += '{\\c' + PNK + '}' + m.group(2).upper() + '{\\c&H00FFFFFF&}'
+    for m in re.finditer(r'\*([^*]+)\*', t):
+        out += pinkify(t[i:m.start()], W_)
+        inner = m.group(1)
+        Y = '{\\c' + YEL + '}'
+        nw = len(re.sub('~', '', inner).split())
+        quoted_sentence = '"' in inner and (nw > 3 or re.search(r'[.,!?]', inner))
+        short = nw <= 4 and '~' not in inner and not quoted_sentence
+        out += Y + (inner.upper() if short else pinkify(inner, Y)) + W_
         i = m.end()
-    out += t[i:].replace('~', '')
+    out += pinkify(t[i:], W_)
     return out
 def plain(t): return re.sub(r'[*~]', '', t)
 
