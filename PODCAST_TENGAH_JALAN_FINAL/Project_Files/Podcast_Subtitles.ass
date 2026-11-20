@@ -1,0 +1,268 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Sub,Poppins,58,&H00FFFFFF,&H00FFFFFF,&H00000000,&H96000000,-1,0,0,0,100,100,0,0,1,4,2.5,2,160,160,62,1
+Style: Pantun,Poppins,54,&H00E0EDF7,&H00FFFFFF,&H00000000,&H96000000,-1,-1,0,0,100,100,0,0,1,4,2.5,8,160,160,0,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 1,0:00:29.50,0:00:31.93,Pantun,,0,0,0,,{\pos(960,850)}{\fad(150,0)}Burung merbah terbang ke hulu,
+Dialogue: 1,0:00:31.93,0:00:34.11,Pantun,,0,0,0,,{\pos(960,850)}{\fad(0,200)}Burung merbah terbang ke hulu,\NHinggap sebentar di pohon jati;
+Dialogue: 1,0:00:34.11,0:00:36.61,Pantun,,0,0,0,,{\pos(960,850)}{\fad(150,0)}Bahasa TikTok viral selalu,
+Dialogue: 1,0:00:36.61,0:00:39.22,Pantun,,0,0,0,,{\pos(960,850)}{\fad(0,200)}Bahasa TikTok viral selalu,\NBahasa Melayu tetap di hati.
+Dialogue: 1,0:00:52.99,0:00:56.20,Pantun,,0,0,0,,{\pos(960,850)}{\fad(150,0)}Anak dara menenun kain,
+Dialogue: 1,0:00:56.20,0:00:58.54,Pantun,,0,0,0,,{\pos(960,850)}{\fad(0,200)}Anak dara menenun kain,\NKain disulam benang suasa;
+Dialogue: 1,0:00:58.54,0:01:02.04,Pantun,,0,0,0,,{\pos(960,850)}{\fad(150,0)}Slanga boleh sekadar bermain,
+Dialogue: 1,0:01:02.04,0:01:04.25,Pantun,,0,0,0,,{\pos(960,850)}{\fad(0,200)}Slanga boleh sekadar bermain,\NJangan rosakkan martabat bahasa.
+Dialogue: 1,0:10:32.18,0:10:34.44,Pantun,,0,0,0,,{\pos(960,850)}{\fad(150,0)}Pucuk paku di tepi perigi,
+Dialogue: 1,0:10:34.44,0:10:37.56,Pantun,,0,0,0,,{\pos(960,850)}{\fad(0,200)}Pucuk paku di tepi perigi,\NDipetik adik dibawa pulang;
+Dialogue: 1,0:10:37.56,0:10:40.36,Pantun,,0,0,0,,{\pos(960,850)}{\fad(150,0)}Kapsyen TikTok tulislah lagi,
+Dialogue: 1,0:10:40.36,0:10:43.70,Pantun,,0,0,0,,{\pos(960,850)}{\fad(0,200)}Kapsyen TikTok tulislah lagi,\NBahasa rancu jangan diulang.
+Dialogue: 0,0:00:10.00,0:00:14.31,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Assalamualaikum dan salam sejahtera kepada semua pendengar!
+Dialogue: 0,0:00:14.31,0:00:16.55,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Selamat datang ke {\c&H004AD5FF&}PODCAST TENGAH JALAN{\c&H00FFFFFF&},
+Dialogue: 0,0:00:16.55,0:00:18.57,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}tempat kita berhenti sebentar
+Dialogue: 0,0:00:18.57,0:00:20.05,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}di tengah perjalanan hidup
+Dialogue: 0,0:00:20.05,0:00:23.45,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}untuk berbual tentang isu yang dekat dengan kita.
+Dialogue: 0,0:00:23.45,0:00:25.95,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Saya Aliff, dan seperti biasa,
+Dialogue: 0,0:00:25.95,0:00:27.79,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}izinkan saya membuka bicara
+Dialogue: 0,0:00:27.79,0:00:29.50,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dengan serangkap pantun.
+Dialogue: 0,0:00:38.98,0:00:43.00,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Wah, pembukaan yang sangat cantik, Aliff!
+Dialogue: 0,0:00:43.00,0:00:45.60,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Saya Ammar, wakil warganet
+Dialogue: 0,0:00:45.60,0:00:48.14,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}yang menghabiskan masa tiga jam sehari
+Dialogue: 0,0:00:48.14,0:00:49.34,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}menatal TikTok.
+Dialogue: 0,0:00:49.34,0:00:51.52,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Tak mahu kalah,
+Dialogue: 0,0:00:51.52,0:00:52.87,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}saya pun ada pantun juga.
+Dialogue: 0,0:01:04.00,0:01:06.40,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Cantik, cantik!
+Dialogue: 0,0:01:06.40,0:01:09.06,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Saya hampir sebut pantun kamu berdua {\c&H00C6B6F4&}"SLAY"{\c&H00FFFFFF&},
+Dialogue: 0,0:01:09.06,0:01:12.98,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}tapi hari ini kita kena jaga bahasa kita.
+Dialogue: 0,0:01:12.98,0:01:14.10,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Saya Iman.
+Dialogue: 0,0:01:14.10,0:01:16.98,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Jadi, Aliff, apakah topik kita
+Dialogue: 0,0:01:16.98,0:01:18.50,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}di Podcast Tengah Jalan kali ini?
+Dialogue: 0,0:01:18.50,0:01:20.29,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Episod kali ini bertajuk
+Dialogue: 0,0:01:20.29,0:01:22.37,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}*"Slay atau Salah?
+Dialogue: 0,0:01:22.37,0:01:24.67,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Bila Bahasa Kita Terpaling Rancu di TikTok"*.
+Dialogue: 0,0:01:24.67,0:01:26.74,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Kita akan membedah tiga ayat
+Dialogue: 0,0:01:26.74,0:01:28.86,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}yang selalu kita jumpa di TikTok,
+Dialogue: 0,0:01:28.86,0:01:30.13,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}satu demi satu,
+Dialogue: 0,0:01:30.13,0:01:32.17,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dari sudut {\c&H004AD5FF&}SINTAKSIS{\c&H00FFFFFF&}.
+Dialogue: 0,0:01:32.17,0:01:34.07,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Iman, sebelum kita bermula,
+Dialogue: 0,0:01:34.07,0:01:38.47,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}apa sebenarnya maksud {\c&H004AD5FF&}"RANCU"{\c&H00FFFFFF&}?
+Dialogue: 0,0:01:38.47,0:01:40.23,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Bunyinya seperti nama kuih.
+Dialogue: 0,0:01:40.23,0:01:41.94,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Bukan kuih, Ammar!
+Dialogue: 0,0:01:41.94,0:01:45.92,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Menurut {\c&H004AD5FF&}KAMUS DEWAN EDISI KEEMPAT{\c&H00FFFFFF&} (2005),
+Dialogue: 0,0:01:45.92,0:01:47.68,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}"rancu" bermaksud {\c&H004AD5FF&}BERCAMPUR ADUK{\c&H00FFFFFF&}
+Dialogue: 0,0:01:47.68,0:01:50.12,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}atau {\c&H004AD5FF&}KACAU{\c&H00FFFFFF&} dalam penggunaan bahasa.
+Dialogue: 0,0:01:50.12,0:01:52.79,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Jadi, {\c&H004AD5FF&}KERANCUAN BAHASA{\c&H00FFFFFF&} berlaku
+Dialogue: 0,0:01:52.79,0:01:54.47,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}apabila unsur bahasa lain
+Dialogue: 0,0:01:54.47,0:01:57.03,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}atau bahasa percakapan {\c&H004AD5FF&}BERCAMPUR ADUK{\c&H00FFFFFF&}
+Dialogue: 0,0:01:57.03,0:02:00.03,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}sehingga peraturan bahasa Melayu itu dilanggar.
+Dialogue: 0,0:02:00.03,0:02:03.01,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Dan bahasa TikTok ialah contoh
+Dialogue: 0,0:02:03.01,0:02:04.41,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}yang paling dekat dengan kita.
+Dialogue: 0,0:02:04.41,0:02:08.41,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Kapsyen dan komen ditulis dengan laju, pendek,
+Dialogue: 0,0:02:08.41,0:02:10.57,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dan banyak meniru gaya bahasa Inggeris.
+Dialogue: 0,0:02:10.57,0:02:13.60,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Akibatnya, yang rosak bukan sahaja perkataan,
+Dialogue: 0,0:02:13.60,0:02:15.56,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}malah {\c&H004AD5FF&}STRUKTUR AYAT{\c&H00FFFFFF&} itu sendiri.
+Dialogue: 0,0:02:15.56,0:02:17.90,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Itulah sebabnya isu ini
+Dialogue: 0,0:02:17.90,0:02:19.87,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}termasuk dalam bidang {\c&H004AD5FF&}SINTAKSIS{\c&H00FFFFFF&}.
+Dialogue: 0,0:02:19.87,0:02:24.37,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Oh, sintaksis itu ilmu tentang susunan ayat, eh?
+Dialogue: 0,0:02:24.37,0:02:25.52,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Betul, Ammar.
+Dialogue: 0,0:02:25.52,0:02:27.12,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Menurut {\c&H004AD5FF&}TATABAHASA DEWAN{\c&H00FFFFFF&} (2008),
+Dialogue: 0,0:02:27.12,0:02:31.38,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}setiap ayat bahasa Melayu terdiri daripada {\c&H004AD5FF&}SUBJEK{\c&H00FFFFFF&},
+Dialogue: 0,0:02:31.38,0:02:34.05,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}iaitu unsur yang diterangkan,
+Dialogue: 0,0:02:34.05,0:02:34.71,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dan {\c&H004AD5FF&}PREDIKAT{\c&H00FFFFFF&},
+Dialogue: 0,0:02:34.71,0:02:37.21,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}iaitu unsur yang menerangkan subjek.
+Dialogue: 0,0:02:37.21,0:02:40.09,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Predikat pula boleh berupa frasa nama,
+Dialogue: 0,0:02:40.09,0:02:42.37,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}frasa kerja, frasa adjektif
+Dialogue: 0,0:02:42.37,0:02:44.60,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}atau frasa sendi nama.
+Dialogue: 0,0:02:44.60,0:02:46.76,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Betul, Aliff. Selain itu,
+Dialogue: 0,0:02:46.76,0:02:48.30,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}ayat boleh jadi {\c&H004AD5FF&}AYAT TUNGGAL{\c&H00FFFFFF&},
+Dialogue: 0,0:02:48.30,0:02:50.88,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}iaitu ayat yang ada satu klausa sahaja,
+Dialogue: 0,0:02:50.88,0:02:52.49,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}atau {\c&H004AD5FF&}AYAT MAJMUK{\c&H00FFFFFF&},
+Dialogue: 0,0:02:52.49,0:02:55.61,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}iaitu ayat yang ada lebih daripada satu klausa
+Dialogue: 0,0:02:55.61,0:02:57.80,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dan disambung dengan {\c&H004AD5FF&}KATA HUBUNG{\c&H00FFFFFF&}.
+Dialogue: 0,0:02:57.80,0:02:59.91,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Baik, untuk permulaan,
+Dialogue: 0,0:02:59.91,0:03:03.54,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}saya bawakan kapsyen yang sangat popular, iaitu:
+Dialogue: 0,0:03:03.54,0:03:06.30,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}*"{\c&H00C6B6F4&}POV{\c&H00FFFFFF&}: kau {\c&H00C6B6F4&}FIRST TIME{\c&H00FFFFFF&} masuk kelas
+Dialogue: 0,0:03:06.30,0:03:07.63,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Cikgu Bahasa Melayu."*
+Dialogue: 0,0:03:07.63,0:03:09.71,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Saya selalu tulis begitu!
+Dialogue: 0,0:03:09.71,0:03:12.70,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Semua orang faham, apa salahnya?
+Dialogue: 0,0:03:12.70,0:03:14.14,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Faham memang faham,
+Dialogue: 0,0:03:14.14,0:03:16.28,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}tetapi mari kita analisis
+Dialogue: 0,0:03:16.28,0:03:17.94,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}bahagian selepas titik bertindih,
+Dialogue: 0,0:03:17.94,0:03:20.61,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}"kau first time masuk kelas Cikgu Bahasa Melayu",
+Dialogue: 0,0:03:20.61,0:03:22.01,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}ialah {\c&H004AD5FF&}AYAT TUNGGAL{\c&H00FFFFFF&}
+Dialogue: 0,0:03:22.01,0:03:25.55,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dengan pola {\c&H004AD5FF&}FRASA NAMA + FRASA KERJA{\c&H00FFFFFF&}.
+Dialogue: 0,0:03:25.55,0:03:27.55,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Subjeknya kata ganti nama "kau".
+Dialogue: 0,0:03:27.55,0:03:29.37,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Predikatnya frasa kerja
+Dialogue: 0,0:03:29.37,0:03:31.43,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}"masuk kelas Cikgu Bahasa Melayu".
+Dialogue: 0,0:03:31.43,0:03:35.08,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Kalau begitu, di manakah kerancuannya, Iman?
+Dialogue: 0,0:03:35.08,0:03:37.14,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Mula-mula, {\c&H00C6B6F4&}"POV"{\c&H00FFFFFF&} di hadapan ayat.
+Dialogue: 0,0:03:37.14,0:03:39.72,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Singkatan Inggeris ini tidak berfungsi
+Dialogue: 0,0:03:39.72,0:03:42.02,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}sebagai subjek atau predikat,
+Dialogue: 0,0:03:42.02,0:03:44.57,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}jadi ia menjadi {\c&H004AD5FF&}UNSUR TERGANTUNG{\c&H00FFFFFF&}.
+Dialogue: 0,0:03:44.57,0:03:48.47,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Selain itu, {\c&H00C6B6F4&}"FIRST TIME"{\c&H00FFFFFF&} ialah keterangan masa
+Dialogue: 0,0:03:48.47,0:03:49.59,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dalam bahasa Inggeris
+Dialogue: 0,0:03:49.59,0:03:53.75,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}yang diselitkan antara subjek dan predikat.
+Dialogue: 0,0:03:53.75,0:03:55.88,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Itulah {\c&H004AD5FF&}CAMPUR KOD{\c&H00FFFFFF&} pada peringkat frasa.
+Dialogue: 0,0:03:55.88,0:03:59.14,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Di samping itu, kata kerja "masuk"
+Dialogue: 0,0:03:59.14,0:04:01.92,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}lebih tepat diikuti kata sendi nama {\c&H004AD5FF&}"KE"{\c&H00FFFFFF&}
+Dialogue: 0,0:04:01.92,0:04:03.47,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}untuk menunjukkan arah,
+Dialogue: 0,0:04:03.47,0:04:05.30,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}iaitu "masuk {\c&H004AD5FF&}KE{\c&H00FFFFFF&} dalam kelas".
+Dialogue: 0,0:04:05.30,0:04:09.54,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Tiga kerancuan dalam satu kapsyen pendek!
+Dialogue: 0,0:04:09.54,0:04:12.27,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Bagaimana pula ayat yang gramatis, Iman?
+Dialogue: 0,0:04:12.27,0:04:15.32,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Baik. *"Bayangkan anda masuk ke kelas guru
+Dialogue: 0,0:04:15.32,0:04:16.80,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Bahasa Melayu buat kali pertama."*
+Dialogue: 0,0:04:16.80,0:04:18.36,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Ini ialah {\c&H004AD5FF&}AYAT PERINTAH{\c&H00FFFFFF&}.
+Dialogue: 0,0:04:18.36,0:04:20.32,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Kata kerja "bayangkan" menjadi predikat,
+Dialogue: 0,0:04:20.32,0:04:22.52,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}manakala "anda masuk ke kelas guru
+Dialogue: 0,0:04:22.52,0:04:23.94,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Bahasa Melayu buat kali pertama"
+Dialogue: 0,0:04:23.94,0:04:26.58,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}ialah klausa yang menjadi objek.
+Dialogue: 0,0:04:26.58,0:04:30.33,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Frasa {\c&H004AD5FF&}"BUAT KALI PERTAMA"{\c&H00FFFFFF&} pula menggantikan "first time"
+Dialogue: 0,0:04:30.33,0:04:32.91,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}sebagai keterangan masa di hujung ayat.
+Dialogue: 0,0:04:32.91,0:04:34.46,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Seterusnya, giliran saya,
+Dialogue: 0,0:04:34.46,0:04:38.16,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dan inilah ayat yang menjadi asal judul episod kita.
+Dialogue: 0,0:04:38.16,0:04:42.50,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Komen ini selalu muncul di video tayangan pakaian:
+Dialogue: 0,0:04:42.50,0:04:44.88,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}*"{\c&H00C6B6F4&}OUTFIT{\c&H00FFFFFF&} dia hari ni {\c&H00C6B6F4&}SLAY{\c&H00FFFFFF&} gila,
+Dialogue: 0,0:04:44.88,0:04:45.81,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}{\c&H00C6B6F4&}CONFIRM{\c&H00FFFFFF&} ramai yang {\c&H00C6B6F4&}JEALOUS{\c&H00FFFFFF&}!"*
+Dialogue: 0,0:04:45.81,0:04:49.88,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Tahukah kamu, dalam kamus bahasa Inggeris,
+Dialogue: 0,0:04:49.88,0:04:52.98,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}{\c&H00C6B6F4&}"SLAY"{\c&H00FFFFFF&} sebenarnya bermaksud {\c&H004AD5FF&}MEMBUNUH{\c&H00FFFFFF&}?
+Dialogue: 0,0:04:52.98,0:04:54.85,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Oh, slay...
+Dialogue: 0,0:04:54.85,0:04:57.35,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Kita memuji pakaian itu
+Dialogue: 0,0:04:57.35,0:04:59.69,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dengan berkata pakaian itu membunuh!
+Dialogue: 0,0:04:59.69,0:05:02.47,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Baiklah, bagaimana analisis sintaksisnya, Aliff?
+Dialogue: 0,0:05:02.47,0:05:05.16,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Mula-mula, ayat ini sebenarnya {\c&H004AD5FF&}AYAT MAJMUK{\c&H00FFFFFF&}
+Dialogue: 0,0:05:05.16,0:05:07.12,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}kerana ada dua klausa,
+Dialogue: 0,0:05:07.12,0:05:09.16,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}tetapi kedua-duanya dicantumkan
+Dialogue: 0,0:05:09.16,0:05:12.61,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dengan tanda koma sahaja, {\c&H004AD5FF&}TANPA KATA HUBUNG{\c&H00FFFFFF&}.
+Dialogue: 0,0:05:12.61,0:05:15.33,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Itu sudah satu kerancuan dari segi struktur.
+Dialogue: 0,0:05:15.33,0:05:17.89,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Klausa sebelum koma,
+Dialogue: 0,0:05:17.89,0:05:20.59,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}iaitu "outfit dia hari ni slay gila",
+Dialogue: 0,0:05:20.59,0:05:23.57,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}berpola {\c&H004AD5FF&}FRASA NAMA + FRASA ADJEKTIF{\c&H00FFFFFF&}.
+Dialogue: 0,0:05:23.57,0:05:26.74,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Subjeknya frasa nama "outfit dia",
+Dialogue: 0,0:05:26.74,0:05:29.85,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dengan inti {\c&H00C6B6F4&}"OUTFIT"{\c&H00FFFFFF&} dalam bahasa Inggeris.
+Dialogue: 0,0:05:29.85,0:05:32.67,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Predikatnya pula "slay gila"?
+Dialogue: 0,0:05:32.67,0:05:35.88,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Ya, dan di sinilah kerancuan yang paling ketara.
+Dialogue: 0,0:05:35.88,0:05:38.98,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}{\c&H00C6B6F4&}"SLAY"{\c&H00FFFFFF&} ialah {\c&H004AD5FF&}KATA KERJA TRANSITIF{\c&H00FFFFFF&}
+Dialogue: 0,0:05:38.98,0:05:40.24,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dalam bahasa Inggeris,
+Dialogue: 0,0:05:40.24,0:05:42.70,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}iaitu kata kerja yang memerlukan objek.
+Dialogue: 0,0:05:42.70,0:05:45.80,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Di sini, ia dipaksa berfungsi
+Dialogue: 0,0:05:45.80,0:05:47.14,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}sebagai {\c&H004AD5FF&}KATA ADJEKTIF{\c&H00FFFFFF&}
+Dialogue: 0,0:05:47.14,0:05:48.76,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}untuk menerangkan pakaian.
+Dialogue: 0,0:05:48.76,0:05:51.50,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Kemudian, "gila" digunakan
+Dialogue: 0,0:05:51.50,0:05:53.72,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}sebagai {\c&H004AD5FF&}KATA PENGUAT{\c&H00FFFFFF&} di belakangnya,
+Dialogue: 0,0:05:53.72,0:05:56.62,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dan penggunaan ini hanya sesuai
+Dialogue: 0,0:05:56.62,0:05:58.27,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dalam bahasa percakapan.
+Dialogue: 0,0:05:58.27,0:06:00.94,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Bagaimana dengan klausa selepas koma,
+Dialogue: 0,0:06:00.94,0:06:02.61,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}macam "confirm ramai yang jealous"?
+Dialogue: 0,0:06:02.61,0:06:04.27,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Klausa ini lebih kabur.
+Dialogue: 0,0:06:04.27,0:06:06.42,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}{\c&H00C6B6F4&}"CONFIRM"{\c&H00FFFFFF&} ialah kata Inggeris
+Dialogue: 0,0:06:06.42,0:06:08.54,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}yang berfungsi sebagai {\c&H004AD5FF&}KATA PENEGAS{\c&H00FFFFFF&}.
+Dialogue: 0,0:06:08.54,0:06:10.42,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Kata hubung "yang" pula
+Dialogue: 0,0:06:10.42,0:06:12.90,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}sepatutnya menerangkan kata nama,
+Dialogue: 0,0:06:12.90,0:06:16.64,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}tetapi kata nama {\c&H004AD5FF&}"ORANG"{\c&H00FFFFFF&} telah digugurkan.
+Dialogue: 0,0:06:16.64,0:06:19.58,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Akibatnya, {\c&H004AD5FF&}SUBJEK KLAUSA INI TIDAK LENGKAP{\c&H00FFFFFF&}.
+Dialogue: 0,0:06:19.58,0:06:22.90,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Akhir sekali, {\c&H00C6B6F4&}"JEALOUS"{\c&H00FFFFFF&} juga kata Inggeris.
+Dialogue: 0,0:06:22.90,0:06:26.51,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Jadi, apakah ayat yang gramatis?
+Dialogue: 0,0:06:26.51,0:06:29.06,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}*"Pakaiannya sungguh hebat hari ini,
+Dialogue: 0,0:06:29.06,0:06:31.48,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dan pasti ramai orang berasa cemburu."*
+Dialogue: 0,0:06:31.48,0:06:34.43,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Kini ayat ini ialah {\c&H004AD5FF&}AYAT MAJMUK GABUNGAN{\c&H00FFFFFF&}
+Dialogue: 0,0:06:34.43,0:06:36.65,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dengan kata hubung {\c&H004AD5FF&}"DAN"{\c&H00FFFFFF&}.
+Dialogue: 0,0:06:36.65,0:06:41.08,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Jadi, jawapan kepada soalan dalam judul kita:
+Dialogue: 0,0:06:41.08,0:06:43.62,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}di TikTok, mungkin {\c&H00C6B6F4&}"SLAY"{\c&H00FFFFFF&}.
+Dialogue: 0,0:06:43.62,0:06:45.90,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Tetapi dari segi tatabahasa,
+Dialogue: 0,0:06:45.90,0:06:48.23,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}jawapannya jelas, iaitu {\c&H004AD5FF&}SALAH{\c&H00FFFFFF&}!
+Dialogue: 0,0:06:48.23,0:06:50.23,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Akhir sekali, giliran saya.
+Dialogue: 0,0:06:50.23,0:06:53.03,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Ayat ini ada perkataan dalam judul kita:
+Dialogue: 0,0:06:53.03,0:06:55.69,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}*"Dia ni {\c&H00C6B6F4&}TERPALING{\c&H00FFFFFF&} alim,
+Dialogue: 0,0:06:55.69,0:06:57.50,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}semua orang dia tegur."*
+Dialogue: 0,0:06:57.50,0:06:59.53,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Apakah masalahnya, Ammar?
+Dialogue: 0,0:06:59.53,0:07:01.30,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Sama seperti ayat Aliff tadi,
+Dialogue: 0,0:07:01.30,0:07:03.26,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}ini juga {\c&H004AD5FF&}AYAT MAJMUK{\c&H00FFFFFF&}
+Dialogue: 0,0:07:03.26,0:07:07.80,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}yang dua klausanya dicantumkan dengan koma
+Dialogue: 0,0:07:07.80,0:07:08.78,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}{\c&H004AD5FF&}TANPA KATA HUBUNG{\c&H00FFFFFF&}.
+Dialogue: 0,0:07:08.78,0:07:11.66,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Klausa sebelum koma, "dia ni terpaling alim",
+Dialogue: 0,0:07:11.66,0:07:14.58,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}berpola frasa nama + frasa adjektif.
+Dialogue: 0,0:07:14.58,0:07:16.32,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Subjeknya "dia ni".
+Dialogue: 0,0:07:16.32,0:07:20.10,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Perkataan "ni" ialah bentuk percakapan bagi "ini".
+Dialogue: 0,0:07:20.10,0:07:22.44,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Predikatnya frasa adjektif,
+Dialogue: 0,0:07:22.44,0:07:23.93,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}iaitu "terpaling alim".
+Dialogue: 0,0:07:23.93,0:07:26.25,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Awalan {\c&H004AD5FF&}TER-{\c&H00FFFFFF&} pada kata adjektif
+Dialogue: 0,0:07:26.25,0:07:27.59,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}sudah membawa makna {\c&H004AD5FF&}PALING{\c&H00FFFFFF&},
+Dialogue: 0,0:07:27.59,0:07:29.41,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}contohnya "terpandai".
+Dialogue: 0,0:07:29.41,0:07:31.37,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Apabila digabungkan dengan "paling",
+Dialogue: 0,0:07:31.37,0:07:33.97,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}maksud yang sama diulang dua kali.
+Dialogue: 0,0:07:33.97,0:07:36.20,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Inilah {\c&H004AD5FF&}KELEWAHAN{\c&H00FFFFFF&},
+Dialogue: 0,0:07:36.20,0:07:39.31,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}sama seperti kita berkata "naik ke atas".
+Dialogue: 0,0:07:39.31,0:07:41.88,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Bagaimana pula dengan klausa selepas koma,
+Dialogue: 0,0:07:41.88,0:07:43.30,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}"semua orang dia tegur"?
+Dialogue: 0,0:07:43.30,0:07:44.24,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Ini {\c&H004AD5FF&}AYAT PASIF{\c&H00FFFFFF&},
+Dialogue: 0,0:07:44.24,0:07:47.82,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}kerana objek "semua orang" dibawa ke hadapan.
+Dialogue: 0,0:07:47.82,0:07:49.86,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Masalahnya, susunan
+Dialogue: 0,0:07:49.86,0:07:54.06,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}"objek + pelaku + kata kerja tanpa imbuhan"
+Dialogue: 0,0:07:54.06,0:07:55.70,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}hanya betul untuk kata ganti nama
+Dialogue: 0,0:07:55.70,0:07:57.54,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}{\c&H004AD5FF&}DIRI PERTAMA DAN KEDUA{\c&H00FFFFFF&},
+Dialogue: 0,0:07:57.54,0:07:59.98,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}contohnya, "Semua orang saya tegur."
+Dialogue: 0,0:07:59.98,0:08:02.76,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Bagi {\c&H004AD5FF&}DIRI KETIGA{\c&H00FFFFFF&} seperti "dia",
+Dialogue: 0,0:08:02.76,0:08:05.74,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}kata kerja mesti menerima imbuhan {\c&H004AD5FF&}DI-{\c&H00FFFFFF&},
+Dialogue: 0,0:08:05.74,0:08:08.90,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}iaitu {\c&H004AD5FF&}"DITEGURNYA"{\c&H00FFFFFF&} atau {\c&H004AD5FF&}"DITEGUR OLEHNYA"{\c&H00FFFFFF&}.
+Dialogue: 0,0:08:08.90,0:08:10.69,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Ayat gramatisnya:
+Dialogue: 0,0:08:10.69,0:08:11.93,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}*"Dia berlagak paling alim
+Dialogue: 0,0:08:11.93,0:08:14.21,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}sehingga semua orang ditegurnya."*
+Dialogue: 0,0:08:14.21,0:08:17.27,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Ini ialah {\c&H004AD5FF&}AYAT MAJMUK PANCANGAN KETERANGAN{\c&H00FFFFFF&}.
+Dialogue: 0,0:08:17.27,0:08:19.79,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Klausa utamanya "dia berlagak paling alim",
+Dialogue: 0,0:08:19.79,0:08:23.85,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}manakala "semua orang ditegurnya"
+Dialogue: 0,0:08:23.85,0:08:25.25,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}menerangkan akibat,
+Dialogue: 0,0:08:25.25,0:08:27.38,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}disambung dengan kata hubung {\c&H004AD5FF&}"SEHINGGA"{\c&H00FFFFFF&}.
+Dialogue: 0,0:08:27.38,0:08:30.16,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Kalau mahu bentuk {\c&H004AD5FF&}AKTIF{\c&H00FFFFFF&} pun boleh.
+Dialogue: 0,0:08:30.16,0:08:32.66,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Contohnya, "Dia berlagak paling alim
+Dialogue: 0,0:08:32.66,0:08:34.20,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}sehingga dia {\c&H004AD5FF&}MENEGUR{\c&H00FFFFFF&} semua orang."
+Dialogue: 0,0:08:34.20,0:08:35.06,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Kedua-duanya betul,
+Dialogue: 0,0:08:35.06,0:08:37.42,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}cuma fokusnya sahaja yang berbeza.
+Dialogue: 0,0:08:37.42,0:08:38.87,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Ya, betul.
+Dialogue: 0,0:08:49.80,0:08:53.38,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Tetapi, jujurnya, gaya bahasa TikTok ni
+Dialogue: 0,0:08:53.38,0:08:55.50,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}membuatkan kita rasa rapat.
+Dialogue: 0,0:08:55.50,0:08:57.50,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Adakah semuanya salah?
+Dialogue: 0,0:08:57.50,0:09:01.24,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Baik. Bahasa santai ada tempatnya, Ammar.
+Dialogue: 0,0:09:01.24,0:09:03.24,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Yang penting, kita tahu membezakan
+Dialogue: 0,0:09:03.24,0:09:04.50,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}{\c&H004AD5FF&}LARAS BAHASA{\c&H00FFFFFF&} itu sendiri.
+Dialogue: 0,0:09:04.50,0:09:06.93,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Masalahnya bermula apabila struktur ayat
+Dialogue: 0,0:09:06.93,0:09:08.69,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}seperti tiga contoh tadi
+Dialogue: 0,0:09:08.69,0:09:10.91,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dibawa ke dalam karangan,
+Dialogue: 0,0:09:10.91,0:09:13.07,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}surat rasmi dan urusan formal.
+Dialogue: 0,0:09:13.07,0:09:16.76,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Sebagai bakal guru, kita boleh jadikan isu ini
+Dialogue: 0,0:09:16.76,0:09:19.63,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}aktiviti {\c&H004AD5FF&}"DETEKTIF KAPSYEN"{\c&H00FFFFFF&}.
+Dialogue: 0,0:09:19.63,0:09:22.31,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Murid mengumpulkan kapsyen TikTok,
+Dialogue: 0,0:09:22.31,0:09:24.41,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}mengaburkan nama pengguna,
+Dialogue: 0,0:09:24.41,0:09:27.35,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}kemudian mengenal pasti pola ayat itu,
+Dialogue: 0,0:09:27.35,0:09:28.99,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}jenis kerancuan
+Dialogue: 0,0:09:28.99,0:09:31.30,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dan membina semula ayat yang gramatis.
+Dialogue: 0,0:09:31.30,0:09:34.50,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Dengan cara ini, murid belajar sintaksis
+Dialogue: 0,0:09:34.50,0:09:36.28,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}daripada bahan yang dekat dengan mereka,
+Dialogue: 0,0:09:36.28,0:09:39.00,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dan sedar bahawa {\c&H004AD5FF&}SANTAI TIDAK BERMAKSUD RANCU{\c&H00FFFFFF&}.
+Dialogue: 0,0:09:49.00,0:09:51.97,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Kesimpulannya, kerancuan bahasa TikTok
+Dialogue: 0,0:09:51.97,0:09:54.39,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}menyentuh struktur ayat itu sendiri.
+Dialogue: 0,0:09:54.39,0:09:56.43,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Mula-mula, ayat {\c&H004AD5FF&}POV{\c&H00FFFFFF&} menunjukkan
+Dialogue: 0,0:09:56.43,0:09:59.05,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}{\c&H004AD5FF&}UNSUR TERGANTUNG{\c&H00FFFFFF&} dan {\c&H004AD5FF&}CAMPUR KOD{\c&H00FFFFFF&}.
+Dialogue: 0,0:09:59.05,0:10:03.19,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Seterusnya, ayat {\c&H004AD5FF&}"SLAY"{\c&H00FFFFFF&} menunjukkan klausa
+Dialogue: 0,0:10:03.19,0:10:05.15,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}yang disambung tanpa kata hubung
+Dialogue: 0,0:10:05.15,0:10:07.03,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dan kata Inggeris yang berubah golongan.
+Dialogue: 0,0:10:07.03,0:10:10.91,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Akhirnya, ayat {\c&H004AD5FF&}"TERPALING"{\c&H00FFFFFF&} menunjukkan {\c&H004AD5FF&}KELEWAHAN{\c&H00FFFFFF&}
+Dialogue: 0,0:10:10.91,0:10:12.94,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}dan ayat pasif yang salah susunannya.
+Dialogue: 0,0:10:12.94,0:10:15.12,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Pesanan saya pula,
+Dialogue: 0,0:10:15.12,0:10:16.70,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}sebelum menekan butang muat naik,
+Dialogue: 0,0:10:16.70,0:10:19.14,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}baca kapsyen anda sekali lagi.
+Dialogue: 0,0:10:19.14,0:10:20.47,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Lima saat sahaja!
+Dialogue: 0,0:10:20.47,0:10:22.73,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Kepada semua pendengar,
+Dialogue: 0,0:10:22.73,0:10:27.21,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}mari kita jadikan bahasa Melayu yang betul dan gramatis
+Dialogue: 0,0:10:27.21,0:10:29.37,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}sebagai "trend" yang sebenar.
+Dialogue: 0,0:10:29.37,0:10:32.17,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Ingat, {\c&H004AD5FF&}SANTAI BOLEH, RANCU JANGAN!{\c&H00FFFFFF&}
+Dialogue: 0,0:10:43.48,0:10:46.31,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Jumpa lagi dalam Podcast Tengah Jalan
+Dialogue: 0,0:10:46.31,0:10:47.27,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}yang akan datang.
+Dialogue: 0,0:10:47.27,0:10:50.93,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Jaga diri, jaga bahasa!
+Dialogue: 0,0:10:50.93,0:10:52.13,Sub,,0,0,0,,{\fad(90,70)\fscx94\fscy94\t(0,140,\fscx100\fscy100)}Assalamualaikum dan selamat sejahtera!

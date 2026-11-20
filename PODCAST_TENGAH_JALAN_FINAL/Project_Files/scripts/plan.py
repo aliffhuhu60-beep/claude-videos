@@ -55,6 +55,13 @@ for pid, a, b, cues, extra in PANELS:
     local = [(0.0 if c == 0 else round(s2o(c) - o0, 3)) if c < 1e8 else 1e9 for c in cues]
     panel_inst.append(dict(id=pid, out0=o0, out1=o1, dur=round(o1 - o0, 3), cues=local, lines=extra))
 
+# never start a panel while the chapter card (first ~4.3 s of a segment) is on screen
+for p in panel_inst:
+    for name, st in seg_starts.items():
+        if name != 'intro' and st - 0.01 <= p['out0'] < st + 4.3:
+            sh = q(st + 4.3) - p['out0']
+            p['out0'] = q(st + 4.3); p['dur'] = round(p['out1'] - p['out0'], 3)
+            p['cues'] = [c if c >= 1e8 else max(0.0, round(c - sh, 3)) for c in p['cues']]
 # split intervals (merge panels separated by < 1.5 s)
 split = []
 for p in panel_inst:
@@ -63,9 +70,9 @@ for p in panel_inst:
 TR = 0.5  # layout transition seconds
 def split_amount(t):
     for a, b in split:
-        if a - TR <= t <= b + TR:
+        if a - TR <= t <= b + 0.15:
             if t < a: return (t - (a - TR)) / TR
-            if t > b: return 1 - (t - b) / TR
+            if t > b - 0.35: return 1 - (t - (b - 0.35)) / TR
             return 1.0
     return 0.0
 

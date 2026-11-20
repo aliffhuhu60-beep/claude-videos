@@ -43,9 +43,9 @@ for i, o in enumerate(ovs): o['dir'] = f'{G}/ov_{i:02d}'
 split = P['split']; TR = 0.5
 def split_amount(t):
     for a, b in split:
-        if a - TR <= t <= b + TR:
+        if a - TR <= t <= b + 0.15:
             if t < a: return (t - (a - TR)) / TR
-            if t > b: return 1 - (t - b) / TR
+            if t > b - 0.35: return 1 - (t - (b - 0.35)) / TR
             return 1.0
     return 0.0
 
