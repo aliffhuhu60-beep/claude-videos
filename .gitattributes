@@ -5,3 +5,5 @@ PODCAST_TENGAH_JALAN_FINAL/*.mp4 filter=lfs diff=lfs merge=lfs -text
 PODCAST_TENGAH_JALAN_FINAL/Assets/**/*.wav filter=lfs diff=lfs merge=lfs -text
 PODCAST_TENGAH_JALAN_FINAL/TRAILER_3D/*.mp4 filter=lfs diff=lfs merge=lfs -text
 PODCAST_TENGAH_JALAN_FINAL/TRAILER_3D/*.wav filter=lfs diff=lfs merge=lfs -text
+PODCAST_TENGAH_JALAN_FINAL/TRAILER_AKSI_VOXEL/*.mp4 filter=lfs diff=lfs merge=lfs -text
+PODCAST_TENGAH_JALAN_FINAL/TRAILER_AKSI_VOXEL/*.wav filter=lfs diff=lfs merge=lfs -text
