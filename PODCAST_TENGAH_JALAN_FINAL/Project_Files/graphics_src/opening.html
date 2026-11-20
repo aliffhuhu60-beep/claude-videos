@@ -1,0 +1,133 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="fonts.css"></head><body>
+<script src="lib.js"></script>
+<script>
+const ctx = setup();
+const R = rng(7);
+const bokeh = Array.from({length:26},()=>({x:R()*W,y:R()*H,r:30+R()*110,a:.04+R()*.08,s:(R()-.5)*30,p:R()*6}));
+const bars = Array.from({length:64},(_,i)=>({ph:R()*6.28, f:1.5+R()*2.5, amp:.35+R()*.65}));
+
+function mic(ctx,x,y,s,t){
+  ctx.save(); ctx.translate(x,y); ctx.scale(s,s);
+  // stand arm
+  ctx.strokeStyle='#1b1517'; ctx.lineWidth=18; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(0,250); ctx.lineTo(0,430); ctx.stroke();
+  ctx.lineWidth=14; ctx.beginPath(); ctx.moveTo(-120,470); ctx.lineTo(120,470); ctx.stroke();
+  // yoke
+  ctx.strokeStyle='#2a2124'; ctx.lineWidth=16;
+  ctx.beginPath(); ctx.arc(0,120,150,Math.PI*0.05,Math.PI*0.95); ctx.stroke();
+  // body
+  let g=ctx.createLinearGradient(-110,0,110,0);
+  g.addColorStop(0,'#1a1214'); g.addColorStop(.35,'#4a3a3e'); g.addColorStop(.55,'#2a2023'); g.addColorStop(1,'#0e0a0b');
+  ctx.fillStyle=g; rrect(ctx,-105,-40,210,300,105); ctx.fill();
+  // grille
+  g=ctx.createLinearGradient(-110,0,110,0);
+  g.addColorStop(0,'#5a4a4d'); g.addColorStop(.3,'#d9cfc8'); g.addColorStop(.5,'#8d7f80'); g.addColorStop(1,'#3a2e31');
+  ctx.save(); rrect(ctx,-100,-230,200,260,100); ctx.fillStyle=g; ctx.fill(); ctx.clip();
+  ctx.strokeStyle='rgba(30,20,22,.35)'; ctx.lineWidth=3;
+  for(let i=-240;i<60;i+=14){ ctx.beginPath(); ctx.moveTo(-110,i); ctx.lineTo(110,i); ctx.stroke(); }
+  for(let i=-110;i<110;i+=14){ ctx.beginPath(); ctx.moveTo(i,-240); ctx.lineTo(i,40); ctx.stroke(); }
+  // specular
+  const sp=ctx.createLinearGradient(-100,0,100,0); sp.addColorStop(0,'rgba(255,255,255,0)'); sp.addColorStop(.32,'rgba(255,255,255,.35)'); sp.addColorStop(.42,'rgba(255,255,255,0)');
+  ctx.fillStyle=sp; ctx.fillRect(-110,-240,220,280); ctx.restore();
+  // band
+  ctx.fillStyle=C.maroon; rrect(ctx,-108,20,216,34,8); ctx.fill();
+  ctx.fillStyle=C.cream; ctx.font=font(700,20); ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('PTJ',0,38);
+  // on-air dot
+  const on = .6+.4*Math.sin(t*5);
+  ctx.fillStyle=`rgba(244,182,198,${on})`; ctx.beginPath(); ctx.arc(0,150,9,0,6.28); ctx.fill();
+  ctx.restore();
+}
+
+window.draw = (t)=>{
+  const T=10;
+  ctx.setTransform(1,0,0,1,0,0); ctx.globalAlpha=1;
+  // slow camera push
+  const z = 1 + 0.06*ease.inOut(t/T);
+  const camx = lerp(20,-20,ease.inOut(t/T));
+  ctx.fillStyle=C.maroonDD; ctx.fillRect(0,0,W,H);
+  ctx.save(); ctx.translate(W/2+camx,H/2); ctx.scale(z,z); ctx.translate(-W/2,-H/2);
+  // studio backdrop
+  let g=ctx.createRadialGradient(W*0.33,H*0.45,50,W*0.4,H*0.5,W*0.8);
+  g.addColorStop(0,'#7d2533'); g.addColorStop(.45,C.maroonD); g.addColorStop(1,'#150407');
+  ctx.fillStyle=g; ctx.fillRect(-100,-100,W+200,H+200);
+  // acoustic panels (studio feel)
+  ctx.save(); ctx.globalAlpha=.035;
+  for(let c=0;c<14;c++) for(let r=0;r<6;r++){ ctx.fillStyle='#000'; rrect(ctx,-60+c*150, -40+r*190, 140, 180, 10); ctx.fill(); }
+  ctx.restore();
+  // bokeh drift (parallax)
+  for(const b of bokeh){ const bx=b.x+b.s*t, by=b.y+Math.sin(t*.6+b.p)*8;
+    const rg=ctx.createRadialGradient(bx,by,0,bx,by,b.r); rg.addColorStop(0,`rgba(244,182,198,${b.a})`); rg.addColorStop(1,'rgba(244,182,198,0)');
+    ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(bx,by,b.r,0,6.28); ctx.fill(); }
+  // spotlight cone
+  ctx.save(); ctx.globalAlpha=.18*ease.out(prog(t,.2,1.6));
+  g=ctx.createLinearGradient(560,0,560,H); g.addColorStop(0,'rgba(255,240,225,.9)'); g.addColorStop(1,'rgba(255,240,225,0)');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.moveTo(500,-50); ctx.lineTo(620,-50); ctx.lineTo(900,H); ctx.lineTo(220,H); ctx.closePath(); ctx.fill(); ctx.restore();
+  // floor ellipse
+  ctx.save(); ctx.globalAlpha=.5; g=ctx.createRadialGradient(560,1000,10,560,1000,420); g.addColorStop(0,'rgba(0,0,0,.6)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(100,850,900,300); ctx.restore();
+
+  // mic enters
+  const mi = ease.out(prog(t,.2,1.8));
+  ctx.globalAlpha=mi; mic(ctx,560, lerp(760,520,mi), .95, t); ctx.globalAlpha=1;
+
+  // audio waveform (circular around mic + baseline)
+  const wv = ease.out(prog(t,1.2,2.6)) * (1-ease.inOut(prog(t,9.2,10)));
+  if(wv>0){
+    ctx.save(); ctx.globalAlpha=wv;
+    for(let i=0;i<bars.length;i++){ const b=bars[i]; const a=-Math.PI/2 + (i/bars.length)*Math.PI*2;
+      const l = 18 + 46*b.amp*(.5+.5*Math.sin(t*b.f*2+b.ph))*wv;
+      const r0=330; const cx=560, cy=470;
+      ctx.strokeStyle = i%2? C.pink : 'rgba(247,237,224,.85)'; ctx.lineWidth=7; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*r0, cy+Math.sin(a)*r0); ctx.lineTo(cx+Math.cos(a)*(r0+l), cy+Math.sin(a)*(r0+l)); ctx.stroke(); }
+    ctx.restore();
+  }
+  ctx.restore(); // end camera
+
+  // ---- typography (screen space, gentle parallax) ----
+  const tx = 990, px = -10*ease.inOut(t/T);
+  ctx.textBaseline='alphabetic'; ctx.textAlign='left';
+  // small label
+  const a1 = win(t,1.6,9.6,.6,.6);
+  ctx.globalAlpha=a1; ctx.fillStyle=C.pink; ctx.font=font(600,30);
+  ctx.save(); ctx.translate(tx+px + lerp(-30,0,ease.out(prog(t,1.6,2.4))), 290);
+  if('letterSpacing' in ctx) ctx.letterSpacing='10px';
+  ctx.fillText('AUDIO SIAR AKADEMIK',0,0); ctx.restore();
+  // accent line
+  ctx.fillStyle=C.pink; ctx.fillRect(tx+px, 318, 520*ease.out(prog(t,1.8,2.8)), 4);
+  // title
+  ctx.globalAlpha=1;
+  const words=['PODCAST','TENGAH JALAN'];
+  words.forEach((w,i)=>{ const st=2.0+i*.35; const p=ease.out(prog(t,st,st+.8)); const al=p*(1-ease.inOut(prog(t,9.2,9.9)));
+    ctx.save(); ctx.globalAlpha=al; const by=430+i*106; ctx.beginPath(); ctx.rect(tx-40,by-100,1000,128); ctx.clip();
+    ctx.fillStyle=C.cream; ctx.font=font(800,92); if('letterSpacing' in ctx) ctx.letterSpacing='2px';
+    ctx.fillText(w, tx+px, by + (1-p)*120); ctx.restore(); });
+  // episode title
+  const p3=ease.outBack(prog(t,4.2,5.0)); const al3=ease.out(prog(t,4.2,4.8))*(1-ease.inOut(prog(t,9.2,9.9)));
+  ctx.save(); ctx.globalAlpha=al3; ctx.translate(tx+px+28, 690); ctx.scale(lerp(.9,1,p3),lerp(.9,1,p3));
+  // pill
+  ctx.font=font(800,72); if('letterSpacing' in ctx) ctx.letterSpacing='1px';
+  const segs=[{t:'SLAY',c:C.pink},{t:' ATAU ',c:C.cream},{t:'SALAH?',c:C.white}];
+  const sw=measureSegs(ctx,segs);
+  ctx.fillStyle='rgba(20,8,12,.55)'; rrect(ctx,-28,-78,sw+56,104,22); ctx.fill();
+  ctx.strokeStyle='rgba(244,182,198,.6)'; ctx.lineWidth=2; rrect(ctx,-28,-78,sw+56,104,22); ctx.stroke();
+  drawSegs(ctx,segs,0,0,'left'); ctx.restore();
+  // strike-through animation on SLAY -> emphasises SALAH (subtle underline instead)
+  const ul = ease.out(prog(t,5.6,6.4))*(1-ease.inOut(prog(t,9.2,9.9)));
+  if(ul>0){ ctx.save(); ctx.font=font(800,72); const wS=ctx.measureText('SLAY ATAU ').width, wT=ctx.measureText('SALAH?').width;
+    ctx.fillStyle=C.yellow; ctx.globalAlpha=ul; ctx.fillRect(tx+px+28+wS, 708, wT*ul, 7); ctx.restore(); }
+  // subtitle
+  const a4=win(t,5.2,9.8,.7,.6);
+  ctx.globalAlpha=a4; ctx.fillStyle='rgba(247,237,224,.92)'; ctx.font=font(500,38); if('letterSpacing' in ctx) ctx.letterSpacing='0px';
+  ctx.fillText('Bila Bahasa Kita Terpaling Rancu di TikTok', tx+px + lerp(20,0,ease.out(prog(t,5.2,6))), 790);
+  // hosts strip
+  const a5=win(t,6.4,9.7,.6,.6);
+  ctx.globalAlpha=a5*.85; ctx.font=font(500,26); ctx.fillStyle=C.pink; if('letterSpacing' in ctx) ctx.letterSpacing='6px';
+  ctx.fillText('ALIFF  ·  AMMAR  ·  IMAN', tx+px, 850);
+  ctx.globalAlpha=1; if('letterSpacing' in ctx) ctx.letterSpacing='0px';
+  // vignette
+  g=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*1.05); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,.55)'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  // fade in / out to black
+  const fi = 1-ease.out(prog(t,0,.6)), fo = ease.inOut(prog(t,9.4,10));
+  ctx.fillStyle=`rgba(0,0,0,${Math.max(fi,fo)})`; ctx.fillRect(0,0,W,H);
+};
+fontsReady().then(()=>{ window.READY=true; });
+</script></body></html>

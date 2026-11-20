@@ -1,0 +1,36 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="fonts.css"></head><body>
+<script src="lib.js"></script>
+<script>
+const ctx = setup(); const DUR=6;
+function ls(px){ if('letterSpacing' in ctx) ctx.letterSpacing=px+'px'; }
+window.draw = t=>{
+  ctx.setTransform(1,0,0,1,0,0); ctx.globalAlpha=1;
+  let g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,'#22070D'); g.addColorStop(.6,C.maroonD); g.addColorStop(1,'#5A1824'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  const r=rng(9); ctx.save(); ctx.globalAlpha=.06; for(let i=0;i<12;i++){ const x=r()*W+ t*8*(i%3-1),y=r()*H,rr=100+r()*240; const rg=ctx.createRadialGradient(x,y,0,x,y,rr); rg.addColorStop(0,C.pink); rg.addColorStop(1,'rgba(244,182,198,0)'); ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(x,y,rr,0,6.28); ctx.fill(); } ctx.restore();
+  const A=(a)=>ease.out(prog(t,a,a+.6));
+  ctx.textBaseline='alphabetic'; ctx.textAlign='center';
+  ctx.globalAlpha=A(.1); ctx.font=font(600,24); ls(8); ctx.fillStyle=C.pink; ctx.fillText('TERIMA KASIH KERANA MENONTON',W/2,170); ls(0);
+  ctx.globalAlpha=A(.25); ctx.font=font(800,78); ls(2); ctx.fillStyle=C.cream; ctx.fillText('PODCAST TENGAH JALAN',W/2,270); ls(0);
+  ctx.globalAlpha=A(.4); ctx.font=font(600,32); ctx.fillStyle='rgba(247,237,224,.85)'; ctx.fillText('Slay atau Salah? Bila Bahasa Kita Terpaling Rancu di TikTok',W/2,328);
+  // hosts
+  const hosts=[['ALIFF','Hos Utama'],['AMMAR','Suara Warganet'],['IMAN','Detektif Sintaksis']];
+  hosts.forEach((h,i)=>{ const x=W/2+(i-1)*420; ctx.globalAlpha=A(.6+i*.12);
+    ctx.fillStyle='rgba(247,237,224,.08)'; rrect(ctx,x-180,380,360,120,18); ctx.fill();
+    ctx.font=font(800,40); ls(3); ctx.fillStyle=C.cream; ctx.fillText(h[0],x,440); ls(0);
+    ctx.font=font(500,24); ctx.fillStyle=C.pink; ctx.fillText(h[1],x,478); });
+  ctx.globalAlpha=A(1.1);
+  ctx.font=font(700,22); ls(5); ctx.fillStyle=C.pink; ctx.fillText('RUJUKAN',W/2,580); ls(0);
+  ctx.font=font(500,24); ctx.fillStyle='rgba(247,237,224,.9)';
+  ctx.fillText('Dewan Bahasa dan Pustaka. (2005). Kamus Dewan (Edisi Keempat). Kuala Lumpur: DBP.',W/2,622);
+  ctx.fillText('Nik Safiah Karim et al. (2008). Tatabahasa Dewan (Edisi Ketiga). Kuala Lumpur: DBP.',W/2,658);
+  ctx.globalAlpha=A(1.4);
+  ctx.font=font(500,21); ctx.fillStyle='rgba(247,237,224,.7)';
+  ctx.fillText('Contoh ayat berdasarkan kandungan awam TikTok dan digunakan untuk tujuan pendidikan sahaja. Hak cipta kekal milik pencipta asal.',W/2,740);
+  ctx.fillText('Muzik latar: muzik asli bebas hak cipta.  ·  Iklan VQY Grab Service: *tawaran tertakluk pada pengesahan.',W/2,774);
+  ctx.globalAlpha=A(1.8); ctx.font=font(800,40); ls(2);
+  ctx.textAlign='left'; const segs=[{t:'SANTAI BOLEH, ',c:C.cream},{t:'RANCU JANGAN!',c:C.pink}]; drawSegs(ctx,segs,W/2,880,'center'); ls(0); ctx.textAlign='center';
+  ctx.globalAlpha=1;
+  const fo=ease.inOut(prog(t,DUR-.8,DUR)); ctx.fillStyle=`rgba(0,0,0,${fo})`; ctx.fillRect(0,0,W,H);
+};
+fontsReady().then(()=>{ window.READY=true; });
+</script></body></html>

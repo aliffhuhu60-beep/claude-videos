@@ -1,0 +1,88 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="fonts.css"></head><body>
+<script src="lib.js"></script>
+<script>
+const ctx = setup();
+const Q = new URLSearchParams(location.search);
+const ID = Q.get('id'); const DUR = parseFloat(Q.get('dur')||'4');
+const T1 = Q.get('t1')||'', T2 = Q.get('t2')||'';
+function ls(px){ if('letterSpacing' in ctx) ctx.letterSpacing=px+'px'; }
+const O = {};
+// lower third (name + role)
+O.name = t=>{
+  const a = win(t,0,DUR,.5,.45); if(a<=0) return;
+  const x=90, y=760, slide=(1-ease.out(prog(t,0,.6)))*-40;
+  ctx.save(); ctx.globalAlpha=a; ctx.translate(slide,0);
+  ctx.font=font(800,46); ls(2); const w1=ctx.measureText(T1).width; ls(0);
+  ctx.font=font(500,26); const w2=ctx.measureText(T2).width;
+  const bw=Math.max(w1,w2)+70;
+  ctx.shadowColor='rgba(0,0,0,.35)'; ctx.shadowBlur=18; ctx.shadowOffsetY=6;
+  ctx.fillStyle=C.maroon; rrect(ctx,x,y,bw*ease.out(prog(t,.05,.6)),76,14); ctx.fill(); ctx.shadowColor='transparent';
+  ctx.fillStyle=C.cream; rrect(ctx,x,y+82,(w2+44)*ease.out(prog(t,.25,.8)),44,10); ctx.fill();
+  ctx.fillStyle=C.pink; ctx.fillRect(x,y,8,76);
+  ctx.save(); ctx.beginPath(); ctx.rect(x,y,bw,76); ctx.clip();
+  ctx.font=font(800,46); ls(2); ctx.fillStyle=C.cream; ctx.fillText(T1,x+34,y+56+(1-ease.out(prog(t,.2,.7)))*50); ls(0); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.rect(x,y+82,w2+44,44); ctx.clip();
+  ctx.font=font(600,26); ctx.fillStyle=C.maroon; ctx.fillText(T2,x+22,y+113+(1-ease.out(prog(t,.4,.9)))*40); ctx.restore();
+  ctx.restore();
+};
+// chapter card (top-left)
+O.chapter = t=>{
+  const a = win(t,0,DUR,.5,.5); if(a<=0) return;
+  const x=70, y=64, slide=(1-ease.out(prog(t,0,.6)))*-30;
+  ctx.save(); ctx.globalAlpha=a; ctx.translate(slide,0);
+  ctx.font=font(600,22); ls(5); const w1=ctx.measureText(T1).width; ls(0);
+  ctx.font=font(800,40); ls(1); const w2=ctx.measureText(T2).width; ls(0);
+  const bw=Math.max(w1,w2)+64;
+  ctx.shadowColor='rgba(0,0,0,.35)'; ctx.shadowBlur=16; ctx.shadowOffsetY=5;
+  ctx.fillStyle='rgba(34,7,13,.82)'; rrect(ctx,x,y,bw,112,18); ctx.fill(); ctx.shadowColor='transparent';
+  ctx.fillStyle=C.pink; rrect(ctx,x,y,8,112,4); ctx.fill();
+  ctx.font=font(600,22); ls(5); ctx.fillStyle=C.pink; ctx.fillText(T1,x+32,y+42); ls(0);
+  ctx.font=font(800,40); ls(1); ctx.fillStyle=C.cream; ctx.fillText(T2,x+32,y+90); ls(0);
+  ctx.restore();
+};
+// episode title (top centre)
+O.title = t=>{
+  const a = win(t,0,DUR,.5,.5); if(a<=0) return;
+  const p=ease.outBack(prog(t,0,.7));
+  ctx.save(); ctx.globalAlpha=a; ctx.translate(W/2,120); ctx.scale(lerp(.92,1,p),lerp(.92,1,p));
+  ctx.font=font(800,60); const segs=[{t:'SLAY',c:C.pink},{t:' ATAU ',c:C.cream},{t:'SALAH?',c:'#fff'}]; const sw=measureSegs(ctx,segs);
+  ctx.shadowColor='rgba(0,0,0,.4)'; ctx.shadowBlur=20; ctx.shadowOffsetY=6;
+  ctx.fillStyle='rgba(34,7,13,.85)'; rrect(ctx,-sw/2-40,-62,sw+80,150,24); ctx.fill(); ctx.shadowColor='transparent';
+  ctx.textBaseline='alphabetic'; drawSegs(ctx,segs,0,8,'center');
+  ctx.font=font(500,26); ctx.fillStyle='rgba(247,237,224,.9)'; ctx.textAlign='center'; ctx.fillText('Bila Bahasa Kita Terpaling Rancu di TikTok',0,58);
+  ctx.restore();
+};
+// stamp: SANTAI BOLEH, RANCU JANGAN!
+O.stamp = t=>{
+  const a = win(t,0,DUR,.35,.5); if(a<=0) return;
+  const p=ease.outBack(prog(t,0,.55));
+  ctx.save(); ctx.globalAlpha=a; ctx.translate(W/2,150); ctx.rotate(-0.025); ctx.scale(lerp(1.15,1,p),lerp(1.15,1,p));
+  ctx.font=font(800,66); ls(1);
+  const segs=[{t:'SANTAI BOLEH, ',c:C.cream},{t:'RANCU JANGAN!',c:C.pink}]; const sw=measureSegs(ctx,segs);
+  ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=24; ctx.shadowOffsetY=8;
+  ctx.fillStyle=C.maroon; rrect(ctx,-sw/2-50,-80,sw+100,124,22); ctx.fill(); ctx.shadowColor='transparent';
+  ctx.strokeStyle='rgba(247,237,224,.5)'; ctx.lineWidth=3; rrect(ctx,-sw/2-38,-68,sw+76,100,16); ctx.stroke();
+  drawSegs(ctx,segs,0,4,'center'); ls(0);
+  ctx.restore();
+};
+// static: logo bug
+O.bug = t=>{
+  ctx.save(); ctx.globalAlpha=.85; ctx.textAlign='right'; ctx.textBaseline='alphabetic';
+  ctx.font=font(800,22); ls(4); const bw=ctx.measureText('PODCAST TENGAH JALAN').width; ls(0);
+  ctx.fillStyle='rgba(34,7,13,.55)'; rrect(ctx,W-60-bw-26,38,bw+46,58,14); ctx.fill();
+  ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=6;
+  ctx.font=font(800,22); ls(4); ctx.fillStyle=C.cream; ctx.fillText('PODCAST TENGAH JALAN',W-60,70); ls(0);
+  ctx.shadowColor='transparent'; ctx.fillStyle=C.pink; ctx.fillRect(W-60-70,80,70,3);
+  ctx.restore();
+};
+// static: split-layout background
+O.splitbg = t=>{
+  let g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,'#2A0911'); g.addColorStop(.55,C.maroonD); g.addColorStop(1,'#5A1824');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  const r=rng(5); ctx.save(); ctx.globalAlpha=.05; for(let i=0;i<14;i++){ const x=r()*W,y=r()*H,rr=80+r()*220; const rg=ctx.createRadialGradient(x,y,0,x,y,rr); rg.addColorStop(0,C.pink); rg.addColorStop(1,'rgba(244,182,198,0)'); ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(x,y,rr,0,6.28); ctx.fill(); } ctx.restore();
+  ctx.save(); ctx.font=font(700,20); ls(5); ctx.fillStyle='rgba(247,237,224,.75)'; ctx.fillText('SLAY ATAU SALAH?',50,110); ls(0);
+  ctx.fillStyle=C.pink; ctx.fillRect(50,122,60,3); ctx.restore();
+};
+window.draw = t=>{ ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,W,H); ctx.globalAlpha=1; ctx.textAlign='left'; ctx.textBaseline='alphabetic'; O[ID](t); };
+fontsReady().then(()=>{ window.READY=true; });
+</script></body></html>

@@ -1,0 +1,247 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="fonts.css"></head><body>
+<script src="lib.js"></script>
+<script>
+const ctx = setup();
+const Q = new URLSearchParams(location.search);
+const ID = Q.get('id'); const DUR = parseFloat(Q.get('dur')||'8'); const CUES = (Q.get('cues')||'').split(',').filter(x=>x!=='').map(parseFloat);
+const LINES = (Q.get('lines')||'').split('|');
+// panel geometry (matches compositor split layout)
+const PX=1180, PY=150, PW=690, PH=619;
+const INK='#2A161B', MUTED='#7A5A60';
+const cue=(k)=> k===0?0:(CUES[k-1]!==undefined?CUES[k-1]:1e9);   // stage k appears at cue k (stage0 at 0)
+const st=(t,k,d=.45)=>ease.out(prog(t,cue(k),cue(k)+d));
+
+// --- rich text: *maroon bold*  ~pink chip~  !strike!  ^yellow chip^
+function parse(s){ const out=[]; let re=/(\*[^*]+\*|~[^~]+~|%[^%]+%|\^[^^]+\^)/g, last=0, m;
+  while((m=re.exec(s))){ if(m.index>last) out.push({t:s.slice(last,m.index),k:'n'}); const c=m[0][0]; out.push({t:m[0].slice(1,-1),k:{'*':'b','~':'p','%':'x','^':'y'}[c]}); last=m.index+m[0].length; }
+  if(last<s.length) out.push({t:s.slice(last),k:'n'}); return out; }
+function rich(s,x,y,maxW,size,opts={}){
+  const lh=opts.lh||size*1.38, w0=opts.weight||500, col=opts.color||INK, align=opts.align||'left';
+  // tokenise into words carrying style
+  const toks=[]; for(const sg of parse(s)){ const parts=sg.t.split(/(\s+)/); for(const p of parts){ if(p==='') continue; toks.push({t:p,k:sg.k}); } }
+  const fontFor=k=> font(k==='b'||k==='p'||k==='y'?700:w0,size);
+  // group consecutive non-space tokens into words so punctuation never wraps alone
+  const groups=[]; for(const tk of toks){ ctx.font=fontFor(tk.k); const w=ctx.measureText(tk.t).width; const sp=/^\s+$/.test(tk.t);
+    if(sp) groups.push({sp:true,items:[{...tk,w}],w}); else { const g=groups[groups.length-1]; if(g&&!g.sp) { g.items.push({...tk,w}); g.w+=w; } else groups.push({sp:false,items:[{...tk,w}],w}); } }
+  const lines=[[]]; let lw=0;
+  for(const g of groups){ if(g.sp){ if(lines[lines.length-1].length){ lines[lines.length-1].push(...g.items); lw+=g.w; } continue; }
+    if(lw+g.w>maxW && lines[lines.length-1].length){ const L=lines[lines.length-1]; while(L.length&&/^\s+$/.test(L[L.length-1].t)) L.pop(); lines.push([]); lw=0; }
+    lines[lines.length-1].push(...g.items); lw+=g.w; }
+  ctx.textBaseline='alphabetic';
+  lines.forEach((L,i)=>{ const tot=L.reduce((a,b)=>a+b.w,0); let cx= align==='center'? x-tot/2 : x; const yy=y+i*lh;
+    for(const tk of L){ ctx.font=fontFor(tk.k);
+      if(tk.k==='p'||tk.k==='y'){ ctx.fillStyle= tk.k==='p'? C.pink : C.yellow; rrect(ctx,cx-4,yy-size*0.95,tk.w+8,size*1.25,8); ctx.fill(); ctx.fillStyle=INK; }
+      else ctx.fillStyle= tk.k==='b'? C.maroon : (tk.k==='x'? '#A0525E' : col);
+      ctx.fillText(tk.t,cx,yy);
+      if(tk.k==='x'){ ctx.strokeStyle='#C0392B'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(cx,yy-size*.32); ctx.lineTo(cx+tk.w,yy-size*.32); ctx.stroke(); }
+      cx+=tk.w; } });
+  return lines.length*lh;
+}
+function card(alpha){ // main panel card
+  ctx.save(); ctx.globalAlpha=alpha;
+  ctx.shadowColor='rgba(0,0,0,.35)'; ctx.shadowBlur=30; ctx.shadowOffsetY=10;
+  ctx.fillStyle=C.cream; rrect(ctx,PX,PY,PW,PH,26); ctx.fill(); ctx.restore();
+}
+function header(txt,sub,a){ ctx.save(); ctx.globalAlpha=a;
+  ctx.fillStyle=C.maroon; rrect(ctx,PX+34,PY+34,10,40,5); ctx.fill();
+  ctx.font=font(700,30); ctx.fillStyle=C.maroon; ctx.textBaseline='alphabetic'; if('letterSpacing' in ctx) ctx.letterSpacing='3px';
+  ctx.fillText(txt,PX+60,PY+66); if('letterSpacing' in ctx) ctx.letterSpacing='0px';
+  if(sub){ ctx.font=font(500,20); ctx.fillStyle=MUTED; ctx.textAlign='right'; ctx.fillText(sub,PX+PW-34,PY+64); ctx.textAlign='left'; }
+  ctx.fillStyle='rgba(110,30,43,.15)'; ctx.fillRect(PX+34,PY+92,PW-68,2);
+  ctx.restore(); }
+function chip(x,y,w,h,txt,bg,fg,size=30,a=1,sub){ ctx.save(); ctx.globalAlpha*=a; ctx.fillStyle=bg; rrect(ctx,x,y,w,h,16); ctx.fill();
+  ctx.fillStyle=fg; ctx.font=font(800,size); ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(txt,x+w/2,y+h/2+(sub?-12:2));
+  if(sub){ ctx.font=font(500,17); ctx.globalAlpha*=.9; ctx.fillText(sub,x+w/2,y+h/2+22); }
+  ctx.restore(); }
+function tag(x,y,txt,bg,fg,size=20){ ctx.font=font(700,size); const w=ctx.measureText(txt).width+28; ctx.fillStyle=bg; rrect(ctx,x,y,w,size+16,(size+16)/2); ctx.fill(); ctx.fillStyle=fg; ctx.textBaseline='middle'; ctx.fillText(txt,x+14,y+(size+16)/2+1); ctx.textBaseline='alphabetic'; return w; }
+function mark(x,y,ok,a=1){ ctx.save(); ctx.globalAlpha*=a; ctx.fillStyle= ok? '#2E7D4F' : '#C0392B'; ctx.beginPath(); ctx.arc(x,y,17,0,6.28); ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=4; ctx.lineCap='round'; ctx.beginPath();
+  if(ok){ ctx.moveTo(x-8,y); ctx.lineTo(x-2,y+7); ctx.lineTo(x+9,y-7); } else { ctx.moveTo(x-7,y-7); ctx.lineTo(x+7,y+7); ctx.moveTo(x+7,y-7); ctx.lineTo(x-7,y+7); }
+  ctx.stroke(); ctx.restore(); }
+function arrowDown(x,y,len,a){ ctx.save(); ctx.globalAlpha*=a; ctx.strokeStyle=C.maroon; ctx.fillStyle=C.maroon; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+len); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x-8,y+len-10); ctx.lineTo(x+8,y+len-10); ctx.lineTo(x,y+len+2); ctx.closePath(); ctx.fill(); ctx.restore(); }
+function arrowRight(x,y,len,a){ ctx.save(); ctx.globalAlpha*=a; ctx.strokeStyle=C.maroon; ctx.fillStyle=C.maroon; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+len,y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x+len-10,y-8); ctx.lineTo(x+len-10,y+8); ctx.lineTo(x+len+2,y); ctx.closePath(); ctx.fill(); ctx.restore(); }
+function fadeUp(t,k,fn){ const p=st(t,k); if(p<=0) return; ctx.save(); ctx.globalAlpha*=p; ctx.translate(0,(1-p)*18); fn(); ctx.restore(); }
+function tiktokCard(x,y,w,txt,label,a,size=34){ // dark social caption card
+  ctx.save(); ctx.globalAlpha*=a;
+  const h = 64 + 30 + measureRich(txt,w-60,size);
+  ctx.fillStyle='#17121A'; rrect(ctx,x,y,w,h,22); ctx.fill();
+  ctx.fillStyle=C.pink; ctx.beginPath(); ctx.arc(x+44,y+42,16,0,6.28); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font=font(600,20); ctx.fillText(label,x+72,y+49);
+  ctx.fillStyle='rgba(255,255,255,.35)'; ctx.font=font(500,18); ctx.textAlign='right'; ctx.fillText('@pengguna · contoh',x+w-28,y+49); ctx.textAlign='left';
+  rich(txt,x+30,y+64+size+4,w-60,size,{color:'#fff',weight:600});
+  ctx.restore(); return h; }
+function measureRich(txt,maxW,size){ ctx.save(); ctx.globalAlpha=0; const h=rich(txt,0,-1000,maxW,size); ctx.restore(); return h; }
+
+const P = {};
+// ---------------- panels ----------------
+P.RANCU = t=>{ header('DEFINISI','Kamus Dewan Edisi Keempat (2005)',st(t,0));
+  fadeUp(t,0,()=>{ ctx.font=font(800,92); ctx.fillStyle=C.maroon; ctx.fillText('RANCU',PX+50,PY+215);
+    ctx.font=font(500,24); ctx.fillStyle=MUTED; ctx.fillText('kata adjektif',PX+395,PY+212); });
+  fadeUp(t,1,()=>{ rich('“*bercampur aduk* atau *kacau* dalam penggunaan bahasa”',PX+50,PY+290,PW-100,34); });
+  fadeUp(t,2,()=>{ ctx.fillStyle='rgba(110,30,43,.08)'; rrect(ctx,PX+34,PY+405,PW-68,180,18); ctx.fill();
+    tag(PX+56,PY+425,'KERANCUAN BAHASA',C.maroon,C.cream,20);
+    rich('Unsur bahasa lain / bahasa percakapan *bercampur aduk* → peraturan bahasa Melayu *dilanggar*.',PX+56,PY+505,PW-112,26); });
+};
+P.SP = t=>{ header('SINTAKSIS','Tatabahasa Dewan (2008)',st(t,0));
+  const y=PY+130, w=170, h=96;
+  fadeUp(t,0,()=>{ chip(PX+40,y,w,h,'SUBJEK',C.maroon,C.cream,30,1,'yang diterangkan');
+    ctx.font=font(800,48); ctx.fillStyle=C.maroon; ctx.textAlign='center'; ctx.fillText('+',PX+40+w+28,y+64);
+    ctx.textAlign='left'; });
+  fadeUp(t,1,()=>{ chip(PX+40+w+56,y,w+20,h,'PREDIKAT',C.maroon,C.cream,30,1,'yang menerangkan');
+    ctx.font=font(800,48); ctx.fillStyle=C.maroon; ctx.textAlign='center'; ctx.fillText('=',PX+40+2*w+20+84,y+64); ctx.textAlign='left';
+    chip(PX+40+2*w+20+112,y,PW-80-(2*w+20+112),h,'AYAT',C.pink,INK,34); });
+  fadeUp(t,2,()=>{ ctx.font=font(600,22); ctx.fillStyle=MUTED; ctx.fillText('Predikat boleh berupa:',PX+40,PY+290);
+    const L=[['FN','frasa nama'],['FK','frasa kerja'],['FA','frasa adjektif'],['FSN','frasa sendi nama']];
+    L.forEach((v,i)=>{ const x=PX+40+i*153; ctx.fillStyle='rgba(110,30,43,.1)'; rrect(ctx,x,PY+308,140,78,14); ctx.fill();
+      ctx.fillStyle=C.maroon; ctx.font=font(800,28); ctx.textAlign='center'; ctx.fillText(v[0],x+70,PY+344); ctx.font=font(500,15); ctx.fillStyle=INK; ctx.fillText(v[1],x+70,PY+370); ctx.textAlign='left'; }); });
+  fadeUp(t,3,()=>{ const y2=PY+420; ctx.fillStyle=C.maroonD; rrect(ctx,PX+40,y2,(PW-100)/2,160,18); ctx.fill(); rrect(ctx,PX+60+(PW-100)/2,y2,(PW-100)/2,160,18); ctx.fill();
+    ctx.fillStyle=C.cream; ctx.font=font(800,28); ctx.fillText('AYAT TUNGGAL',PX+64,y2+50); ctx.fillText('AYAT MAJMUK',PX+84+(PW-100)/2,y2+50);
+    ctx.font=font(500,21); ctx.fillStyle='rgba(247,237,224,.9)'; ctx.fillText('1 klausa sahaja',PX+64,y2+92);
+    ctx.fillText('> 1 klausa,',PX+84+(PW-100)/2,y2+92); ctx.fillText('disambung dengan',PX+84+(PW-100)/2,y2+120); ctx.fillStyle=C.pink; ctx.font=font(700,21); ctx.fillText('kata hubung',PX+84+(PW-100)/2,y2+146); });
+};
+P.POV1 = t=>{ header('AYAT 1','Kapsyen TikTok',st(t,0));
+  fadeUp(t,0,()=>{ tiktokCard(PX+40,PY+140,PW-80,'~POV:~ kau ~first time~ masuk kelas Cikgu Bahasa Melayu.','kapsyen',1,40); });
+  fadeUp(t,1,()=>{ rich('Format *POV* meminta penonton membayangkan diri mereka dalam sesuatu situasi.',PX+44,PY+470,PW-88,26,{color:MUTED}); });
+};
+P.POV2 = t=>{ header('ANALISIS','Ayat 1 · POV',st(t,0));
+  fadeUp(t,0,()=>{ ctx.font=font(600,22); ctx.fillStyle=MUTED; ctx.fillText('Bahagian selepas titik bertindih:',PX+44,PY+150);
+    rich('“kau first time masuk kelas Cikgu Bahasa Melayu”',PX+44,PY+195,PW-88,30,{weight:600}); });
+  fadeUp(t,1,()=>{ tag(PX+44,PY+268,'AYAT TUNGGAL',C.maroon,C.cream,20); tag(PX+250,PY+268,'FN + FK',C.pink,INK,20); });
+  fadeUp(t,2,()=>{ const y=PY+345; ctx.fillStyle='rgba(110,30,43,.1)'; rrect(ctx,PX+44,y,170,150,18); ctx.fill();
+    ctx.fillStyle=C.maroon; ctx.font=font(800,22); ctx.fillText('SUBJEK',PX+64,y+40); ctx.font=font(800,44); ctx.fillStyle=INK; ctx.fillText('kau',PX+64,y+100); ctx.font=font(500,17); ctx.fillStyle=MUTED; ctx.fillText('kata ganti nama',PX+64,y+132); });
+  fadeUp(t,3,()=>{ const y=PY+345; ctx.fillStyle='rgba(110,30,43,.1)'; rrect(ctx,PX+230,y,PW-274,150,18); ctx.fill();
+    ctx.fillStyle=C.maroon; ctx.font=font(800,22); ctx.fillText('PREDIKAT (FK)',PX+250,y+40);
+    rich('masuk kelas Cikgu Bahasa Melayu',PX+250,y+84,PW-310,28,{weight:700}); });
+};
+P.POV3 = t=>{ header('KERANCUAN','3 kesalahan',st(t,0));
+  const rows=[['POV','UNSUR TERGANTUNG','bukan subjek, bukan predikat'],['first time','CAMPUR KOD','keterangan masa bahasa Inggeris'],['masuk kelas','masuk KE kelas','kata sendi nama “ke” menunjukkan arah']];
+  rows.forEach((r,i)=>fadeUp(t,i,()=>{ const y=PY+125+i*160;
+    ctx.fillStyle='rgba(110,30,43,.07)'; rrect(ctx,PX+34,y,PW-68,138,18); ctx.fill();
+    ctx.fillStyle=C.pink; rrect(ctx,PX+54,y+26,ctx.measureText?220:220,48,12); ctx.font=font(700,26); const w=ctx.measureText(r[0]).width+28; ctx.fillStyle=C.pink; rrect(ctx,PX+54,y+24,w,50,12); ctx.fill();
+    ctx.fillStyle=INK; ctx.fillText(r[0],PX+68,y+59);
+    arrowRight(PX+70+w,y+49,40,1);
+    ctx.font=font(800,26); ctx.fillStyle=C.maroon; ctx.fillText(r[1],PX+130+w,y+59);
+    ctx.font=font(500,20); ctx.fillStyle=MUTED; ctx.fillText(r[2],PX+56,y+110); }));
+};
+P.POV4 = t=>{ header('PEMBETULAN','Ayat 1 · POV',st(t,0));
+  fadeUp(t,0,()=>{ ctx.font=font(700,20); ctx.fillStyle=MUTED; ctx.fillText('AYAT ASAL',PX+44,PY+140); mark(PX+PW-60,PY+133,false);
+    rich('%POV: kau first time masuk kelas Cikgu Bahasa Melayu.%',PX+44,PY+180,PW-88,26); });
+  fadeUp(t,0,()=>{ ctx.fillStyle='rgba(46,125,79,.10)'; rrect(ctx,PX+34,PY+250,PW-68,200,18); ctx.fill();
+    ctx.font=font(700,20); ctx.fillStyle='#2E7D4F'; ctx.fillText('AYAT GRAMATIS',PX+56,PY+288); mark(PX+PW-62,PY+282,true);
+    rich('“*Bayangkan* anda masuk *ke* kelas guru Bahasa Melayu *buat kali pertama*.”',PX+56,PY+335,PW-112,30,{weight:600}); });
+  fadeUp(t,1,()=>{ let x=PX+44; x+=tag(x,PY+480,'AYAT PERINTAH',C.maroon,C.cream,19)+10; tag(x,PY+480,'“bayangkan” = predikat',C.pink,INK,19); });
+  fadeUp(t,2,()=>{ tag(PX+44,PY+535,'“buat kali pertama” ganti “first time”',C.yellow,INK,19); });
+};
+P.SLAY1 = t=>{ header('AYAT 2','Komen TikTok',st(t,0));
+  fadeUp(t,0,()=>{ tiktokCard(PX+40,PY+140,PW-80,'~Outfit~ dia hari ni ~slay~ gila, ~confirm~ ramai yang ~jealous~!','komen',1,38); });
+  fadeUp(t,1,()=>{ const y=PY+440; ctx.fillStyle='rgba(110,30,43,.08)'; rrect(ctx,PX+34,y,PW-68,120,18); ctx.fill();
+    ctx.font=font(800,40); ctx.fillStyle=C.maroon; ctx.fillText('slay',PX+60,y+76); ctx.font=font(500,20); ctx.fillStyle=MUTED; ctx.fillText('(Inggeris)',PX+150,y+74);
+    arrowRight(PX+270,y+62,50,1); ctx.font=font(800,40); ctx.fillStyle=INK; ctx.fillText('membunuh',PX+340,y+76); });
+};
+P.SLAY2 = t=>{ header('ANALISIS','Ayat 2 · klausa 1',st(t,0));
+  fadeUp(t,0,()=>{ const y=PY+125; ctx.fillStyle='rgba(110,30,43,.1)'; rrect(ctx,PX+34,y,370,70,14); ctx.fill(); rrect(ctx,PX+430,y,226,70,14); ctx.fill();
+    ctx.font=font(600,21); ctx.fillStyle=INK; ctx.fillText('outfit dia hari ni slay gila',PX+50,y+44); ctx.fillText('confirm ramai…',PX+446,y+44);
+    ctx.font=font(800,40); ctx.fillStyle='#C0392B'; ctx.fillText(',',PX+409,y+52);
+    ctx.font=font(600,16); ctx.fillStyle=MUTED; ctx.fillText('KLAUSA 1',PX+40,y+96); ctx.fillText('KLAUSA 2',PX+436,y+96);
+    tag(PX+300,y+108,'TANPA KATA HUBUNG',C.maroon,C.cream,17); });
+  fadeUp(t,1,()=>{ const y=PY+280; ctx.font=font(700,20); ctx.fillStyle=MUTED; ctx.fillText('KLAUSA 1 · FN + FA',PX+44,y);
+    chip(PX+44,y+16,280,84,'outfit dia',C.cream,INK,30); ctx.strokeStyle=C.maroon; ctx.lineWidth=2; rrect(ctx,PX+44,y+16,280,84,16); ctx.stroke();
+    chip(PX+346,y+16,PW-390,84,'slay gila',C.pink,INK,30);
+    ctx.font=font(600,16); ctx.fillStyle=C.maroon; ctx.fillText('SUBJEK (FN)',PX+52,y+122); ctx.fillText('PREDIKAT (FA)',PX+354,y+122); });
+  fadeUp(t,2,()=>{ const y=PY+430; rich('*slay*: kata kerja transitif Inggeris → dipaksa jadi ^kata adjektif^',PX+44,y+20,PW-88,22); });
+  fadeUp(t,3,()=>{ const y=PY+430; rich('*gila*: kata penguat bahasa percakapan',PX+44,y+110,PW-88,22); });
+};
+P.SLAY3 = t=>{ header('ANALISIS','Ayat 2 · klausa 2',st(t,0));
+  fadeUp(t,0,()=>{ rich('“~confirm~ ramai yang ~jealous~”',PX+44,PY+165,PW-88,38,{weight:700}); });
+  const rows=[['confirm','kata Inggeris sebagai *kata penegas*'],['yang','kata nama *“orang”* digugurkan → *subjek tidak lengkap*'],['jealous','kata Inggeris (campur kod)']];
+  rows.forEach((r,i)=>fadeUp(t,i+1,()=>{ const y=PY+225+i*120; ctx.fillStyle='rgba(110,30,43,.07)'; rrect(ctx,PX+34,y,PW-68,104,16); ctx.fill();
+    ctx.font=font(700,24); const w=ctx.measureText(r[0]).width+24; ctx.fillStyle=C.pink; rrect(ctx,PX+52,y+28,w,46,12); ctx.fill(); ctx.fillStyle=INK; ctx.fillText(r[0],PX+64,y+60);
+    rich(r[1],PX+76+w,y+48,PW-150-w,21); }));
+};
+P.SLAY4 = t=>{ header('PEMBETULAN','Ayat 2 · SLAY',st(t,0));
+  fadeUp(t,0,()=>{ ctx.font=font(700,20); ctx.fillStyle=MUTED; ctx.fillText('AYAT ASAL',PX+44,PY+140); mark(PX+PW-60,PY+133,false);
+    rich('%Outfit dia hari ni slay gila, confirm ramai yang jealous!%',PX+44,PY+180,PW-88,25); });
+  fadeUp(t,0,()=>{ ctx.fillStyle='rgba(46,125,79,.10)'; rrect(ctx,PX+34,PY+250,PW-68,190,18); ctx.fill();
+    ctx.font=font(700,20); ctx.fillStyle='#2E7D4F'; ctx.fillText('AYAT GRAMATIS',PX+56,PY+288); mark(PX+PW-62,PY+282,true);
+    rich('“*Pakaiannya* sungguh hebat hari ini, *dan* pasti ramai *orang* berasa cemburu.”',PX+56,PY+335,PW-112,29,{weight:600}); });
+  fadeUp(t,1,()=>{ tag(PX+44,PY+470,'AYAT MAJMUK GABUNGAN',C.maroon,C.cream,19);
+    ctx.font=font(700,24); ctx.fillStyle=INK; ctx.fillText('[FN + FA]  ',PX+44,PY+560); const w=ctx.measureText('[FN + FA]  ').width;
+    ctx.fillStyle=C.maroon; ctx.fillText('dan',PX+44+w,PY+560); const w2=ctx.measureText('dan  ').width; ctx.fillStyle=INK; ctx.fillText('[FN + FK]',PX+44+w+w2,PY+560); });
+};
+P.TER1 = t=>{ header('AYAT 3','Kapsyen TikTok',st(t,0));
+  fadeUp(t,0,()=>{ tiktokCard(PX+40,PY+130,PW-80,'Dia ni ~terpaling~ alim, semua orang dia tegur.','kapsyen',1,38); });
+  fadeUp(t,1,()=>{ let x=PX+44; x+=tag(x,PY+340,'AYAT MAJMUK',C.maroon,C.cream,19)+10; tag(x,PY+340,'2 klausa · tanpa kata hubung',C.pink,INK,19); });
+  fadeUp(t,2,()=>{ const y=PY+405; ctx.font=font(700,20); ctx.fillStyle=MUTED; ctx.fillText('KLAUSA 1 · FN + FA',PX+44,y);
+    chip(PX+44,y+16,220,80,'dia ni',C.cream,INK,30); ctx.strokeStyle=C.maroon; ctx.lineWidth=2; rrect(ctx,PX+44,y+16,220,80,16); ctx.stroke();
+    chip(PX+286,y+16,PW-330,80,'terpaling alim',C.pink,INK,30);
+    ctx.font=font(600,16); ctx.fillStyle=C.maroon; ctx.fillText('SUBJEK',PX+52,y+118); ctx.fillText('PREDIKAT (FA)',PX+294,y+118); });
+  fadeUp(t,3,()=>{ rich('*“ni”* = bentuk percakapan bagi *“ini”*',PX+44,PY+580,PW-88,21,{color:MUTED}); });
+};
+P.TER2 = t=>{ header('KELEWAHAN BAHASA','Ayat 3 · TERPALING',st(t,0));
+  fadeUp(t,0,()=>{ const y=PY+130; chip(PX+44,y,170,90,'TER-',C.maroon,C.cream,40); ctx.font=font(800,48); ctx.fillStyle=C.maroon; ctx.textAlign='center'; ctx.fillText('+',PX+246,y+62);
+    ctx.textAlign='left'; chip(PX+280,y,200,90,'PALING',C.maroon,C.cream,38);
+    ctx.font=font(600,19); ctx.fillStyle=MUTED; ctx.fillText('makna “paling”',PX+60,y+120); ctx.fillText('makna “paling”',PX+310,y+120); });
+  fadeUp(t,1,()=>{ ctx.font=font(500,22); ctx.fillStyle=INK; rich('contoh: *terpandai* = paling pandai',PX+44,PY+300,PW-88,24); });
+  fadeUp(t,2,()=>{ ctx.fillStyle=C.pink; rrect(ctx,PX+44,PY+340,PW-88,70,16); ctx.fill(); ctx.font=font(800,30); ctx.fillStyle=INK; ctx.fillText('= maksud diulang dua kali',PX+66,PY+386); });
+  fadeUp(t,3,()=>{ rich('sama seperti %naik ke atas%',PX+44,PY+460,PW-88,24); });
+  fadeUp(t,3,()=>{ ctx.font=font(600,20); ctx.fillStyle='#2E7D4F'; ctx.fillText('Cukup sebut:',PX+44,PY+530); mark(PX+215,PY+523,true); ctx.font=font(800,34); ctx.fillStyle=INK; ctx.fillText('paling alim',PX+250,PY+535); });
+};
+P.TER3 = t=>{ header('AYAT PASIF','Ayat 3 · klausa 2',st(t,0));
+  fadeUp(t,0,()=>{ rich('“semua orang dia tegur”',PX+44,PY+160,PW-88,34,{weight:700}); mark(PX+PW-60,PY+150,false);
+    ctx.font=font(500,19); ctx.fillStyle=MUTED; ctx.fillText('objek + pelaku + kata kerja tanpa imbuhan',PX+44,PY+205); });
+  fadeUp(t,1,()=>{ const y=PY+240; ctx.fillStyle='rgba(46,125,79,.09)'; rrect(ctx,PX+34,y,PW-68,120,16); ctx.fill();
+    tag(PX+54,y+16,'DIRI PERTAMA & KEDUA',C.maroon,C.cream,17); rich('“Semua orang *saya* tegur.”',PX+56,y+96,PW-140,28,{weight:600}); mark(PX+PW-62,y+80,true); });
+  fadeUp(t,2,()=>{ const y=PY+380; ctx.fillStyle='rgba(46,125,79,.09)'; rrect(ctx,PX+34,y,PW-68,200,16); ctx.fill();
+    tag(PX+54,y+16,'DIRI KETIGA · imbuhan di-',C.maroon,C.cream,17);
+    rich('“Semua orang *ditegurnya*.”',PX+56,y+96,PW-140,28,{weight:600}); rich('“Semua orang *ditegur olehnya*.”',PX+56,y+150,PW-140,28,{weight:600}); mark(PX+PW-62,y+110,true); });
+};
+P.TER4 = t=>{ header('PEMBETULAN','Ayat 3 · TERPALING',st(t,0));
+  fadeUp(t,0,()=>{ ctx.font=font(700,20); ctx.fillStyle=MUTED; ctx.fillText('AYAT ASAL',PX+44,PY+140);
+    rich('%Dia ni terpaling alim, semua orang dia tegur.%',PX+44,PY+178,PW-88,25); });
+  fadeUp(t,0,()=>{ const y=PY+215; ctx.fillStyle='rgba(46,125,79,.10)'; rrect(ctx,PX+34,y,PW-68,150,16); ctx.fill();
+    tag(PX+54,y+14,'PASIF',C.maroon,C.cream,17); rich('“Dia berlagak *paling* alim *sehingga* semua orang *ditegurnya*.”',PX+56,y+86,PW-112,26,{weight:600}); });
+  fadeUp(t,1,()=>{ rich('Ayat majmuk pancangan keterangan (akibat) · kata hubung *“sehingga”*',PX+44,PY+405,PW-88,20,{color:MUTED}); });
+  fadeUp(t,2,()=>{ const y=PY+455; ctx.fillStyle='rgba(110,30,43,.09)'; rrect(ctx,PX+34,y,PW-68,140,16); ctx.fill();
+    tag(PX+54,y+14,'AKTIF',C.pink,INK,17); rich('“Dia berlagak paling alim sehingga dia *menegur* semua orang.”',PX+56,y+84,PW-112,26,{weight:600}); });
+};
+P.LARAS = t=>{ header('LARAS BAHASA','Salah atau kreatif?',st(t,0));
+  const cw=(PW-100)/2;
+  fadeUp(t,0,()=>{ const x=PX+40, y=PY+130; ctx.fillStyle=C.pink; rrect(ctx,x,y,cw,330,20); ctx.fill();
+    ctx.font=font(800,30); ctx.fillStyle=INK; ctx.fillText('SANTAI',x+26,y+56); ctx.font=font(500,22);
+    ['TikTok & komen','sembang harian','kapsyen media sosial'].forEach((s,i)=>{ ctx.fillText('• '+s,x+26,y+120+i*52); }); });
+  fadeUp(t,1,()=>{ const x=PX+60+cw, y=PY+130; ctx.fillStyle=C.maroon; rrect(ctx,x,y,cw,330,20); ctx.fill();
+    ctx.font=font(800,30); ctx.fillStyle=C.cream; ctx.fillText('FORMAL',x+26,y+56); ctx.font=font(500,22);
+    ['karangan','surat rasmi','urusan formal'].forEach((s,i)=>{ ctx.fillText('• '+s,x+26,y+120+i*52); }); });
+  fadeUp(t,2,()=>{ ctx.font=font(700,24); ctx.fillStyle=C.maroon; ctx.textAlign='center'; ctx.fillText('Tahu membezakan laras bahasa',PX+PW/2,PY+530); ctx.textAlign='left'; });
+};
+P.DETEKTIF = t=>{ header('DETEKTIF KAPSYEN','Aktiviti bilik darjah',st(t,0));
+  // magnifier icon
+  fadeUp(t,0,()=>{ ctx.save(); ctx.translate(PX+PW-120,PY+190); ctx.strokeStyle=C.maroon; ctx.lineWidth=12; ctx.beginPath(); ctx.arc(0,0,44,0,6.28); ctx.stroke(); ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(32,32); ctx.lineTo(70,70); ctx.stroke();
+    ctx.fillStyle='rgba(244,182,198,.5)'; ctx.beginPath(); ctx.arc(0,0,38,0,6.28); ctx.fill(); ctx.restore(); });
+  const steps=['Kumpul kapsyen TikTok','Kaburkan nama pengguna','Kenal pasti pola ayat & jenis kerancuan','Bina semula ayat yang gramatis'];
+  steps.forEach((s,i)=>fadeUp(t,i+1,()=>{ const y=PY+130+i*112; ctx.fillStyle=C.maroon; ctx.beginPath(); ctx.arc(PX+74,y+40,28,0,6.28); ctx.fill();
+    ctx.fillStyle=C.cream; ctx.font=font(800,28); ctx.textAlign='center'; ctx.fillText(String(i+1),PX+74,y+50); ctx.textAlign='left';
+    rich(s,PX+124,y+50,PW-310,26,{weight:600}); }));
+};
+P.RUMUSAN = t=>{ header('RUMUSAN','3 contoh kerancuan',st(t,0));
+  const rows=[['POV','unsur tergantung · campur kod'],['SLAY','klausa tanpa kata hubung · kata Inggeris berubah golongan'],['TERPALING','kelewahan · ayat pasif salah susunan']];
+  rows.forEach((r,i)=>fadeUp(t,i+1,()=>{ const y=PY+130+i*150; ctx.fillStyle='rgba(110,30,43,.08)'; rrect(ctx,PX+34,y,PW-68,130,18); ctx.fill();
+    chip(PX+54,y+22,200,86,r[0],C.maroon,C.cream,r[0].length>6?26:32); rich(r[1],PX+280,y+58,PW-340,23,{weight:600}); }));
+};
+P.PANTUN = t=>{ header('PANTUN','',st(t,0));
+  ctx.save(); ctx.globalAlpha*=st(t,0); ctx.font=font(500,120); ctx.fillStyle='rgba(110,30,43,.10)'; ctx.fillText('“',PX+PW-110,PY+200); ctx.restore();
+  LINES.forEach((L,i)=>fadeUp(t,i,()=>{ const y=PY+190+i*92; ctx.font=font(i%2? 600:600,33); ctx.fillStyle= i>=2? C.maroon : INK; ctx.fillText(L,PX+56,y);
+    ctx.fillStyle='rgba(110,30,43,.25)'; ctx.fillRect(PX+56,y+26,60,3); }));
+};
+
+window.draw = (t)=>{
+  ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,W,H); ctx.globalAlpha=1;
+  const a = Math.min(ease.out(prog(t,0,.5)), 1-ease.inOut(prog(t,DUR-.4,DUR)));
+  if(a<=0) return;
+  ctx.save(); ctx.translate((1-ease.out(prog(t,0,.55)))*60,0); ctx.globalAlpha=a;
+  card(1); ctx.globalAlpha=a;
+  P[ID](t);
+  ctx.restore();
+};
+fontsReady().then(()=>{ window.READY=true; });
+</script></body></html>
