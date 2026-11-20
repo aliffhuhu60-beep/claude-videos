@@ -3,3 +3,5 @@ HOTEL_HIJAU_VIDEO/08_PREVIEW/*.mp4 filter=lfs diff=lfs merge=lfs -text
 HOTEL_HIJAU_VIDEO/09_FINAL_EXPORT/*.mp4 filter=lfs diff=lfs merge=lfs -text
 PODCAST_TENGAH_JALAN_FINAL/*.mp4 filter=lfs diff=lfs merge=lfs -text
 PODCAST_TENGAH_JALAN_FINAL/Assets/**/*.wav filter=lfs diff=lfs merge=lfs -text
+PODCAST_TENGAH_JALAN_FINAL/TRAILER_3D/*.mp4 filter=lfs diff=lfs merge=lfs -text
+PODCAST_TENGAH_JALAN_FINAL/TRAILER_3D/*.wav filter=lfs diff=lfs merge=lfs -text
