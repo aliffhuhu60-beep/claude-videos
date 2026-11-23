@@ -29,34 +29,35 @@ const CAM = 7, Y_OFF = 0.70, BASE_Y = -1.30, LEVELS = 14;
 const LIGHT = unit([-0.35, 0.55, -0.75]);
 
 const PAL = {
-  rose_red: [[150, 0, 35], [255, 70, 100]],     rose_pink: [[205, 45, 120], [255, 165, 200]],
-  cosmos: [[235, 60, 160], [255, 195, 235]],    white: [[250, 225, 190], [255, 255, 255]],
-  sun: [[255, 150, 0], [255, 235, 70]],         orange: [[255, 100, 20], [255, 200, 100]],
-  purple: [[110, 55, 215], [205, 160, 255]],    lilac: [[165, 115, 230], [235, 210, 255]],
-  lavender: [[120, 80, 225], [175, 140, 255]],  blue: [[40, 110, 245], [130, 190, 255]],
-  t_red: [[190, 0, 40], [255, 90, 90]],         t_yellow: [[255, 190, 0], [255, 245, 140]],
-  t_pink: [[240, 80, 150], [255, 185, 215]],    gold: [[255, 175, 20], [255, 215, 60]],
-  brown: [[95, 50, 15], [165, 95, 30]],         stem: [[70, 170, 80], [120, 225, 120]],
-  leaf: [[25, 140, 60], [110, 225, 110]],       wrap: [[240, 185, 200], [255, 225, 232]],
-  ribbon: [[230, 30, 120], [255, 90, 170]],     bwhite: [[240, 240, 255], [255, 255, 255]],
+  rose_red: [[170, 0, 30], [255, 40, 70]],      rose_pink: [[220, 30, 120], [255, 120, 180]],
+  cosmos: [[230, 40, 150], [255, 140, 210]],    white: [[225, 225, 245], [255, 255, 255]],
+  sun: [[255, 140, 0], [255, 215, 0]],          orange: [[255, 90, 0], [255, 160, 40]],
+  purple: [[110, 40, 220], [170, 110, 255]],    lilac: [[160, 90, 235], [210, 170, 255]],
+  lavender: [[120, 70, 230], [160, 120, 255]],  blue: [[30, 100, 250], [90, 170, 255]],
+  t_red: [[210, 0, 30], [255, 60, 60]],         t_yellow: [[255, 190, 0], [255, 235, 60]],
+  t_pink: [[245, 60, 140], [255, 150, 200]],    gold: [[255, 175, 0], [255, 210, 40]],
+  brown: [[100, 45, 10], [150, 80, 20]],        stem: [[60, 160, 70], [100, 210, 100]],
+  leaf: [[20, 130, 50], [70, 200, 80]],         wrap: [[235, 175, 195], [250, 210, 222]],
+  ribbon: [[225, 20, 110], [255, 70, 150]],     bwhite: [[240, 240, 255], [255, 255, 255]],
 };
 const K_SURF = 0, K_STEM = 1, K_LEAF = 2, K_WRAP = 3, K_DOT = 4, K_CENTER = 5;
 const RAMPS = { 0: ".:-=+oO0@", 2: ".,-~=+*", 3: ".,:;=+*#", 5: ".:*#%@" };
 
 // ---------------------------------------------------------------- warna
-const shadeIndex = new Map(), SHADES = [];
+const shadeIndex = new Map(), SHADES = [], SHADES_BG = [];   // warna aksara & warna latar sel
 function shadeId(rgb) {
   const key = rgb.map(Math.round).join(",");
   if (!shadeIndex.has(key)) {
-    const row = [];
+    const row = [], brow = [], css = c => `rgb(${c.map(v => Math.max(0, Math.min(255, Math.round(v)))).join(",")})`;
     for (let L = 0; L < LEVELS; L++) {
-      const e = L / (LEVELS - 1), k = 0.4 + 0.75 * e;
-      let c = rgb.map(v => v * k);
-      if (e > 0.8) { const m = (e - 0.8) * 1.6; c = c.map(v => v + (255 - v) * m); }
-      row.push(`rgb(${c.map(v => Math.max(0, Math.min(255, Math.round(v)))).join(",")})`);
+      const e = L / (LEVELS - 1);
+      let c = rgb.map(v => v * (0.55 + 0.6 * e));
+      if (e > 0.9) { const m = (e - 0.9) * 1.5; c = c.map(v => v + (255 - v) * m); }
+      row.push(css(c));
+      brow.push(css(rgb.map(v => v * (0.2 + 0.5 * e))));
     }
     shadeIndex.set(key, SHADES.length);
-    SHADES.push(row);
+    SHADES.push(row); SHADES_BG.push(brow);
   }
   return shadeIndex.get(key);
 }
@@ -90,37 +91,44 @@ function buildScene(h, spread) {
   const R = rng(SEED), uni = (a, b) => a + (b - a) * R(), pick = s => s[Math.floor(R() * s.length)];
   const randint = (a, b) => a + Math.floor(R() * (b - a + 1));
   const pts = [];
-  const put = (p, n, kind, pal, s, appear, phase = null, ch = " ") => {
+  let obj = 0;
+  const nu = () => { obj++; };      // id objek baru (untuk garis pemisah)
+  const put = (p, n, kind, pal, s, appear, phase = null, ch = " ", tone = 1) => {
     const sway = phase === null ? 0 : 0.014 * Math.max(0, p[1] - BASE_Y) ** 2;
     const sid = shadeId(mix(PAL[pal][0], PAL[pal][1], Math.round(s * 4) / 4));
-    pts.push([p[0], p[1], p[2], n[0], n[1], n[2], kind, sid, ch, Math.min(appear, 0.99), sway, phase || 0]);
+    pts.push([p[0], p[1], p[2], n[0], n[1], n[2], kind, sid, ch, Math.min(appear, 0.99), sway, phase || 0, tone, obj]);
   };
   const stem = (a, c, b, t0, t1, phase, pal = "stem") => {
+    nu();
     const L = dist(a, c) + dist(c, b);
     for (const s of frange(0, 1, h / L)) put(bezier(a, c, b, s), bezierTan(a, c, b, s), K_STEM, pal, s, t0 + (t1 - t0) * s, phase);
   };
   const leaf = (base, out, length, width, appear, phase) => {
+    nu();
     const ld = unit(add(out, [0, 0.8, 0])), side = unit(cross(ld, [0, 1, 0])), nrm = unit(cross(side, ld));
     for (const a of frange(0, 1, h / length)) {
       const hw = width * Math.sin(Math.PI * a) ** 0.7;
       const centre = add(add(base, mul(ld, a * length)), [0, -0.35 * length * a * a, 0]);
       for (const b of (hw > h * 0.5 ? frange(-hw, hw, h) : [0]))
-        put(add(add(centre, mul(side, b)), mul(nrm, Math.abs(b) * 0.6)), nrm, K_LEAF, "leaf", a, appear + 0.12 * a, phase);
+        put(add(add(centre, mul(side, b)), mul(nrm, Math.abs(b) * 0.6)), nrm, K_LEAF, "leaf", a, appear + 0.12 * a, phase, " ",
+            hw > 0 ? 1 - 0.45 * (Math.abs(b) / hw) ** 2 : 1);
     }
   };
   const daisy = (c, axis, Rd, petals, pal, cpal, appear, phase, centre = 0.28, cup = 0.3) => {
     const [u, w] = frameOf(axis), rc = Rd * centre;
+    nu();
     for (const r of frange(0, rc, h)) {
       const n = Math.floor(2 * Math.PI * r / h) + 1;
       for (let j = 0; j < n; j++) {
         const th = 2 * Math.PI * j / n, rad = add(mul(u, Math.cos(th)), mul(w, Math.sin(th)));
         const p = add(add(c, mul(rad, r)), mul(axis, rc * 0.6 * (1 - (r / rc) ** 2)));
-        put(p, unit(add(axis, mul(rad, r / rc))), K_CENTER, cpal, r / rc, appear, phase);
+        put(p, unit(add(axis, mul(rad, r / rc))), K_CENTER, cpal, r / rc, appear, phase, " ", 0.75 + 0.25 * Math.cos(th * 9 + r * 60) ** 2);
       }
     }
-    const off = uni(0, Math.PI), half = Math.PI / petals * 0.9, r0 = rc * 0.7;
+    const off = uni(0, Math.PI), half = Math.PI / petals * 0.8, r0 = rc * 0.7;
     for (let k = 0; k < petals; k++) {
       const a0 = off + 2 * Math.PI * k / petals;
+      nu();
       for (const r of frange(r0, Rd, h * 0.75)) {
         const s = (r - r0) / (Rd - r0);
         const wid = half * Math.sin(Math.PI * (0.08 + 0.92 * s)) ** 0.5;
@@ -128,13 +136,14 @@ function buildScene(h, spread) {
         for (let j = -n; j <= n; j++) {
           const th = a0 + (n ? wid * j / n : 0), rad = add(mul(u, Math.cos(th)), mul(w, Math.sin(th)));
           put(add(add(c, mul(rad, r)), mul(axis, Rd * cup * s * s)), unit(add(axis, mul(rad, -0.6 * s))),
-              K_SURF, pal, s, appear + 0.25 * s, phase);
+              K_SURF, pal, s, appear + 0.25 * s, phase, " ", 1 - 0.5 * (n ? Math.abs(j / n) : 0) ** 3);
         }
       }
     }
   };
   const rose = (c, axis, Rr, pal, appear, phase) => {
     const [u, w] = frameOf(axis), thmax = 2 * Math.PI * 3.3, off = uni(0, 2 * Math.PI);
+    nu();
     let th = 0.6;
     while (th < thmax) {
       const s = th / thmax, r = Rr * s;
@@ -143,7 +152,7 @@ function buildScene(h, spread) {
       for (const v of frange(0, Hh, h)) {
         const f = (v / Hh) ** 2 * 0.3 * Rr * s;
         put(add(add(c, mul(rad, r + f)), mul(axis, v - 0.15 * Rr)), unit(add(rad, mul(axis, -0.5 * f / Rr))),
-            K_SURF, pal, s, appear + 0.25 * s, phase);
+            K_SURF, pal, s, appear + 0.25 * s, phase, " ", 0.45 + 0.55 * (v / Hh) ** 1.5);
       }
       th += h / Math.max(r, 0.03) * 0.9;
     }
@@ -151,25 +160,29 @@ function buildScene(h, spread) {
       const n = Math.floor(2 * Math.PI * r / h) + 1;
       for (let j = 0; j < n; j++) {
         const t2 = 2 * Math.PI * j / n, rad = add(mul(u, Math.cos(t2)), mul(w, Math.sin(t2)));
-        put(add(add(c, mul(rad, r)), mul(axis, -0.15 * Rr)), axis, K_SURF, pal, 0, appear, phase);
+        put(add(add(c, mul(rad, r)), mul(axis, -0.15 * Rr)), axis, K_SURF, pal, 0, appear, phase, " ", 0.4);
       }
     }
   };
   const tulip = (c, axis, Rt, pal, appear, phase) => {
     const [u, w] = frameOf(axis), H = Rt * 1.5, off = uni(0, Math.PI);
+    nu();
     for (const v of frange(0, 1, h / H)) {
       const r = Rt * (0.25 + 0.75 * Math.sin(Math.PI * (0.1 + 0.6 * v)));
       const n = Math.floor(2 * Math.PI * r / h) + 3;
       for (let j = 0; j < n; j++) {
         const th = 2 * Math.PI * j / n;
-        if (v > 0.78 + 0.22 * Math.abs(Math.cos(1.5 * (th - off)))) continue;
+        const lobe = Math.abs(Math.cos(1.5 * (th - off)));
+        if (v > 0.78 + 0.22 * lobe) continue;
         const rad = add(mul(u, Math.cos(th)), mul(w, Math.sin(th)));
-        put(add(add(c, mul(rad, r)), mul(axis, v * H)), unit(add(rad, mul(axis, -0.3))), K_SURF, pal, v, appear + 0.2 * v, phase);
+        put(add(add(c, mul(rad, r)), mul(axis, v * H)), unit(add(rad, mul(axis, -0.3))), K_SURF, pal, v, appear + 0.2 * v, phase,
+            " ", 0.55 + 0.45 * Math.sqrt(lobe));
       }
     }
   };
   const lavender = (c, axis, L, pal, appear, phase) => {
     const [u, w] = frameOf(axis), steps = Math.max(4, Math.floor(L / (h * 1.4)));
+    nu();
     for (let i = 0; i <= steps; i++) {
       const v = i / steps, r = 0.065 * (1 - 0.55 * v);
       for (let j = 0; j < 7; j++) {
@@ -179,6 +192,7 @@ function buildScene(h, spread) {
     }
   };
   const babysBreath = (c, axis, appear, phase) => {
+    nu();
     const nb = randint(6, 9);
     for (let b = 0; b < nb; b++) {
       const d = unit(add(axis, [uni(-0.9, 0.9), uni(-0.3, 0.6), uni(-0.9, 0.9)]));
@@ -191,6 +205,7 @@ function buildScene(h, spread) {
   };
   const wrapping = () => {
     const y0 = -1.75, y1 = -0.72, r0 = 0.07, r1 = 0.66, H = y1 - y0, slope = (r1 - r0) / H, opening = Math.PI / 2;
+    nu();
     for (const v of frange(0, 1.07, h / (H * 1.15))) {
       const y = y0 + v * H, r = r0 + (r1 - r0) * v, n = Math.floor(2 * Math.PI * r / h) + 4;
       for (let j = 0; j < n; j++) {
@@ -200,6 +215,7 @@ function buildScene(h, spread) {
         put([Math.cos(th) * r, y, Math.sin(th) * r], unit([Math.cos(th), -slope, Math.sin(th)]), K_WRAP, "wrap", v, 0.15 * v);
       }
     }
+    nu();
     const yr = -1.38, rr = r0 + (r1 - r0) * (yr - y0) / H + 0.015;
     for (const y of frange(yr - 0.045, yr + 0.045, h)) {
       const n = Math.floor(2 * Math.PI * rr / h) + 4;
@@ -336,6 +352,7 @@ function frame(now) {
   const x = Math.min(1, t / GROW_SECONDS), g = x * x * (3 - 2 * x);
   const { cols, rows, S, cx, cy, cw, lh, ox, oy, W, H } = V, size = cols * rows;
   const zbuf = new Float32Array(size).fill(1e9), chars = new Array(size).fill(" "), colors = new Array(size);
+  const bgs = new Array(size).fill(null), ids = new Int32Array(size);
   const ang = t * SPIN_SPEED + dragAngle, ca = Math.cos(ang), sa = Math.sin(ang);
   const ct = Math.cos(TILT), st = Math.sin(TILT), [lx, ly, lz] = LIGHT, kS = S * ASP, top = LEVELS - 1;
 
@@ -369,7 +386,17 @@ function frame(now) {
         ch = ramp[Math.min(ramp.length - 1, Math.floor(e * ramp.length))];
       }
     }
-    chars[i] = ch; colors[i] = SHADES[P[7]][Math.min(top, Math.floor(e * LEVELS))];
+    const lvl = Math.min(top, Math.floor(e * P[12] * LEVELS));
+    chars[i] = ch; colors[i] = SHADES[P[7]][lvl]; ids[i] = P[13];
+    bgs[i] = kind === K_STEM ? null : SHADES_BG[P[7]][lvl];
+  }
+  // garis pemisah: sel di belakang tepi objek lain tidak diisi warna latar
+  const keep = bgs.slice();
+  for (let i = cols; i < size - cols; i++) {
+    if (!keep[i]) continue;
+    const o = ids[i], zi = zbuf[i] - 0.03;
+    if ((ids[i - 1] !== o && zbuf[i - 1] < zi) || (ids[i + 1] !== o && zbuf[i + 1] < zi) ||
+        (ids[i - cols] !== o && zbuf[i - cols] < zi) || (ids[i + cols] !== o && zbuf[i + cols] < zi)) bgs[i] = null;
   }
 
   for (const [sx, sy, ph, sp] of stars) {                       // bintang berkelip
@@ -389,6 +416,13 @@ function frame(now) {
   tctx.clearRect(0, 0, W, H);
   tctx.font = V.font; tctx.textBaseline = "top";
   let cur = null;
+  for (let i = 0; i < size; i++) {                              // isi warna padu sel
+    const b = bgs[i];
+    if (!b) continue;
+    if (b !== cur) { cur = b; tctx.fillStyle = b; }
+    tctx.fillRect(ox + (i % cols) * cw, oy + ((i / cols) | 0) * lh, cw + 0.6, lh + 0.6);
+  }
+  cur = null;
   for (let i = 0; i < size; i++) {
     const ch = chars[i];
     if (ch === " ") continue;
@@ -401,7 +435,7 @@ function frame(now) {
   gctx.clearRect(0, 0, glow.width, glow.height);
   gctx.drawImage(txt, 0, 0, glow.width, glow.height);
   ctx.imageSmoothingEnabled = true;
-  ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 0.85;
+  ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 0.4;
   ctx.drawImage(glow, 0, 0, W, H);
   ctx.globalAlpha = 1;
   ctx.drawImage(txt, 0, 0, W, H);

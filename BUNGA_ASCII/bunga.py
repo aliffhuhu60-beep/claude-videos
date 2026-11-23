@@ -47,25 +47,25 @@ LEVELS = 12             # bilangan tahap cahaya
 
 # warna RGB: (dalam, luar) — kelopak bergradien dari tengah ke hujung
 PAL = {
-    "rose_red":  ((150, 0, 35), (255, 70, 100)),
-    "rose_pink": ((205, 45, 120), (255, 165, 200)),
-    "cosmos":    ((235, 60, 160), (255, 195, 235)),
-    "white":     ((250, 225, 190), (255, 255, 255)),
-    "sun":       ((255, 150, 0), (255, 235, 70)),
-    "orange":    ((255, 100, 20), (255, 200, 100)),
-    "purple":    ((110, 55, 215), (205, 160, 255)),
-    "lilac":     ((165, 115, 230), (235, 210, 255)),
-    "lavender":  ((120, 80, 225), (175, 140, 255)),
-    "blue":      ((40, 110, 245), (130, 190, 255)),
-    "t_red":     ((190, 0, 40), (255, 90, 90)),
-    "t_yellow":  ((255, 190, 0), (255, 245, 140)),
-    "t_pink":    ((240, 80, 150), (255, 185, 215)),
-    "gold":      ((255, 175, 20), (255, 215, 60)),
-    "brown":     ((95, 50, 15), (165, 95, 30)),
-    "stem":      ((70, 170, 80), (120, 225, 120)),
-    "leaf":      ((25, 140, 60), (110, 225, 110)),
-    "wrap":      ((240, 185, 200), (255, 225, 232)),
-    "ribbon":    ((230, 30, 120), (255, 90, 170)),
+    "rose_red":  ((170, 0, 30), (255, 40, 70)),
+    "rose_pink": ((220, 30, 120), (255, 120, 180)),
+    "cosmos":    ((230, 40, 150), (255, 140, 210)),
+    "white":     ((225, 225, 245), (255, 255, 255)),
+    "sun":       ((255, 140, 0), (255, 215, 0)),
+    "orange":    ((255, 90, 0), (255, 160, 40)),
+    "purple":    ((110, 40, 220), (170, 110, 255)),
+    "lilac":     ((160, 90, 235), (210, 170, 255)),
+    "lavender":  ((120, 70, 230), (160, 120, 255)),
+    "blue":      ((30, 100, 250), (90, 170, 255)),
+    "t_red":     ((210, 0, 30), (255, 60, 60)),
+    "t_yellow":  ((255, 190, 0), (255, 235, 60)),
+    "t_pink":    ((245, 60, 140), (255, 150, 200)),
+    "gold":      ((255, 175, 0), (255, 210, 40)),
+    "brown":     ((100, 45, 10), (150, 80, 20)),
+    "stem":      ((60, 160, 70), (100, 210, 100)),
+    "leaf":      ((20, 130, 50), (70, 200, 80)),
+    "wrap":      ((235, 175, 195), (250, 210, 222)),
+    "ribbon":    ((225, 20, 110), (255, 70, 150)),
     "bwhite":    ((240, 240, 255), (255, 255, 255)),
 }
 
@@ -87,30 +87,39 @@ def to256(r, g, b):
     return 16 + 36 * q(r) + 6 * q(g) + q(b)
 
 
-def esc(rgb):
+NOBG = "\x1b[49m"
+
+
+def esc(rgb, bg=False):
     r, g, b = (max(0, min(255, int(c))) for c in rgb)
-    return "\x1b[38;2;%d;%d;%dm" % (r, g, b) if TRUECOLOR else "\x1b[38;5;%dm" % to256(r, g, b)
+    lead = 48 if bg else 38
+    if TRUECOLOR:
+        return "\x1b[%d;2;%d;%d;%dm" % (lead, r, g, b)
+    return "\x1b[%d;5;%dm" % (lead, to256(r, g, b))
 
 
 _SHADES = {}
-SHADE_TABLE = []
+SHADE_FG = []           # warna aksara sahaja
+SHADE_FB = []           # warna aksara + warna latar sel (bentuk padu)
 
 
 def shade_id(rgb):
     """Senarai kod warna untuk satu warna asas, dari gelap ke terang."""
     rgb = tuple(int(c) for c in rgb)
     if rgb not in _SHADES:
-        row = []
+        fg_row, fb_row = [], []
         for L in range(LEVELS):
             e = L / (LEVELS - 1)
-            k = 0.4 + 0.75 * e
-            c = [v * k for v in rgb]
-            if e > 0.8:                                  # kilauan
-                m = (e - 0.8) * 1.6
+            c = [v * (0.55 + 0.6 * e) for v in rgb]
+            if e > 0.9:                                  # kilauan kecil
+                m = (e - 0.9) * 1.5
                 c = [v + (255 - v) * m for v in c]
-            row.append(esc(c))
-        _SHADES[rgb] = len(SHADE_TABLE)
-        SHADE_TABLE.append(row)
+            bgc = [v * (0.2 + 0.5 * e) for v in rgb]
+            fg_row.append(esc(c) + NOBG)
+            fb_row.append(esc(c) + esc(bgc, bg=True))
+        _SHADES[rgb] = len(SHADE_FG)
+        SHADE_FG.append(fg_row)
+        SHADE_FB.append(fb_row)
     return _SHADES[rgb]
 
 
@@ -164,22 +173,28 @@ class Scene:
         self.h = h
         self.rnd = rnd
         self.pts = []
+        self.obj = 0            # setiap kelopak/bunga/daun ada id sendiri (untuk garis pemisah)
 
-    def add(self, p, n, kind, pal, s, appear, phase=None, ch=" "):
+    def new(self):
+        self.obj += 1
+
+    def add(self, p, n, kind, pal, s, appear, phase=None, ch=" ", tone=1.0):
         """pal = nama warna, s = 0..1 kedudukan dalam gradien (dalam -> luar)."""
         sway = 0.0 if phase is None else 0.014 * max(0.0, p[1] - BASE_Y) ** 2
         a, b = PAL[pal]
         sid = shade_id(mix(a, b, round(s * 4) / 4))
         self.pts.append((p[0], p[1], p[2], n[0], n[1], n[2], kind, sid, ch,
-                         min(appear, 0.99), sway, phase or 0.0))
+                         min(appear, 0.99), sway, phase or 0.0, tone, self.obj))
 
     def stem(self, a, c, b, t0, t1, phase, pal="stem"):
+        self.new()
         length = math.dist(a, c) + math.dist(c, b)
         for s in frange(0.0, 1.0, self.h / length):
             self.add(bezier(a, c, b, s), bezier_tan(a, c, b, s), K_STEM, pal, s,
                      t0 + (t1 - t0) * s, phase)
 
     def leaf(self, base, out, length, width, appear, phase):
+        self.new()
         ld = unit(add(out, (0.0, 0.8, 0.0)))
         side = unit(cross(ld, (0.0, 1.0, 0.0)))
         nrm = unit(cross(side, ld))
@@ -189,12 +204,14 @@ class Scene:
             bs = frange(-hw, hw, self.h) if hw > self.h * 0.5 else [0.0]
             for b in bs:
                 p = add(add(centre, mul(side, b)), mul(nrm, abs(b) * 0.6))
-                self.add(p, nrm, K_LEAF, "leaf", a, appear + 0.12 * a, phase)
+                tone = 1.0 - 0.45 * (abs(b) / hw) ** 2 if hw > 0 else 1.0
+                self.add(p, nrm, K_LEAF, "leaf", a, appear + 0.12 * a, phase, tone=tone)
 
     def daisy(self, c, axis, R, petals, pal, cpal, appear, phase, centre=0.28, cup=0.3):
         u, w = frame_of(axis)
         h = self.h
         rc = R * centre
+        self.new()
         for r in frange(0.0, rc, h):
             n = int(2 * math.pi * r / h) + 1
             for j in range(n):
@@ -202,12 +219,14 @@ class Scene:
                 rad = add(mul(u, math.cos(th)), mul(w, math.sin(th)))
                 lift = rc * 0.6 * (1 - (r / rc) ** 2)
                 p = add(add(c, mul(rad, r)), mul(axis, lift))
-                self.add(p, unit(add(axis, mul(rad, r / rc))), K_CENTER, cpal, r / rc, appear, phase)
+                self.add(p, unit(add(axis, mul(rad, r / rc))), K_CENTER, cpal, r / rc, appear, phase,
+                         tone=0.75 + 0.25 * math.cos(th * 9 + r * 60) ** 2)
         off = self.rnd.uniform(0, math.pi)
-        half = math.pi / petals * 0.9
+        half = math.pi / petals * 0.8
         r0 = rc * 0.7
         for k in range(petals):
             a0 = off + 2 * math.pi * k / petals
+            self.new()
             for r in frange(r0, R, h * 0.75):
                 s = (r - r0) / (R - r0)
                 wid = half * math.sin(math.pi * (0.08 + 0.92 * s)) ** 0.5
@@ -216,8 +235,9 @@ class Scene:
                     th = a0 + (wid * j / n if n else 0.0)
                     rad = add(mul(u, math.cos(th)), mul(w, math.sin(th)))
                     p = add(add(c, mul(rad, r)), mul(axis, R * cup * s * s))
+                    edge = abs(j / n) if n else 0.0
                     self.add(p, unit(add(axis, mul(rad, -0.6 * s))), K_SURF, pal, s,
-                             appear + 0.25 * s, phase)
+                             appear + 0.25 * s, phase, tone=1.0 - 0.5 * edge ** 3)
 
     def rose(self, c, axis, R, pal, appear, phase):
         """Kelopak berlingkar (spiral) seperti bunga ros."""
@@ -226,6 +246,7 @@ class Scene:
         turns = 3.3
         thmax = 2 * math.pi * turns
         off = self.rnd.uniform(0, 2 * math.pi)
+        self.new()
         th = 0.6
         while th < thmax:
             s = th / thmax
@@ -236,7 +257,7 @@ class Scene:
                 rad = add(mul(u, math.cos(th + off)), mul(w, math.sin(th + off)))
                 p = add(add(c, mul(rad, r + f)), mul(axis, v - 0.15 * R))
                 self.add(p, unit(add(rad, mul(axis, -0.5 * f / R))), K_SURF, pal, s,
-                         appear + 0.25 * s, phase)
+                         appear + 0.25 * s, phase, tone=0.45 + 0.55 * (v / Hh) ** 1.5)
             th += h / max(r, 0.03) * 0.9
         for r in frange(0.0, R, h):                       # dasar cawan
             n = int(2 * math.pi * r / h) + 1
@@ -244,26 +265,30 @@ class Scene:
                 t2 = 2 * math.pi * j / n
                 rad = add(mul(u, math.cos(t2)), mul(w, math.sin(t2)))
                 self.add(add(add(c, mul(rad, r)), mul(axis, -0.15 * R)), axis, K_SURF, pal,
-                         0.0, appear, phase)
+                         0.0, appear, phase, tone=0.4)
 
     def tulip(self, c, axis, R, pal, appear, phase):
         u, w = frame_of(axis)
         H = R * 1.5
         off = self.rnd.uniform(0, math.pi)
+        self.new()
         for v in frange(0.0, 1.0, self.h / H):
             r = R * (0.25 + 0.75 * math.sin(math.pi * (0.1 + 0.6 * v)))
             n = int(2 * math.pi * r / self.h) + 3
             for j in range(n):
                 th = 2 * math.pi * j / n
-                if v > 0.78 + 0.22 * abs(math.cos(1.5 * (th - off))):
+                lobe = abs(math.cos(1.5 * (th - off)))
+                if v > 0.78 + 0.22 * lobe:
                     continue
                 rad = add(mul(u, math.cos(th)), mul(w, math.sin(th)))
                 p = add(add(c, mul(rad, r)), mul(axis, v * H))
-                self.add(p, unit(add(rad, mul(axis, -0.3))), K_SURF, pal, v, appear + 0.2 * v, phase)
+                self.add(p, unit(add(rad, mul(axis, -0.3))), K_SURF, pal, v, appear + 0.2 * v, phase,
+                         tone=0.55 + 0.45 * lobe ** 0.5)
 
     def lavender(self, c, axis, L, pal, appear, phase):
         u, w = frame_of(axis)
         steps = max(4, int(L / (self.h * 1.4)))
+        self.new()
         for i in range(steps + 1):
             v = i / steps
             r = 0.065 * (1 - 0.55 * v)
@@ -275,6 +300,7 @@ class Scene:
 
     def babys_breath(self, c, axis, appear, phase):
         rnd = self.rnd
+        self.new()
         for _ in range(rnd.randint(6, 9)):
             d = unit(add(axis, (rnd.uniform(-0.9, 0.9), rnd.uniform(-0.3, 0.6), rnd.uniform(-0.9, 0.9))))
             end = add(c, mul(d, rnd.uniform(0.1, 0.24)))
@@ -289,6 +315,7 @@ class Scene:
         H = y1 - y0
         slope = (r1 - r0) / H
         opening = math.pi / 2
+        self.new()
         for v in frange(0.0, 1.07, h / (H * 1.15)):
             y = y0 + v * H
             r = r0 + (r1 - r0) * v
@@ -303,6 +330,7 @@ class Scene:
                 rad = (math.cos(th), 0.0, math.sin(th))
                 self.add((rad[0] * r, y, rad[2] * r), unit((rad[0], -slope, rad[2])),
                          K_WRAP, "wrap", v, 0.15 * v)
+        self.new()
         yr = -1.38
         rr = r0 + (r1 - r0) * (yr - y0) / H + 0.015
         for y in frange(yr - 0.045, yr + 0.045, h):
@@ -441,7 +469,9 @@ def render(scene, t, g, view, stars, petals, msg, dt):
     size = cols * rows
     zbuf = [1e9] * size
     chars = [" "] * size
-    colors = [""] * size
+    colors = [NOBG] * size
+    ids = [0] * size        # id objek di setiap sel
+    alt = [None] * size     # warna tanpa latar (untuk garis pemisah)
 
     ang = t * SPIN_SPEED
     ca, sa = math.cos(ang), math.sin(ang)
@@ -450,9 +480,9 @@ def render(scene, t, g, view, stars, petals, msg, dt):
     sin, cos, atan2 = math.sin, math.cos, math.atan2
     kS = S * ASP
     top = LEVELS - 1
-    table = SHADE_TABLE
+    fg_t, fb_t = SHADE_FG, SHADE_FB
 
-    for (x, y, z, nx, ny, nz, kind, sid, ch, appear, sway, ph) in scene:
+    for (x, y, z, nx, ny, nz, kind, sid, ch, appear, sway, ph, tone, obj) in scene:
         if appear > g:
             continue
         if sway:
@@ -488,8 +518,26 @@ def render(scene, t, g, view, stars, petals, msg, dt):
                 e = (0.12 + 0.88 * abs(nx1 * lx + ny2 * ly + nz2 * lz)) * fog
                 ramp = RAMPS[kind]
                 ch = ramp[min(len(ramp) - 1, int(e * len(ramp)))]
+        lvl = min(top, int(e * tone * LEVELS))
         chars[i] = ch
-        colors[i] = table[sid][min(top, int(e * LEVELS))]
+        ids[i] = obj
+        if kind == K_STEM:
+            colors[i] = fg_t[sid][lvl]
+            alt[i] = None
+        else:                                         # permukaan: aksara + latar padu
+            colors[i] = fb_t[sid][lvl]
+            alt[i] = fg_t[sid][lvl]
+
+    # garis pemisah: sel permukaan yang berada di belakang tepi objek lain hilang latarnya
+    for i in range(cols, size - cols):
+        a = alt[i]
+        if a is None:
+            continue
+        o, zi = ids[i], zbuf[i] - 0.03
+        for j in (i - 1, i + 1, i - cols, i + cols):
+            if ids[j] != o and zbuf[j] < zi:
+                colors[i] = a
+                break
 
     star_hi, star_lo, star_mid = STAR_CODES
     for (sx, sy, ph, sp) in stars:
@@ -524,16 +572,14 @@ def render(scene, t, g, view, stars, petals, msg, dt):
 
     out = ["\x1b[H"]
     for r in range(rows):
-        last = ""
+        last = NOBG
         base = r * cols
         for c in range(cols):
-            ch = chars[base + c]
-            if ch != " ":
-                co = colors[base + c]
-                if co != last:
-                    out.append(co)
-                    last = co
-            out.append(ch)
+            co = colors[base + c]
+            if co != last:
+                out.append(co)
+                last = co
+            out.append(chars[base + c])
         out.append("\x1b[0m")
         if r < rows - 1:
             out.append("\n")
@@ -546,7 +592,7 @@ def make_stars(cols, rows, rnd):
 
 
 def make_petals(cols, rows, rnd):
-    cols_ = [esc(c) for c in ((255, 130, 200), (255, 90, 150), (255, 255, 255), (255, 190, 230))]
+    cols_ = [esc(c) + NOBG for c in ((255, 130, 200), (255, 90, 150), (255, 255, 255), (255, 190, 230))]
     return [[rnd.uniform(0, cols - 1), rnd.uniform(-rows, 0), rnd.uniform(1.5, 3.5),
              rnd.uniform(0, 6.3), rnd.choice("*o',"), rnd.choice(cols_)]
             for _ in range(max(8, cols // 10))]
@@ -559,8 +605,8 @@ def main():
     msg = " ".join(args) or MESSAGE
     TRUECOLOR = "--truecolor" in flags or (
         "--256" not in flags and os.environ.get("COLORTERM", "").lower() in ("truecolor", "24bit"))
-    STAR_CODES = (esc((255, 255, 210)), esc((110, 110, 140)), esc((220, 220, 160)))
-    MSG_CODES = [esc(c) for c in ((255, 120, 200), (255, 160, 220), (255, 200, 235),
+    STAR_CODES = tuple(esc(c) + NOBG for c in ((255, 255, 210), (110, 110, 140), (220, 220, 160)))
+    MSG_CODES = [esc(c) + NOBG for c in ((255, 120, 200), (255, 160, 220), (255, 200, 235),
                                   (255, 255, 255), (255, 200, 235), (255, 160, 220))]
     if os.name == "nt":
         os.system("")
