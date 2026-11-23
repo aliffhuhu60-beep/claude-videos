@@ -23,6 +23,7 @@
 
   Pilihan URL:
     hari_lahir.html?nama=Aisyah            tambah nama di bawah "Selamat Hari Lahir"
+    hari_lahir.html?ayat=Teks%20sendiri    tukar ayat yang muncul bersama bunga (guna | untuk baris baru)
     hari_lahir.html?msg=untuk%20awak       pesanan kecil di bawah jambangan
   Ketik dua kali untuk main semula.
 */
@@ -31,9 +32,12 @@ const MESSAGE = new URLSearchParams(location.search).get("msg") || "bunga ini kh
 const QS = new URLSearchParams(location.search);
 const WALL = false, CAPTURE = QS.has("capture");
 const NAMA = (QS.get("nama") || "").trim(), MSG_ON = QS.has("msg");
+// ayat lembut yang muncul bersama bunga (bukan gaya tulisan "Selamat Hari Lahir")
+const AYAT = (QS.get("ayat") || "Semoga setiap harimu|mekar seindah bunga ini").split("|").map(l => l.trim()).filter(Boolean);
 // garis masa (saat)
 const CAKE_DY = 0.42;  // kek dinaikkan sedikit supaya di tengah ruang kosong
-const T = { cake0: 0.3, cakeBuild: 3.2, light: 3.7, text0: 4.6, blow: 10.2, dis0: 11.0, disDur: 1.6, flower0: 11.6 };
+const T = { cake0: 0.3, cakeBuild: 3.2, light: 3.7, text0: 4.6, blow: 10.2, dis0: 11.0, disDur: 1.6, flower0: 11.6,
+            ayat0: 15.4 };                       // ayat mula muncul bila bunga hampir mekar
 const LOOP = +QS.get("loop") || 20;            // semua gerakan berulang tepat setiap LOOP saat (?loop=15)
 const TAU = 2 * Math.PI, W_ = TAU / LOOP;
 const GROW_SECONDS = 7, SPIN_SPEED = W_, TILT = 0.40, SEED = 2026;
@@ -422,7 +426,7 @@ function buildText(lines, cols, rows, asp, r0, r1) {
     if (!on(i)) continue;
     const li = Math.max(0, Math.min(lines.length - 1, Math.floor((r - start) / lineH)));
     const edge = q === 0 || q === cols - 1 || r === 0 || r === rows - 1 || !on(i - 1) || !on(i + 1) || !on(i - cols) || !on(i + cols);
-    cells.push([i, li, q, edge]);
+    cells.push([i, li, q, edge, Math.random()]);
     ext[li][0] = Math.min(ext[li][0], q); ext[li][1] = Math.max(ext[li][1], q);
   }
   for (const cl of cells) { const [a, b] = ext[cl[1]]; cl[2] = (cl[2] - a) / Math.max(1, b - a); }
@@ -492,7 +496,7 @@ function setup() {
   const usable = rows - msgRows - topPad;
   const S = Math.min(usable / (ymax - ymin), (WALL ? 1.2 : portrait ? 1.12 : 1) * cols / (2 * xmax * ASP));
   const cy = topPad + (usable - (ymax - ymin) * S) / 2 + ymax * S + (portrait && !WALL ? msgRows * 0.25 : 0);
-  V = { cols, rows, S, cx: cols / 2, cy, cw, lh, fs, font, W, H, portrait,
+  V = { cols, rows, S, cx: cols / 2, cy, cw, lh, fs, font, W, H, portrait, topPad,
         ox: (W - cols * cw) / 2, oy: (H - rows * lh) / 2, bottom: cy - ymin * S };
   scene = buildScene(Math.max(0.008, 0.3 / S), spread);
   cake = buildCake(Math.max(0.008, 0.28 / S));
@@ -613,9 +617,11 @@ function frame(now, tFixed) {
       chars[i] = c[4]; colors[i] = c[5];
     }
   // tulisan "Selamat Hari Lahir": ditaip baris demi baris, berkilau pelangi
-  for (const [i, li, xf, edge] of textCells) {
+  const tdis = clamp((t - T.dis0) / 1.3);                      // tulisan larut bersama kek
+  if (tdis < 1) for (const [i, li, xf, edge, r] of textCells) {
     const p = clamp((t - T.text0 - li * 1.5) / 1.3);
-    if (p <= 0 || xf > p) continue;
+    if (p <= 0 || xf > p || r < tdis) continue;
+    if (tdis > 0 && r < tdis + 0.08) { chars[i] = "*"; colors[i] = "#fff3c4"; bgs[i] = null; continue; }
     const front = p < 1 && xf > p - 0.07;
     const k = Math.floor(((xf * 0.55 + li * 0.2 + t * 0.18) % 1) * 48);
     chars[i] = edge ? "@" : "#";
@@ -679,7 +685,37 @@ function frame(now, tFixed) {
   }
   ctx.globalCompositeOperation = "source-over";
 
-  // 4) pesanan ditaip dengan cahaya
+  // 4) ayat lembut bersama bunga: perkataan muncul satu demi satu
+  if (t > T.ayat0) {
+    const fam = 'Georgia, "Palatino Linotype", "Book Antiqua", "Times New Roman", "DejaVu Serif", serif';
+    let fsz = Math.min(H * 0.042, W * 0.09);
+    ctx.font = `italic ${fsz}px ${fam}`;
+    const wmax = Math.max(...AYAT.map(l => ctx.measureText(l).width));
+    if (wmax > W * 0.86) { fsz *= W * 0.86 / wmax; ctx.font = `italic ${fsz}px ${fam}`; }
+    const lineGap = fsz * 1.45, yMid = oy + V.topPad * lh * 0.5;
+    const y0 = yMid - (AYAT.length - 1) * lineGap / 2;
+    ctx.textBaseline = "middle"; ctx.textAlign = "left";
+    ctx.shadowColor = "rgba(255,120,190,0.85)"; ctx.shadowBlur = fsz * 0.6;
+    const space = ctx.measureText(" ").width;
+    let w = 0;
+    AYAT.forEach((line, li) => {
+      const words = line.split(/\s+/);
+      let x = (W - ctx.measureText(line).width) / 2;
+      for (const word of words) {
+        const a = smooth((t - T.ayat0 - w * 0.32) / 0.9);
+        if (a > 0) {
+          ctx.globalAlpha = a;
+          ctx.fillStyle = "#ffe8f3";
+          ctx.fillText(word, x, y0 + li * lineGap + (1 - a) * fsz * 0.35);
+        }
+        x += ctx.measureText(word).width + space;
+        w++;
+      }
+    });
+    ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+  }
+
+  // 5) pesanan ditaip dengan cahaya
   const tMsg = T.flower0 + GROW_SECONDS * 0.85;
   if (MSG_ON && t > tMsg) {
     const shown = MESSAGE.slice(0, Math.floor((t - tMsg) * 14));
