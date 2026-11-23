@@ -2,14 +2,15 @@
 <html lang="ms">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070818">
 <title>Jambangan Bunga ASCII</title>
 <style>
-  :root { --bg: #0b0c1e; }
-  html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
-  canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
-  #hint { position: fixed; left: 0; right: 0; top: 10px; text-align: center; color: #6b6f9a;
-          font: 12px ui-monospace, Menlo, Consolas, monospace; pointer-events: none; transition: opacity 1s; }
+  html, body { margin: 0; height: 100%; background: #070818; overflow: hidden; }
+  canvas { display: block; position: fixed; inset: 0; width: 100vw; height: 100vh; touch-action: none; }
+  #hint { position: fixed; left: 0; right: 0; top: max(10px, env(safe-area-inset-top)); text-align: center;
+          color: #8a86b8; font: 12px ui-monospace, Menlo, Consolas, monospace; pointer-events: none;
+          transition: opacity 1.2s; }
 </style>
 </head>
 <body>
@@ -18,24 +19,48 @@
 <script>
 /*
   Jambangan bunga liar ASCII 3D yang bergerak — versi pelayar web.
-  Sama seperti bunga.py, tetapi dilukis pada <canvas>.
+  Geometri sama seperti bunga.py, dilukis pada <canvas> dengan warna gradien & kesan glow.
   Tukar pesanan:  bunga.html?msg=untuk%20awak%20sayang
 */
 "use strict";
 const MESSAGE = new URLSearchParams(location.search).get("msg") || "bunga ini khas untuk awak <3";
-const GROW_SECONDS = 7, SPIN_SPEED = 0.35, TILT = 0.26, SEED = 2026;
-const CAM = 7, Y_OFF = 0.70, BASE_Y = -1.30;
+const GROW_SECONDS = 7, SPIN_SPEED = 0.30, TILT = 0.40, SEED = 2026;
+const CAM = 7, Y_OFF = 0.70, BASE_Y = -1.30, LEVELS = 14;
 const LIGHT = unit([-0.35, 0.55, -0.75]);
 
-const COL = {
-  pink: ["#ff87ff", "#d75faf"], rose: ["#ff5faf", "#d7005f"], red: ["#ff0000", "#af0000"],
-  purple: ["#af87ff", "#875faf"], lilac: ["#d7afff", "#af87af"], blue: ["#5fafff", "#0087d7"],
-  yellow: ["#ffff5f", "#d7af00"], orange: ["#ffaf5f", "#d75f00"], white: ["#ffffff", "#bcbcbc"],
-  gold: ["#ffd700", "#af8700"], brown: ["#af5f5f", "#875f00"], stem: ["#87d787", "#5f875f"],
-  leaf: ["#5fd75f", "#008700"], wrap: ["#ffffd7", "#d7d787"], ribbon: ["#ff5fd7", "#af005f"],
+const PAL = {
+  rose_red: [[150, 0, 35], [255, 70, 100]],     rose_pink: [[205, 45, 120], [255, 165, 200]],
+  cosmos: [[235, 60, 160], [255, 195, 235]],    white: [[250, 225, 190], [255, 255, 255]],
+  sun: [[255, 150, 0], [255, 235, 70]],         orange: [[255, 100, 20], [255, 200, 100]],
+  purple: [[110, 55, 215], [205, 160, 255]],    lilac: [[165, 115, 230], [235, 210, 255]],
+  lavender: [[120, 80, 225], [175, 140, 255]],  blue: [[40, 110, 245], [130, 190, 255]],
+  t_red: [[190, 0, 40], [255, 90, 90]],         t_yellow: [[255, 190, 0], [255, 245, 140]],
+  t_pink: [[240, 80, 150], [255, 185, 215]],    gold: [[255, 175, 20], [255, 215, 60]],
+  brown: [[95, 50, 15], [165, 95, 30]],         stem: [[70, 170, 80], [120, 225, 120]],
+  leaf: [[25, 140, 60], [110, 225, 110]],       wrap: [[240, 185, 200], [255, 225, 232]],
+  ribbon: [[230, 30, 120], [255, 90, 170]],     bwhite: [[240, 240, 255], [255, 255, 255]],
 };
 const K_SURF = 0, K_STEM = 1, K_LEAF = 2, K_WRAP = 3, K_DOT = 4, K_CENTER = 5;
-const RAMPS = { 0: ".:-=oO0@", 2: ".,-~=+", 3: ".,:;=+*#", 5: ".:*#@" };
+const RAMPS = { 0: ".:-=+oO0@", 2: ".,-~=+*", 3: ".,:;=+*#", 5: ".:*#%@" };
+
+// ---------------------------------------------------------------- warna
+const shadeIndex = new Map(), SHADES = [];
+function shadeId(rgb) {
+  const key = rgb.map(Math.round).join(",");
+  if (!shadeIndex.has(key)) {
+    const row = [];
+    for (let L = 0; L < LEVELS; L++) {
+      const e = L / (LEVELS - 1), k = 0.4 + 0.75 * e;
+      let c = rgb.map(v => v * k);
+      if (e > 0.8) { const m = (e - 0.8) * 1.6; c = c.map(v => v + (255 - v) * m); }
+      row.push(`rgb(${c.map(v => Math.max(0, Math.min(255, Math.round(v)))).join(",")})`);
+    }
+    shadeIndex.set(key, SHADES.length);
+    SHADES.push(row);
+  }
+  return shadeIndex.get(key);
+}
+const mix = (a, b, s) => [0, 1, 2].map(i => a[i] + (b[i] - a[i]) * s);
 
 // ------------------------------------------------------------ matematik 3D
 function add(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
@@ -55,59 +80,82 @@ function frange(a, b, step) {
 function bezier(a, c, b, s) { const m = 1 - s; return [0,1,2].map(i => m*m*a[i] + 2*m*s*c[i] + s*s*b[i]); }
 function bezierTan(a, c, b, s) { return unit([0,1,2].map(i => 2*(1-s)*(c[i]-a[i]) + 2*s*(b[i]-c[i]))); }
 function dist(a, b) { return Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]); }
-function rng(seed) {             // mulberry32: rawak yang boleh diulang
+function rng(seed) {
   return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
     t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 }
 
 // ---------------------------------------------------------------- pembina
-function buildScene(h) {
+function buildScene(h, spread) {
   const R = rng(SEED), uni = (a, b) => a + (b - a) * R(), pick = s => s[Math.floor(R() * s.length)];
+  const randint = (a, b) => a + Math.floor(R() * (b - a + 1));
   const pts = [];
-  const put = (p, n, kind, color, appear, phase = null, ch = " ") => {
-    const sway = phase === null ? 0 : 0.016 * Math.max(0, p[1] - BASE_Y) ** 2;
-    pts.push([p[0], p[1], p[2], n[0], n[1], n[2], kind, COL[color][0], COL[color][1], ch,
-              Math.min(appear, 0.99), sway, phase || 0]);
+  const put = (p, n, kind, pal, s, appear, phase = null, ch = " ") => {
+    const sway = phase === null ? 0 : 0.014 * Math.max(0, p[1] - BASE_Y) ** 2;
+    const sid = shadeId(mix(PAL[pal][0], PAL[pal][1], Math.round(s * 4) / 4));
+    pts.push([p[0], p[1], p[2], n[0], n[1], n[2], kind, sid, ch, Math.min(appear, 0.99), sway, phase || 0]);
   };
-  const stem = (a, c, b, t0, t1, phase, color = "stem") => {
+  const stem = (a, c, b, t0, t1, phase, pal = "stem") => {
     const L = dist(a, c) + dist(c, b);
-    for (const s of frange(0, 1, h / L)) put(bezier(a, c, b, s), bezierTan(a, c, b, s), K_STEM, color, t0 + (t1 - t0) * s, phase);
+    for (const s of frange(0, 1, h / L)) put(bezier(a, c, b, s), bezierTan(a, c, b, s), K_STEM, pal, s, t0 + (t1 - t0) * s, phase);
   };
   const leaf = (base, out, length, width, appear, phase) => {
-    const ld = unit(add(out, [0, 0.9, 0])), side = unit(cross(ld, [0, 1, 0])), nrm = unit(cross(side, ld));
+    const ld = unit(add(out, [0, 0.8, 0])), side = unit(cross(ld, [0, 1, 0])), nrm = unit(cross(side, ld));
     for (const a of frange(0, 1, h / length)) {
-      const hw = width * Math.sin(Math.PI * a) ** 0.8;
-      const centre = add(add(base, mul(ld, a * length)), [0, -0.3 * length * a * a, 0]);
+      const hw = width * Math.sin(Math.PI * a) ** 0.7;
+      const centre = add(add(base, mul(ld, a * length)), [0, -0.35 * length * a * a, 0]);
       for (const b of (hw > h * 0.5 ? frange(-hw, hw, h) : [0]))
-        put(add(add(centre, mul(side, b)), mul(nrm, Math.abs(b) * 0.6)), nrm, K_LEAF, "leaf", appear + 0.12 * a, phase);
+        put(add(add(centre, mul(side, b)), mul(nrm, Math.abs(b) * 0.6)), nrm, K_LEAF, "leaf", a, appear + 0.12 * a, phase);
     }
   };
-  const daisy = (c, axis, Rd, petals, pcol, ccol, appear, phase, centre = 0.28) => {
+  const daisy = (c, axis, Rd, petals, pal, cpal, appear, phase, centre = 0.28, cup = 0.3) => {
     const [u, w] = frameOf(axis), rc = Rd * centre;
     for (const r of frange(0, rc, h)) {
       const n = Math.floor(2 * Math.PI * r / h) + 1;
       for (let j = 0; j < n; j++) {
         const th = 2 * Math.PI * j / n, rad = add(mul(u, Math.cos(th)), mul(w, Math.sin(th)));
         const p = add(add(c, mul(rad, r)), mul(axis, rc * 0.6 * (1 - (r / rc) ** 2)));
-        put(p, unit(add(axis, mul(rad, r / rc))), K_CENTER, ccol, appear, phase);
+        put(p, unit(add(axis, mul(rad, r / rc))), K_CENTER, cpal, r / rc, appear, phase);
       }
     }
-    const off = uni(0, Math.PI), half = Math.PI / petals * 0.85, r0 = rc * 0.7;
+    const off = uni(0, Math.PI), half = Math.PI / petals * 0.9, r0 = rc * 0.7;
     for (let k = 0; k < petals; k++) {
       const a0 = off + 2 * Math.PI * k / petals;
-      for (const r of frange(r0, Rd, h * 0.8)) {
+      for (const r of frange(r0, Rd, h * 0.75)) {
         const s = (r - r0) / (Rd - r0);
         const wid = half * Math.sin(Math.PI * (0.08 + 0.92 * s)) ** 0.5;
-        const n = Math.floor(r * wid / h * 1.2);
+        const n = Math.floor(r * wid / h * 1.3);
         for (let j = -n; j <= n; j++) {
           const th = a0 + (n ? wid * j / n : 0), rad = add(mul(u, Math.cos(th)), mul(w, Math.sin(th)));
-          put(add(add(c, mul(rad, r)), mul(axis, Rd * 0.3 * s * s)), unit(add(axis, mul(rad, -0.6 * s))),
-              K_SURF, pcol, appear + 0.25 * s, phase);
+          put(add(add(c, mul(rad, r)), mul(axis, Rd * cup * s * s)), unit(add(axis, mul(rad, -0.6 * s))),
+              K_SURF, pal, s, appear + 0.25 * s, phase);
         }
       }
     }
   };
-  const tulip = (c, axis, Rt, col, appear, phase) => {
+  const rose = (c, axis, Rr, pal, appear, phase) => {
+    const [u, w] = frameOf(axis), thmax = 2 * Math.PI * 3.3, off = uni(0, 2 * Math.PI);
+    let th = 0.6;
+    while (th < thmax) {
+      const s = th / thmax, r = Rr * s;
+      const Hh = Rr * 0.62 * (1 - 0.4 * s) * (0.82 + 0.18 * Math.cos(th * 1.7));
+      const rad = add(mul(u, Math.cos(th + off)), mul(w, Math.sin(th + off)));
+      for (const v of frange(0, Hh, h)) {
+        const f = (v / Hh) ** 2 * 0.3 * Rr * s;
+        put(add(add(c, mul(rad, r + f)), mul(axis, v - 0.15 * Rr)), unit(add(rad, mul(axis, -0.5 * f / Rr))),
+            K_SURF, pal, s, appear + 0.25 * s, phase);
+      }
+      th += h / Math.max(r, 0.03) * 0.9;
+    }
+    for (const r of frange(0, Rr, h)) {
+      const n = Math.floor(2 * Math.PI * r / h) + 1;
+      for (let j = 0; j < n; j++) {
+        const t2 = 2 * Math.PI * j / n, rad = add(mul(u, Math.cos(t2)), mul(w, Math.sin(t2)));
+        put(add(add(c, mul(rad, r)), mul(axis, -0.15 * Rr)), axis, K_SURF, pal, 0, appear, phase);
+      }
+    }
+  };
+  const tulip = (c, axis, Rt, pal, appear, phase) => {
     const [u, w] = frameOf(axis), H = Rt * 1.5, off = uni(0, Math.PI);
     for (const v of frange(0, 1, h / H)) {
       const r = Rt * (0.25 + 0.75 * Math.sin(Math.PI * (0.1 + 0.6 * v)));
@@ -116,67 +164,68 @@ function buildScene(h) {
         const th = 2 * Math.PI * j / n;
         if (v > 0.78 + 0.22 * Math.abs(Math.cos(1.5 * (th - off)))) continue;
         const rad = add(mul(u, Math.cos(th)), mul(w, Math.sin(th)));
-        put(add(add(c, mul(rad, r)), mul(axis, v * H)), unit(add(rad, mul(axis, -0.3))), K_SURF, col, appear + 0.2 * v, phase);
+        put(add(add(c, mul(rad, r)), mul(axis, v * H)), unit(add(rad, mul(axis, -0.3))), K_SURF, pal, v, appear + 0.2 * v, phase);
       }
     }
   };
-  const lavender = (c, axis, L, col, appear, phase) => {
-    const [u, w] = frameOf(axis), steps = Math.max(4, Math.floor(L / (h * 1.6)));
+  const lavender = (c, axis, L, pal, appear, phase) => {
+    const [u, w] = frameOf(axis), steps = Math.max(4, Math.floor(L / (h * 1.4)));
     for (let i = 0; i <= steps; i++) {
-      const v = i / steps, r = 0.055 * (1 - 0.55 * v);
-      for (let j = 0; j < 6; j++) {
-        const th = 2 * Math.PI * j / 6 + v * 7, rad = add(mul(u, Math.cos(th)), mul(w, Math.sin(th)));
-        put(add(add(c, mul(axis, v * L)), mul(rad, r)), rad, K_DOT, col, appear + 0.2 * v, phase, pick("oO0"));
+      const v = i / steps, r = 0.065 * (1 - 0.55 * v);
+      for (let j = 0; j < 7; j++) {
+        const th = 2 * Math.PI * j / 7 + v * 7, rad = add(mul(u, Math.cos(th)), mul(w, Math.sin(th)));
+        put(add(add(c, mul(axis, v * L)), mul(rad, r)), rad, K_DOT, pal, v, appear + 0.2 * v, phase, pick("oO0@"));
       }
     }
   };
   const babysBreath = (c, axis, appear, phase) => {
-    const nb = 5 + Math.floor(R() * 4);
+    const nb = randint(6, 9);
     for (let b = 0; b < nb; b++) {
       const d = unit(add(axis, [uni(-0.9, 0.9), uni(-0.3, 0.6), uni(-0.9, 0.9)]));
-      const end = add(c, mul(d, uni(0.08, 0.2)));
+      const end = add(c, mul(d, uni(0.1, 0.24)));
       stem(c, add(c, mul(d, 0.05)), end, appear, appear + 0.05, phase);
-      const nd = 2 + Math.floor(R() * 3);
+      const nd = randint(3, 5);
       for (let k = 0; k < nd; k++)
-        put(add(end, [uni(-0.04, 0.04), uni(-0.02, 0.04), uni(-0.04, 0.04)]), d, K_DOT, "white", appear + 0.1, phase, pick("oo.*"));
+        put(add(end, [uni(-0.05, 0.05), uni(-0.02, 0.05), uni(-0.05, 0.05)]), d, K_DOT, "bwhite", 1, appear + 0.1, phase, pick("oo*."));
     }
   };
   const wrapping = () => {
-    const y0 = -1.75, y1 = -0.72, r0 = 0.07, r1 = 0.62, H = y1 - y0, slope = (r1 - r0) / H, opening = Math.PI / 2;
+    const y0 = -1.75, y1 = -0.72, r0 = 0.07, r1 = 0.66, H = y1 - y0, slope = (r1 - r0) / H, opening = Math.PI / 2;
     for (const v of frange(0, 1.07, h / (H * 1.15))) {
       const y = y0 + v * H, r = r0 + (r1 - r0) * v, n = Math.floor(2 * Math.PI * r / h) + 4;
       for (let j = 0; j < n; j++) {
         const th = 2 * Math.PI * j / n;
         const gap = Math.abs((((th - opening + Math.PI) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) - Math.PI);
-        if (gap < 0.65 * v || y > y1 + 0.07 * Math.sin(6 * th)) continue;
-        put([Math.cos(th) * r, y, Math.sin(th) * r], unit([Math.cos(th), -slope, Math.sin(th)]), K_WRAP, "wrap", 0.15 * v);
+        if (gap < 0.65 * v || y > y1 + 0.08 * Math.sin(6 * th)) continue;
+        put([Math.cos(th) * r, y, Math.sin(th) * r], unit([Math.cos(th), -slope, Math.sin(th)]), K_WRAP, "wrap", v, 0.15 * v);
       }
     }
     const yr = -1.38, rr = r0 + (r1 - r0) * (yr - y0) / H + 0.015;
-    for (const y of frange(yr - 0.04, yr + 0.04, h)) {
+    for (const y of frange(yr - 0.045, yr + 0.045, h)) {
       const n = Math.floor(2 * Math.PI * rr / h) + 4;
       for (let j = 0; j < n; j++) { const th = 2 * Math.PI * j / n, rad = [Math.cos(th), 0, Math.sin(th)];
-        put([rad[0] * rr, y, rad[2] * rr], rad, K_SURF, "ribbon", 0.2); }
+        put([rad[0] * rr, y, rad[2] * rr], rad, K_SURF, "ribbon", 0.5, 0.2); }
     }
     const front = -Math.PI / 2, rad = [Math.cos(front), 0, Math.sin(front)], tan = [-Math.sin(front), 0, Math.cos(front)];
-    const kn = mul(rad, rr + 0.02), knot = [kn[0], yr, kn[2]], nl = Math.floor(2 * Math.PI * 0.08 / h) + 6;
+    const kn = mul(rad, rr + 0.02), knot = [kn[0], yr, kn[2]], nl = Math.floor(2 * Math.PI * 0.1 / h) + 6;
     for (const side of [-1, 1]) {
-      for (let k = 0; k < nl; k++) { const a = 2 * Math.PI * k / nl;
-        const p = add(knot, add(mul(tan, side * (0.08 + 0.08 * Math.cos(a))), [0, 0.05 * Math.sin(a), 0]));
-        put(add(p, mul(rad, 0.03)), rad, K_SURF, "ribbon", 0.22); }
-      for (const s of frange(0, 1, h / 0.25)) {
-        const p = add(knot, add(mul(tan, side * 0.07 * s), [0, -0.25 * s, 0]));
-        put(add(p, mul(rad, 0.03)), rad, K_SURF, "ribbon", 0.22); }
+      for (const lw of frange(-0.025, 0.025, h))
+        for (let k = 0; k < nl; k++) { const a = 2 * Math.PI * k / nl;
+          const p = add(knot, add(mul(tan, side * (0.1 + 0.1 * Math.cos(a))), [0, 0.06 * Math.sin(a) + lw, 0]));
+          put(add(p, mul(rad, 0.03)), rad, K_SURF, "ribbon", 1, 0.22); }
+      for (const s of frange(0, 1, h / 0.3)) {
+        const p = add(knot, add(mul(tan, side * 0.09 * s), [0, -0.3 * s, 0]));
+        put(add(p, mul(rad, 0.03)), rad, K_SURF, "ribbon", 0.5, 0.22); }
     }
     for (let k = 0; k < 7; k++) { const a = 2 * Math.PI * k / 7;
-      for (const y of frange(-2.05, BASE_Y, h)) put([0.035 * Math.cos(a), y, 0.035 * Math.sin(a)], [0, 1, 0], K_STEM, "stem", 0.05); }
+      for (const y of frange(-2.05, BASE_Y, h)) put([0.035 * Math.cos(a), y, 0.035 * Math.sin(a)], [0, 1, 0], K_STEM, "stem", 0, 0.05); }
   };
 
   const FLOWERS = [
-    ["sunflower", "yellow", "brown"], ["daisy", "pink", "gold"], ["tulip", "red"], ["lavender", "purple"],
-    ["daisy", "white", "yellow"], ["daisy", "orange", "brown"], ["tulip", "rose"], ["aster", "purple", "gold"],
-    ["daisy", "pink", "gold"], ["lavender", "blue"], ["tulip", "yellow"], ["daisy", "white", "gold"],
-    ["aster", "lilac", "yellow"], ["daisy", "red", "gold"],
+    ["rose", "rose_red"], ["sunflower", "sun"], ["daisy", "cosmos"], ["tulip", "t_red"], ["lavender", "lavender"],
+    ["rose", "rose_pink"], ["daisy", "white"], ["daisy", "orange"], ["aster", "purple"], ["tulip", "t_pink"],
+    ["rose", "rose_red"], ["lavender", "blue"], ["daisy", "cosmos"], ["tulip", "t_yellow"], ["aster", "lilac"],
+    ["rose", "rose_pink"], ["daisy", "white"],
   ];
   const base = [0, BASE_Y, 0], golden = Math.PI * (3 - Math.sqrt(5));
   wrapping();
@@ -186,27 +235,31 @@ function buildScene(h) {
     const ctrl = [sb[0] + d[0] * d0 * 0.3, sb[1] + d[1] * d0 * 0.65, sb[2] + d[2] * d0 * 0.3];
     const phase = uni(0, 2 * Math.PI);
     stem(sb, ctrl, head, 0.03 + 0.12 * R(), tHead, phase);
-    return { d, head, axis: unit(add(d, [0, 0.6, 0])), phase, curve: [sb, ctrl, head] };
+    return { d, head, axis: unit(add(mul(d, 0.8), [0, 1, 0])), phase, curve: [sb, ctrl, head] };
   };
-  const n = 16;
+  const n = FLOWERS.length;
   for (let i = 0; i < n; i++) {
-    const f = i / (n - 1), el = (3 + 60 * Math.sqrt(f)) * Math.PI / 180;
+    const f = i / (n - 1), el = (3 + (spread - 3) * Math.sqrt(f)) * Math.PI / 180;
     const az = i * golden + uni(-0.2, 0.2), tHead = 0.5 + 0.2 * R();
-    const s = stalk(el, az, uni(2.0, 2.3) - 0.25 * f, tHead);
-    if (R() < 0.55) {
-      const sp = uni(0.35, 0.6), out = el > 0.2 ? unit([s.d[0], 0, s.d[2]]) : [1, 0, 0];
-      leaf(bezier(...s.curve, sp), out, uni(0.28, 0.4), 0.07, tHead * sp + 0.05, s.phase);
+    const s = stalk(el, az, uni(2.05, 2.35) - 0.3 * f, tHead);
+    const nLeaves = R() < 0.5 ? 2 : 1;
+    for (let q = 0; q < nLeaves; q++) {
+      const sp = uni(0.3, 0.6);
+      let out = el > 0.2 ? unit([s.d[0], 0, s.d[2]]) : [Math.cos(az), 0, Math.sin(az)];
+      out = unit(add(out, [uni(-0.6, 0.6), 0, uni(-0.6, 0.6)]));
+      leaf(bezier(...s.curve, sp), out, uni(0.32, 0.46), 0.08, tHead * sp + 0.05, s.phase);
     }
-    const [kind, c1, c2] = FLOWERS[i % FLOWERS.length];
-    if (kind === "sunflower") daisy(s.head, s.axis, 0.27, 16, c1, c2, tHead, s.phase, 0.45);
-    else if (kind === "daisy") daisy(s.head, s.axis, uni(0.19, 0.24), pick([8, 10, 12]), c1, c2, tHead, s.phase);
-    else if (kind === "aster") daisy(s.head, s.axis, uni(0.17, 0.2), 14, c1, c2, tHead, s.phase, 0.32);
-    else if (kind === "tulip") tulip(s.head, s.axis, uni(0.12, 0.14), c1, tHead, s.phase);
-    else lavender(s.head, s.axis, uni(0.3, 0.4), c1, tHead, s.phase);
+    const [kind, pal] = FLOWERS[i];
+    if (kind === "sunflower") daisy(s.head, s.axis, 0.36, 20, pal, "brown", tHead, s.phase, 0.45, 0.2);
+    else if (kind === "daisy") daisy(s.head, s.axis, uni(0.25, 0.3), pick([8, 10, 12]), pal, pal === "orange" ? "brown" : "gold", tHead, s.phase);
+    else if (kind === "aster") daisy(s.head, s.axis, uni(0.22, 0.26), 16, pal, "gold", tHead, s.phase, 0.3);
+    else if (kind === "rose") rose(s.head, s.axis, uni(0.25, 0.3), pal, tHead, s.phase);
+    else if (kind === "tulip") tulip(s.head, s.axis, uni(0.15, 0.17), pal, tHead, s.phase);
+    else lavender(s.head, s.axis, uni(0.38, 0.48), pal, tHead, s.phase);
   }
-  for (let i = 0; i < 8; i++) {
-    const el = uni(15, 62) * Math.PI / 180, az = uni(0, 2 * Math.PI), tHead = 0.6 + 0.25 * R();
-    const s = stalk(el, az, uni(1.6, 2.0), tHead);
+  for (let i = 0; i < 9; i++) {
+    const el = uni(12, spread + 2) * Math.PI / 180, az = uni(0, 2 * Math.PI), tHead = 0.6 + 0.25 * R();
+    const s = stalk(el, az, uni(1.75, 2.15), tHead);
     babysBreath(s.head, s.axis, tHead, s.phase);
   }
   return pts;
@@ -214,8 +267,12 @@ function buildScene(h) {
 
 // ---------------------------------------------------------------- lukisan
 const cv = document.getElementById("c"), ctx = cv.getContext("2d");
+const txt = document.createElement("canvas"), tctx = txt.getContext("2d");    // lapisan aksara
+const glow = document.createElement("canvas"), gctx = glow.getContext("2d");  // lapisan glow (kabur)
+const bg = document.createElement("canvas"), bctx = bg.getContext("2d");      // latar langit
 const FONT = 'ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace';
-let view, scene, stars, petals, ext, ASP;
+let V, scene, stars, petals, hearts, ASP;
+const extCache = {};
 let t0 = performance.now(), last = t0, dragAngle = 0, dragging = null;
 
 function extents(sc) {
@@ -223,123 +280,172 @@ function extents(sc) {
   let xmax = 0, ymin = 1e9, ymax = -1e9;
   for (let a = 0; a < 360; a += 15) {
     const ca = Math.cos(a * Math.PI / 180), sa = Math.sin(a * Math.PI / 180);
-    for (let i = 0; i < sc.length; i += 7) {
+    for (let i = 0; i < sc.length; i += 5) {
       const p = sc[i], y = p[1] + Y_OFF, x1 = p[0] * ca + p[2] * sa, z1 = p[2] * ca - p[0] * sa;
       const y2 = y * ct + z1 * st, z2 = z1 * ct - y * st, k = CAM / (CAM + z2);
       xmax = Math.max(xmax, Math.abs(x1 * k)); ymin = Math.min(ymin, y2 * k); ymax = Math.max(ymax, y2 * k);
     }
   }
-  return [xmax + 0.05, ymin - 0.05, ymax + 0.08];
+  return [xmax + 0.1, ymin - 0.03, ymax + 0.14];
 }
 
 function setup() {
   const dpr = Math.min(2, window.devicePixelRatio || 1), W = innerWidth, H = innerHeight;
-  cv.width = W * dpr; cv.height = H * dpr;
+  const portrait = H > W * 1.15;
+  for (const c of [cv, txt]) { c.width = W * dpr; c.height = H * dpr; }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  // saiz fon: sasarkan ~100 lajur di skrin lebar, ~90 di telefon
-  const fs = Math.max(5, Math.min(16, Math.min(W / (W > H ? 120 : 92) / 0.6, H / 60 / 1.15)));
-  ctx.font = `${fs}px ${FONT}`;
-  const cw = ctx.measureText("M").width, lh = fs * 1.15;
+  tctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  glow.width = Math.ceil(W / 5); glow.height = Math.ceil(H / 5);
+
+  // latar: langit malam dengan cahaya lembut di belakang jambangan
+  bg.width = W; bg.height = H;
+  let gr = bctx.createLinearGradient(0, 0, 0, H);
+  gr.addColorStop(0, "#05061a"); gr.addColorStop(0.55, "#0d0b2a"); gr.addColorStop(1, "#1a0c2c");
+  bctx.fillStyle = gr; bctx.fillRect(0, 0, W, H);
+  gr = bctx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, Math.max(W, H) * 0.55);
+  gr.addColorStop(0, "rgba(120,60,170,0.28)"); gr.addColorStop(0.5, "rgba(70,40,130,0.10)"); gr.addColorStop(1, "rgba(0,0,0,0)");
+  bctx.fillStyle = gr; bctx.fillRect(0, 0, W, H);
+
+  // saiz fon kecil = lebih banyak aksara = bunga lebih halus & besar
+  const fs = Math.max(4.5, Math.min(14, Math.min(W / (portrait ? 112 : 175) / 0.6, H / (portrait ? 150 : 82) / 1.12)));
+  const font = `${fs}px ${FONT}`;
+  tctx.font = font;
+  const cw = tctx.measureText("M").width, lh = fs * 1.12;
   ASP = lh / cw;
   const cols = Math.floor(W / cw), rows = Math.floor(H / lh);
-  if (!ext) ext = extents(buildScene(0.05));
-  const [xmax, ymin, ymax] = ext, usable = rows - 2;
-  const S = Math.min((usable - 1) / (ymax - ymin), (cols - 2) / (2 * xmax * ASP));
-  view = { cols, rows, S, cx: cols / 2, cy: (usable - (ymax - ymin) * S) / 2 + ymax * S, cw, lh, fs,
-           ox: (W - cols * cw) / 2, oy: (H - rows * lh) / 2 };
-  scene = buildScene(Math.max(0.012, 0.32 / S));
-  stars = Array.from({ length: Math.floor(cols * rows / 45) }, () =>
-    [Math.floor(Math.random() * cols), Math.floor(Math.random() * (rows - 2)), Math.random() * 6.3, 0.6 + Math.random() * 1.6]);
-  petals = Array.from({ length: Math.max(6, Math.floor(cols / 12)) }, () =>
-    [Math.random() * (cols - 1), -Math.random() * rows, 1.5 + Math.random() * 2, Math.random() * 6.3,
-     "*o',"[Math.floor(Math.random() * 4)], ["#ff87ff", "#ff5faf", "#ffffff", "#ffafff"][Math.floor(Math.random() * 4)]]);
+  const spread = portrait ? 40 : 58;
+  if (!extCache[spread]) extCache[spread] = extents(buildScene(0.05, spread));
+  const [xmax, ymin, ymax] = extCache[spread];
+  const msgRows = portrait ? 6 : 4, usable = rows - msgRows;
+  const S = Math.min(usable / (ymax - ymin), (portrait ? 1.12 : 1) * cols / (2 * xmax * ASP));
+  const cy = (usable - (ymax - ymin) * S) / 2 + ymax * S + (portrait ? msgRows * 0.25 : 0);
+  V = { cols, rows, S, cx: cols / 2, cy, cw, lh, fs, font, W, H, portrait,
+        ox: (W - cols * cw) / 2, oy: (H - rows * lh) / 2, bottom: cy - ymin * S };
+  scene = buildScene(Math.max(0.008, 0.3 / S), spread);
+  stars = Array.from({ length: Math.floor(cols * rows / 55) }, () =>
+    [Math.floor(Math.random() * cols), Math.floor(Math.random() * rows), Math.random() * 6.3, 0.5 + Math.random() * 1.8]);
+  petals = Array.from({ length: Math.max(10, Math.floor(cols / 8)) }, () =>
+    [Math.random() * cols, -Math.random() * rows, 2 + Math.random() * 4, Math.random() * 6.3,
+     "*o',"[Math.floor(Math.random() * 4)], ["#ff87d0", "#ff5fa0", "#ffffff", "#ffc0e8"][Math.floor(Math.random() * 4)]]);
+  hearts = Array.from({ length: 7 }, () => [Math.random() * W, H + Math.random() * H, 12 + Math.random() * 20, Math.random() * 6.3, 14 + Math.random() * 22]);
 }
 
 function frame(now) {
   const t = (now - t0) / 1000, dt = Math.min(0.1, (now - last) / 1000);
   last = now;
   const x = Math.min(1, t / GROW_SECONDS), g = x * x * (3 - 2 * x);
-  const { cols, rows, S, cx, cy } = view, size = cols * rows;
+  const { cols, rows, S, cx, cy, cw, lh, ox, oy, W, H } = V, size = cols * rows;
   const zbuf = new Float32Array(size).fill(1e9), chars = new Array(size).fill(" "), colors = new Array(size);
   const ang = t * SPIN_SPEED + dragAngle, ca = Math.cos(ang), sa = Math.sin(ang);
-  const ct = Math.cos(TILT), st = Math.sin(TILT), [lx, ly, lz] = LIGHT, kS = S * ASP;
+  const ct = Math.cos(TILT), st = Math.sin(TILT), [lx, ly, lz] = LIGHT, kS = S * ASP, top = LEVELS - 1;
 
   for (let q = 0; q < scene.length; q++) {
     const P = scene[q];
-    if (P[10] > g) continue;
+    if (P[9] > g) continue;
     let x0 = P[0], z0 = P[2];
-    const sway = P[11];
-    if (sway) { x0 += sway * Math.sin(t * 1.3 + P[12]); z0 += sway * Math.cos(t * 1.05 + P[12] * 1.7); }
+    const sway = P[10];
+    if (sway) { x0 += sway * Math.sin(t * 1.3 + P[11]); z0 += sway * Math.cos(t * 1.05 + P[11] * 1.7); }
     const x1 = x0 * ca + z0 * sa, z1 = z0 * ca - x0 * sa, y1 = P[1] + Y_OFF;
     const y2 = y1 * ct + z1 * st, z2 = z1 * ct - y1 * st, k = CAM / (CAM + z2);
     const sx = Math.round(cx + x1 * k * kS), sy = Math.round(cy - y2 * k * S);
-    if (sx < 0 || sx >= cols || sy < 0 || sy >= rows - 2) continue;
+    if (sx < 0 || sx >= cols || sy < 0 || sy >= rows) continue;
     const i = sy * cols + sx;
     if (z2 >= zbuf[i]) continue;
     zbuf[i] = z2;
+    const fog = 1 - 0.22 * Math.min(1, Math.max(0, (z2 + 0.6) / 1.8));
     const nx = P[3], ny = P[4], nz = P[5], kind = P[6];
     const nx1 = nx * ca + nz * sa, nz1 = nz * ca - nx * sa, ny2 = ny * ct + nz1 * st;
-    let ch = P[9], col;
+    let ch = P[8], e;
     if (kind === K_STEM) {
       const deg = ((Math.atan2(ny2, nx1) * 180 / Math.PI) % 180 + 180) % 180;
       ch = deg < 22.5 || deg >= 157.5 ? "-" : deg < 67.5 ? "/" : deg < 112.5 ? "|" : "\\";
-      col = z2 < 0.2 ? P[7] : P[8];
+      e = 0.65 * fog;
     } else {
       const nz2 = nz1 * ct - ny * st;
-      if (kind === K_DOT) col = nz2 < 0.3 ? P[7] : P[8];
+      if (kind === K_DOT) e = (nz2 < 0.3 ? 0.9 : 0.5) * fog;
       else {
-        const lum = 0.15 + 0.85 * Math.abs(nx1 * lx + ny2 * ly + nz2 * lz), ramp = RAMPS[kind];
-        ch = ramp[Math.min(ramp.length - 1, Math.floor(lum * ramp.length))];
-        col = lum > 0.4 ? P[7] : P[8];
+        e = (0.12 + 0.88 * Math.abs(nx1 * lx + ny2 * ly + nz2 * lz)) * fog;
+        const ramp = RAMPS[kind];
+        ch = ramp[Math.min(ramp.length - 1, Math.floor(e * ramp.length))];
       }
     }
-    chars[i] = ch; colors[i] = col;
+    chars[i] = ch; colors[i] = SHADES[P[7]][Math.min(top, Math.floor(e * LEVELS))];
   }
 
-  for (const [sx, sy, ph, sp] of stars) {             // bintang berkelip
+  for (const [sx, sy, ph, sp] of stars) {                       // bintang berkelip
     const i = sy * cols + sx;
     if (chars[i] !== " ") continue;
     const b = Math.sin(t * sp + ph);
-    if (b > 0.3) { chars[i] = b > 0.9 ? "*" : b > 0.7 ? "+" : "."; colors[i] = b > 0.7 ? "#ffffaf" : "#808080"; }
+    if (b > 0.25) { chars[i] = b > 0.9 ? "*" : b > 0.7 ? "+" : "."; colors[i] = b > 0.9 ? "#fffbe0" : b > 0.7 ? "#d8d4a8" : "#6e6c96"; }
   }
-  if (g >= 1) for (const p of petals) {               // kelopak gugur
-    p[1] += p[2] * dt; p[0] += Math.sin(t * 1.4 + p[3]) * dt * 1.5;
-    if (p[1] >= rows - 2) { p[0] = Math.random() * (cols - 1); p[1] = -1; }
+  if (g >= 1) for (const p of petals) {                         // kelopak gugur
+    p[1] += p[2] * dt; p[0] += Math.sin(t * 1.4 + p[3]) * dt * 2;
+    if (p[1] >= rows) { p[0] = Math.random() * cols; p[1] = -1; }
     const sx = Math.floor(p[0]), sy = Math.floor(p[1]);
-    if (sx >= 0 && sx < cols && sy >= 0 && sy < rows - 2) { chars[sy * cols + sx] = p[4]; colors[sy * cols + sx] = p[5]; }
+    if (sx >= 0 && sx < cols && sy >= 0 && sy < rows) { chars[sy * cols + sx] = p[4]; colors[sy * cols + sx] = p[5]; }
   }
 
-  ctx.fillStyle = "#0b0c1e";
-  ctx.fillRect(0, 0, innerWidth, innerHeight);
-  ctx.textBaseline = "top";
-  const { cw, lh, ox, oy } = view;
+  // 1) aksara ke lapisan txt
+  tctx.clearRect(0, 0, W, H);
+  tctx.font = V.font; tctx.textBaseline = "top";
   let cur = null;
   for (let i = 0; i < size; i++) {
     const ch = chars[i];
     if (ch === " ") continue;
-    if (colors[i] !== cur) { cur = colors[i]; ctx.fillStyle = cur; }
-    ctx.fillText(ch, ox + (i % cols) * cw, oy + Math.floor(i / cols) * lh);
+    if (colors[i] !== cur) { cur = colors[i]; tctx.fillStyle = cur; }
+    tctx.fillText(ch, ox + (i % cols) * cw, oy + ((i / cols) | 0) * lh);
   }
+  // 2) latar + glow + aksara
+  ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
+  ctx.drawImage(bg, 0, 0, W, H);
+  gctx.clearRect(0, 0, glow.width, glow.height);
+  gctx.drawImage(txt, 0, 0, glow.width, glow.height);
+  ctx.imageSmoothingEnabled = true;
+  ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 0.85;
+  ctx.drawImage(glow, 0, 0, W, H);
+  ctx.globalAlpha = 1;
+  ctx.drawImage(txt, 0, 0, W, H);
 
-  const tMsg = GROW_SECONDS * 0.85;                   // pesanan ditaip
+  // 3) hati terapung (selepas mekar)
+  if (g >= 1) {
+    const a = Math.min(1, (t - GROW_SECONDS) / 2);
+    ctx.globalCompositeOperation = "lighter";
+    for (const h of hearts) {
+      h[1] -= h[2] * dt;
+      if (h[1] < -40) { h[1] = H + 30; h[0] = Math.random() * W; }
+      const fade = Math.min(1, h[1] / H * 2.2) * Math.min(1, (H - h[1]) / 120 + 0.2);
+      ctx.globalAlpha = 0.35 * a * Math.max(0, fade);
+      ctx.fillStyle = "#ff6fb5";
+      ctx.font = `${h[4]}px sans-serif`;
+      ctx.fillText("♥", h[0] + Math.sin(t * 0.9 + h[3]) * 18, h[1]);
+    }
+    ctx.globalAlpha = 1;
+  }
+  ctx.globalCompositeOperation = "source-over";
+
+  // 4) pesanan ditaip dengan cahaya
+  const tMsg = GROW_SECONDS * 0.85;
   if (t > tMsg) {
     const shown = MESSAGE.slice(0, Math.floor((t - tMsg) * 14));
-    const fs = Math.min(20, Math.max(13, view.fs * 1.4));
-    ctx.font = `${fs}px ${FONT}`;
-    const mw = ctx.measureText(MESSAGE).width, wave = ["#ff87ff", "#ffafff", "#ffd7ff", "#ffffff", "#ffd7ff", "#ffafff"];
-    let x = (innerWidth - mw) / 2;
-    const y = oy + (rows - 1.6) * lh;
+    let fs = Math.min(30, Math.max(15, W / 22));
+    ctx.font = `600 ${fs}px ${FONT}`;
+    let mw = ctx.measureText(MESSAGE).width;
+    if (mw > W * 0.92) { fs *= W * 0.92 / mw; ctx.font = `600 ${fs}px ${FONT}`; mw = ctx.measureText(MESSAGE).width; }
+    const y = Math.min(H - fs * 1.8, oy + (V.bottom + 1.5) * lh);
+    let x = (W - mw) / 2;
+    ctx.textBaseline = "top";
+    ctx.shadowColor = "rgba(255,100,190,0.9)"; ctx.shadowBlur = 14;
+    const wave = ["#ff8fd0", "#ffb3e0", "#ffd9f0", "#ffffff", "#ffd9f0", "#ffb3e0"];
     for (let j = 0; j < shown.length; j++) {
       ctx.fillStyle = wave[(j + Math.floor(t * 8)) % wave.length];
       ctx.fillText(shown[j], x, y);
       x += ctx.measureText(shown[j]).width;
     }
-    ctx.font = `${view.fs}px ${FONT}`;
+    ctx.shadowBlur = 0;
   }
   requestAnimationFrame(frame);
 }
 
-// seret untuk putar, ketik dua kali untuk mekar semula
 cv.addEventListener("pointerdown", e => { dragging = e.clientX; cv.setPointerCapture(e.pointerId); });
 cv.addEventListener("pointermove", e => { if (dragging !== null) { dragAngle += (e.clientX - dragging) * 0.01; dragging = e.clientX; } });
 cv.addEventListener("pointerup", () => { dragging = null; });
