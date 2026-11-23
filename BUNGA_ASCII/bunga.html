@@ -21,10 +21,15 @@
   Jambangan bunga liar ASCII 3D yang bergerak — versi pelayar web.
   Geometri sama seperti bunga.py, dilukis pada <canvas> dengan warna gradien & kesan glow.
   Tukar pesanan:  bunga.html?msg=untuk%20awak%20sayang
+  Mod wallpaper (tiada tulisan, gerakan berulang setiap 20 s):  bunga.html?wallpaper
 */
 "use strict";
 const MESSAGE = new URLSearchParams(location.search).get("msg") || "bunga ini khas untuk awak <3";
-const GROW_SECONDS = 7, SPIN_SPEED = 0.30, TILT = 0.40, SEED = 2026;
+const QS = new URLSearchParams(location.search);
+const WALL = QS.has("wallpaper"), CAPTURE = QS.has("capture");
+const LOOP = 20;                               // semua gerakan berulang tepat setiap 20 saat
+const TAU = 2 * Math.PI, W_ = TAU / LOOP;
+const GROW_SECONDS = 7, SPIN_SPEED = W_, TILT = 0.40, SEED = 2026;
 const CAM = 7, Y_OFF = 0.70, BASE_Y = -1.30, LEVELS = 14;
 const LIGHT = unit([-0.35, 0.55, -0.75]);
 
@@ -332,24 +337,27 @@ function setup() {
   const spread = portrait ? 40 : 58;
   if (!extCache[spread]) extCache[spread] = extents(buildScene(0.05, spread));
   const [xmax, ymin, ymax] = extCache[spread];
-  const msgRows = portrait ? 6 : 4, usable = rows - msgRows;
-  const S = Math.min(usable / (ymax - ymin), (portrait ? 1.12 : 1) * cols / (2 * xmax * ASP));
-  const cy = (usable - (ymax - ymin) * S) / 2 + ymax * S + (portrait ? msgRows * 0.25 : 0);
+  // wallpaper: ruang di atas untuk jam skrin kunci
+  const topPad = WALL ? rows * 0.15 : 0, msgRows = WALL ? rows * 0.05 : portrait ? 6 : 4;
+  const usable = rows - msgRows - topPad;
+  const S = Math.min(usable / (ymax - ymin), (WALL ? 1.2 : portrait ? 1.12 : 1) * cols / (2 * xmax * ASP));
+  const cy = topPad + (usable - (ymax - ymin) * S) / 2 + ymax * S + (portrait && !WALL ? msgRows * 0.25 : 0);
   V = { cols, rows, S, cx: cols / 2, cy, cw, lh, fs, font, W, H, portrait,
         ox: (W - cols * cw) / 2, oy: (H - rows * lh) / 2, bottom: cy - ymin * S };
   scene = buildScene(Math.max(0.008, 0.3 / S), spread);
   stars = Array.from({ length: Math.floor(cols * rows / 55) }, () =>
-    [Math.floor(Math.random() * cols), Math.floor(Math.random() * rows), Math.random() * 6.3, 0.5 + Math.random() * 1.8]);
+    [Math.floor(Math.random() * cols), Math.floor(Math.random() * rows), Math.random() * 6.3, W_ * (2 + Math.floor(Math.random() * 6))]);
   petals = Array.from({ length: Math.max(10, Math.floor(cols / 8)) }, () =>
-    [Math.random() * cols, -Math.random() * rows, 2 + Math.random() * 4, Math.random() * 6.3,
-     "*o',"[Math.floor(Math.random() * 4)], ["#ff87d0", "#ff5fa0", "#ffffff", "#ffc0e8"][Math.floor(Math.random() * 4)]]);
-  hearts = Array.from({ length: 7 }, () => [Math.random() * W, H + Math.random() * H, 12 + Math.random() * 20, Math.random() * 6.3, 14 + Math.random() * 22]);
+    [Math.random() * cols, Math.random(), [1, 1, 2][Math.floor(Math.random() * 3)], Math.random() * 6.3,
+     "*o',"[Math.floor(Math.random() * 4)], ["#ff87d0", "#ff5fa0", "#ffffff", "#ffc0e8"][Math.floor(Math.random() * 4)],
+     1 + Math.floor(Math.random() * 3)]);
+  hearts = Array.from({ length: 7 }, () => [Math.random() * W, Math.random(), 1, Math.random() * 6.3, 14 + Math.random() * 22,
+                                             1 + Math.floor(Math.random() * 2)]);
 }
 
-function frame(now) {
-  const t = (now - t0) / 1000, dt = Math.min(0.1, (now - last) / 1000);
-  last = now;
-  const x = Math.min(1, t / GROW_SECONDS), g = x * x * (3 - 2 * x);
+function frame(now, tFixed) {
+  const t = tFixed !== undefined ? tFixed : (now - t0) / 1000;
+  const x = Math.min(1, t / GROW_SECONDS), g = WALL ? 1 : x * x * (3 - 2 * x);
   const { cols, rows, S, cx, cy, cw, lh, ox, oy, W, H } = V, size = cols * rows;
   const zbuf = new Float32Array(size).fill(1e9), chars = new Array(size).fill(" "), colors = new Array(size);
   const bgs = new Array(size).fill(null), ids = new Int32Array(size);
@@ -361,7 +369,7 @@ function frame(now) {
     if (P[9] > g) continue;
     let x0 = P[0], z0 = P[2];
     const sway = P[10];
-    if (sway) { x0 += sway * Math.sin(t * 1.3 + P[11]); z0 += sway * Math.cos(t * 1.05 + P[11] * 1.7); }
+    if (sway) { x0 += sway * Math.sin(t * 4 * W_ + P[11]); z0 += sway * Math.cos(t * 3 * W_ + P[11] * 1.7); }
     const x1 = x0 * ca + z0 * sa, z1 = z0 * ca - x0 * sa, y1 = P[1] + Y_OFF;
     const y2 = y1 * ct + z1 * st, z2 = z1 * ct - y1 * st, k = CAM / (CAM + z2);
     const sx = Math.round(cx + x1 * k * kS), sy = Math.round(cy - y2 * k * S);
@@ -405,10 +413,9 @@ function frame(now) {
     const b = Math.sin(t * sp + ph);
     if (b > 0.25) { chars[i] = b > 0.9 ? "*" : b > 0.7 ? "+" : "."; colors[i] = b > 0.9 ? "#fffbe0" : b > 0.7 ? "#d8d4a8" : "#6e6c96"; }
   }
-  if (g >= 1) for (const p of petals) {                         // kelopak gugur
-    p[1] += p[2] * dt; p[0] += Math.sin(t * 1.4 + p[3]) * dt * 2;
-    if (p[1] >= rows) { p[0] = Math.random() * cols; p[1] = -1; }
-    const sx = Math.floor(p[0]), sy = Math.floor(p[1]);
+  if (g >= 1) for (const p of petals) {                         // kelopak gugur (berulang setiap LOOP)
+    const sy = Math.floor(((p[1] + p[2] * t / LOOP) % 1) * (rows + 2)) - 1;
+    const sx = Math.floor(p[0] + Math.sin(p[6] * W_ * t + p[3]) * 3);
     if (sx >= 0 && sx < cols && sy >= 0 && sy < rows) { chars[sy * cols + sx] = p[4]; colors[sy * cols + sx] = p[5]; }
   }
 
@@ -442,16 +449,15 @@ function frame(now) {
 
   // 3) hati terapung (selepas mekar)
   if (g >= 1) {
-    const a = Math.min(1, (t - GROW_SECONDS) / 2);
+    const a = WALL ? 1 : Math.min(1, (t - GROW_SECONDS) / 2);
     ctx.globalCompositeOperation = "lighter";
     for (const h of hearts) {
-      h[1] -= h[2] * dt;
-      if (h[1] < -40) { h[1] = H + 30; h[0] = Math.random() * W; }
-      const fade = Math.min(1, h[1] / H * 2.2) * Math.min(1, (H - h[1]) / 120 + 0.2);
+      const hy = H + 30 - ((h[1] + h[2] * t / LOOP) % 1) * (H + 70);
+      const fade = Math.min(1, hy / H * 2.2) * Math.min(1, (H - hy) / 120 + 0.2);
       ctx.globalAlpha = 0.35 * a * Math.max(0, fade);
       ctx.fillStyle = "#ff6fb5";
       ctx.font = `${h[4]}px sans-serif`;
-      ctx.fillText("♥", h[0] + Math.sin(t * 0.9 + h[3]) * 18, h[1]);
+      ctx.fillText("♥", h[0] + Math.sin(h[5] * W_ * t + h[3]) * 18, hy);
     }
     ctx.globalAlpha = 1;
   }
@@ -459,7 +465,7 @@ function frame(now) {
 
   // 4) pesanan ditaip dengan cahaya
   const tMsg = GROW_SECONDS * 0.85;
-  if (t > tMsg) {
+  if (!WALL && t > tMsg) {
     const shown = MESSAGE.slice(0, Math.floor((t - tMsg) * 14));
     let fs = Math.min(30, Math.max(15, W / 22));
     ctx.font = `600 ${fs}px ${FONT}`;
@@ -477,19 +483,21 @@ function frame(now) {
     }
     ctx.shadowBlur = 0;
   }
-  requestAnimationFrame(frame);
+  if (!CAPTURE) requestAnimationFrame(frame);
 }
 
 cv.addEventListener("pointerdown", e => { dragging = e.clientX; cv.setPointerCapture(e.pointerId); });
 cv.addEventListener("pointermove", e => { if (dragging !== null) { dragAngle += (e.clientX - dragging) * 0.01; dragging = e.clientX; } });
 cv.addEventListener("pointerup", () => { dragging = null; });
 cv.addEventListener("dblclick", () => { t0 = performance.now(); });
+if (WALL) document.getElementById("hint").style.display = "none";
 setTimeout(() => { document.getElementById("hint").style.opacity = 0; }, 5000);
 let rt;
 addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(setup, 150); });
 
 setup();
-requestAnimationFrame(frame);
+if (CAPTURE) window.renderAt = t => frame(0, t);    // untuk rakaman video bingkai demi bingkai
+else requestAnimationFrame(frame);
 </script>
 </body>
 </html>
