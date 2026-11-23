@@ -1,7 +1,7 @@
 // Version 2 — black cat on a lamp-lit window sill, looking out over a moonlit garden.
 window.SCENES = window.SCENES || {};
 SCENES.tingkap = function (opts) {
-  const W = 1080, H = 2400, T = 20, TAU = P.TAU;
+  const W = 1080, H = 2400, T = 30, TAU = P.TAU;
   const osc = (t, k, p = 0) => Math.sin(TAU * k * t / T + p);
   const R = P.rng(23), noise = P.makeNoise(9);
   const WALL = 78, SILL_B = 1985, SILL_F = 2150, PX0 = 838, PX1 = 1008;
@@ -175,6 +175,27 @@ SCENES.tingkap = function (opts) {
     return c;
   }
 
+  function makeWisp(seed, w, h) {
+    const Rw = P.rng(seed), c = P.canvas(w, h), g = c.getContext('2d');
+    g.filter = 'blur(7px)';
+    for (let i = 0; i < 26; i++) {
+      const u = Rw(), x = w * (0.1 + 0.8 * u), y = h * (0.5 + (Rw() - 0.5) * 0.35) - Math.sin(Math.PI * u) * h * 0.12;
+      g.fillStyle = P.css(P.mix(P.hex('#5d6ea6'), P.hex('#b9c4e6'), Rw() * 0.7), 0.35);
+      g.beginPath(); g.ellipse(x, y, P.rand(Rw, 30, 70) * (0.35 + 0.65 * Math.sin(Math.PI * u)), P.rand(Rw, 10, 22), 0, 0, TAU); g.fill();
+    }
+    g.filter = 'blur(3px)';
+    for (let i = 0; i < 10; i++) { const x = w * P.rand(Rw, 0.25, 0.75), y = h * P.rand(Rw, 0.3, 0.45); g.fillStyle = 'rgba(215,222,245,0.25)'; g.beginPath(); g.ellipse(x, y, P.rand(Rw, 20, 50), P.rand(Rw, 5, 10), 0, 0, TAU); g.fill(); }
+    return c;
+  }
+  const WISPS = [{ x: 380, y: 200, o: 0, s: 16, w: 420 }, { x: 720, y: 330, o: 0.5, s: 13, w: 360 }, { x: 260, y: 420, o: 0.3, s: 18, w: 320 }, { x: 640, y: 120, o: 0.75, s: 14, w: 380 }];
+  function drawWisps(ctx, t) {
+    WISPS.forEach((c) => {
+      const p = ((t / T + c.o) % 1 + 1) % 1, x = c.x + c.s * T * (p - 0.5), a = P.smooth(0, 0.2, p) * (1 - P.smooth(0.8, 1, p));
+      ctx.globalAlpha = a; ctx.drawImage(c.img, x - c.img.width / 2, c.y - c.img.height / 2);
+    });
+    ctx.globalAlpha = 1;
+  }
+
   function makeBranch(seed, o) {
     const Rb = P.rng(seed), c = P.canvas(W, H), g = c.getContext('2d');
     const pts = o.pts;
@@ -183,7 +204,7 @@ SCENES.tingkap = function (opts) {
       g.lineWidth = o.stemW * (1 - i / pts.length * 0.7);
       g.beginPath(); g.moveTo(pts[i][0], pts[i][1]); g.lineTo(pts[i + 1][0], pts[i + 1][1]); g.stroke();
     }
-    const pal = o.pal;
+    const leaves = [];
     for (let i = 0; i < o.n; i++) {
       const u = Rb(), seg = Math.min(pts.length - 2, Math.floor(u * (pts.length - 1))), f = u * (pts.length - 1) - seg;
       const a = pts[seg], b = pts[seg + 1];
@@ -191,23 +212,23 @@ SCENES.tingkap = function (opts) {
       const dir = Math.atan2(b[1] - a[1], b[0] - a[0]);
       const side = Rb() < 0.5 ? -1 : 1;
       let ang = dir + side * P.rand(Rb, 0.5, 1.2);
-      ang = ang + (Math.PI / 2 - ang) * (o.droop || 0.25) * Rb(); // gravity
+      ang = ang + (Math.PI / 2 - ang) * (o.droop || 0.25) * Rb();
       const len = P.rand(Rb, o.len[0], o.len[1]) * (0.75 + 0.35 * u), wid = len * P.rand(Rb, 0.22, 0.3);
-      g.save(); g.translate(x, y); g.rotate(ang);
+      const lc = P.canvas(Math.ceil(len + 12), Math.ceil(wid * 2.6 + 12)), lg = lc.getContext('2d'), lox = 6, loy = lc.height / 2;
+      lg.translate(lox, loy);
       const lp = P.leafPath(len, wid, (Rb() - 0.5) * wid * 0.6);
-      const base = P.pick(Rb, pal);
-      g.fillStyle = P.css(P.jit(P.hex(base), Rb, 6)); g.fill(lp);
-      g.save(); g.clip(lp);
-      for (let k = 0; k < 7; k++) P.stroke(g, Rb, P.rand(Rb, len * 0.2, len * 0.8), P.rand(Rb, -wid * 0.4, wid * 0.4), (Rb() - 0.5) * 0.5, len * 0.35, wid * 0.4, P.css(P.jit(P.mix(P.hex(base), P.hex(o.hi), Rb() * 0.6), Rb, 6)), 0.5);
-      // moon rim on the upper edge
-      g.strokeStyle = o.rim; g.lineWidth = 2.5; g.filter = 'blur(1px)';
-      g.beginPath(); g.moveTo(len * 0.05, -wid * 0.1); g.quadraticCurveTo(len * 0.45, -wid * 0.95, len, 0); g.stroke(); g.filter = 'none';
-      g.restore();
-      g.strokeStyle = 'rgba(0,0,0,0.25)'; g.lineWidth = 1.2;
-      g.beginPath(); g.moveTo(len * 0.05, 0); g.lineTo(len * 0.9, 0); g.stroke();
-      g.restore();
+      const base = P.pick(Rb, o.pal);
+      lg.fillStyle = P.css(P.jit(P.hex(base), Rb, 6)); lg.fill(lp);
+      lg.save(); lg.clip(lp);
+      for (let k = 0; k < 7; k++) P.stroke(lg, Rb, P.rand(Rb, len * 0.2, len * 0.8), P.rand(Rb, -wid * 0.4, wid * 0.4), (Rb() - 0.5) * 0.5, len * 0.35, wid * 0.4, P.css(P.jit(P.mix(P.hex(base), P.hex(o.hi), Rb() * 0.6), Rb, 6)), 0.5);
+      lg.strokeStyle = o.rim; lg.lineWidth = 2.5; lg.filter = 'blur(1px)';
+      lg.beginPath(); lg.moveTo(len * 0.05, -wid * 0.1); lg.quadraticCurveTo(len * 0.45, -wid * 0.95, len, 0); lg.stroke(); lg.filter = 'none';
+      lg.restore();
+      lg.strokeStyle = 'rgba(0,0,0,0.25)'; lg.lineWidth = 1.2;
+      lg.beginPath(); lg.moveTo(len * 0.05, 0); lg.lineTo(len * 0.9, 0); lg.stroke();
+      leaves.push({ c: lc, ox: lox, oy: loy, x, y, ang, k: 7 + Math.floor(Rb() * 6), p: Rb() * TAU, f: P.rand(Rb, 0.07, 0.16) });
     }
-    return { c, ax: pts[0][0], ay: pts[0][1], amp: o.amp, k: o.k, p: Rb() * TAU };
+    return { c, leaves, ax: pts[0][0], ay: pts[0][1], amp: o.amp * 2.2, k: o.k + 1, p: Rb() * TAU };
   }
 
   function paintFront() {
@@ -310,7 +331,7 @@ SCENES.tingkap = function (opts) {
       base: '#0c0b11', jit: 4,
       color: (u, v, R) => P.pick(R, [P.hex('#141320'), P.hex('#1b1a27'), P.hex('#0f0e16'), P.hex('#22212f')]),
       edge: (u) => (u > 0 ? '#4a5378' : '#3a2522'),
-      whisker: 'rgba(235,238,248,0.8)',
+      whisker: 'rgba(235,238,248,0.8)', snout: '#15141d', snoutRim: 'rgba(140,160,220,0.7)',
       pawRim: 'rgba(130,150,210,0.45)', toe: 'rgba(120,135,190,0.45)',
       rim: (g, path, d) => {
         const { ox, oy, h, cw } = d;
@@ -331,36 +352,46 @@ SCENES.tingkap = function (opts) {
     [8.3, 455, 1640], [9.0, 410, 1700], [9.5, 395, 1690], [10.0, 360, 1560], [11.0, 300, 1330], [12.2, 470, 1120],
     [13.3, 640, 900], [14.4, 720, 700], [15.4, 690, 560],
   ];
-  const mothAt = (t) => { const [x, y] = P.pathAt(t, MOTH); return [x + 12 * Math.sin(TAU * 27 * t / T), y + 9 * Math.sin(TAU * 35 * t / T + 2)]; };
+  const mothAt = (t) => { const [x, y] = P.pathAt(t, MOTH); return [x + 12 * Math.sin(TAU * 40 * t / T), y + 9 * Math.sin(TAU * 52 * t / T + 2)]; };
   const mothA = (t) => P.keys(t, [[1.4, 0], [2.0, 1], [14.6, 1], [15.4, 0]]);
   const mothS = (t) => P.keys(t, [[10.5, 1], [15.4, 0.45]]); // shrinks as it flies far into the garden
   function catState(t) {
     const head = [CAT.x, CAT.base - CAT.h * 0.74];
-    let lx = P.keys(t, [[0, -0.1], [15.3, -0.1], [15.9, -0.15], [16.6, 0.1], [17.6, 0.15], [18.6, -0.1], [20, -0.1]]);
-    let ly = P.keys(t, [[0, 0.15], [15.3, 0.15], [15.9, 0.95], [17.6, 0.8], [18.6, 0.15], [20, 0.15]]);
+    // 1.8-15 watches & swats the moth | 15.6-18 shooting star | 18.4-22.6 licks its paw | 24.2-27.2 yawns
+    let lx = P.keys(t, [[0, -0.1], [15.3, -0.1], [15.9, -0.15], [16.6, 0.1], [17.2, 0.15], [18.0, -0.1], [18.4, -0.1], [18.9, 0.6], [22.0, 0.6], [22.6, -0.1],
+      [24.2, -0.1], [24.7, -0.8], [26.4, -0.8], [27.2, -0.1], [30, -0.1]]);
+    let ly = P.keys(t, [[0, 0.15], [15.3, 0.15], [15.9, 0.95], [17.2, 0.8], [18.0, 0.15], [18.4, 0.15], [18.9, -0.4], [22.0, -0.4], [22.6, 0.15],
+      [24.2, 0.15], [24.7, 0.8], [26.4, 0.8], [27.2, 0.15], [30, 0.15]]);
     const w = P.keys(t, [[1.8, 0], [2.6, 1], [14.3, 1], [15.1, 0]]);
     if (w > 0) {
       const [mx, my] = mothAt(t);
       lx += (P.clamp((mx - head[0]) / 300, -1, 1) - lx) * w;
       ly += (P.clamp((head[1] - my) / 520, -0.3, 1) - ly) * w;
     }
+    const lick = P.keys(t, [[18.5, 0], [19.0, 1], [21.8, 1], [22.3, 0]]);
+    const lickBeat = Math.max(0, Math.sin(TAU * 60 * t / T));
+    ly += lick * 0.1 * lickBeat;
+    const yawn = P.keys(t, [[24.6, 0], [25.3, 1], [26.0, 1], [26.6, 0]]);
+    const snout = Math.max(P.keys(t, [[18.4, 0], [18.9, 1], [22.0, 1], [22.6, 0]]), P.keys(t, [[24.2, 0], [24.7, 1], [26.4, 1], [27.2, 0]]));
     const exc = P.keys(t, [[2.5, 0], [4, 0.6], [8, 1], [11, 1], [14, 0.4], [15, 0]]);
     const wig = P.keys(t, [[7.9, 0], [8.2, 1], [8.8, 1], [9.05, 0]]);
-    const paw = P.keys(t, [[9.0, 0], [9.22, 1], [9.38, 0.78], [9.55, 1], [10.0, 0]]);
+    const swipe = P.keys(t, [[9.0, 0], [9.22, 1], [9.38, 0.78], [9.55, 1], [10.0, 0]]);
+    const paw = swipe > 0.001 ? { side: -1, amt: swipe, wave: 0.15 * Math.sin(TAU * 90 * t / T) * swipe }
+      : { side: 1, amt: lick, up: -1.36, wave: 0.09 * lickBeat * lick };
     return {
-      lx, ly, t,
-      earL: P.twitch(t, [0.8, 6.6, 12.0]), earR: P.twitch(t, [4.2, 18.8]),
-      alert: exc, crouch: 0.5 * wig + 0.2 * exc * (1 - paw), wiggle: wig * 8 * Math.sin(TAU * 40 * t / T),
-      lean: -0.07 * paw, breath: osc(t, 5) * (1 + exc * 0.6),
-      paw: { side: -1, amt: paw, wave: 0.15 * Math.sin(TAU * 60 * t / T) * paw },
-      tailCurl: 2.5 + 0.55 * osc(t, 2, 0.6) + 0.15 * osc(t, 5) + exc * 0.6 * osc(t, 30),
+      lx, ly, t, T, snout, open: yawn, tongue: lick * lickBeat, stretch: yawn,
+      earL: Math.max(P.twitch(t, [0.8, 6.6, 12.0]), 0.65 * yawn), earR: Math.max(P.twitch(t, [4.2, 23.0, 28.6]), 0.65 * yawn),
+      alert: exc, crouch: 0.5 * wig + 0.2 * exc * (1 - swipe), wiggle: wig * 8 * Math.sin(TAU * 60 * t / T),
+      lean: -0.07 * swipe + 0.03 * lick, breath: osc(t, 8) * (1 + exc * 0.6),
+      paw,
+      tailCurl: 2.5 + 0.55 * osc(t, 3, 0.6) + 0.15 * osc(t, 7) + exc * 0.6 * osc(t, 45),
     };
   }
   function drawMoth(ctx, t) {
     const a = mothA(t); if (a <= 0) return;
-    const [x, y] = mothAt(t), sc = mothS(t), flap = 0.35 + 0.65 * Math.abs(Math.sin(TAU * 120 * t / T));
+    const [x, y] = mothAt(t), sc = mothS(t), flap = 0.35 + 0.65 * Math.abs(Math.sin(TAU * 180 * t / T));
     P.glow(ctx, x, y, 60 * sc, [255, 230, 190], 0.25 * a);
-    ctx.save(); ctx.translate(x, y); ctx.scale(sc * 1.5, sc * 1.5); ctx.rotate(0.15 * Math.sin(TAU * 9 * t / T));
+    ctx.save(); ctx.translate(x, y); ctx.scale(sc * 1.5, sc * 1.5); ctx.rotate(0.15 * Math.sin(TAU * 14 * t / T));
     ctx.globalAlpha = a;
     [-1, 1].forEach((s) => {
       ctx.fillStyle = '#e9dcc6';
@@ -375,7 +406,8 @@ SCENES.tingkap = function (opts) {
   }
   // sheer curtain breathing in the night breeze
   function drawCurtain(ctx, t) {
-    const right = (y) => { const f = y / SILL_B; return 120 + 40 * f + f * (38 * Math.sin(TAU * 2 * t / T - y * 0.003) + 14 * Math.sin(TAU * 5 * t / T - y * 0.007 + 1)); };
+    const gust = 1 + 0.8 * Math.pow(Math.max(0, Math.sin(TAU * 3 * t / T)), 3);
+    const right = (y) => { const f = y / SILL_B; return 120 + 40 * f + f * gust * (40 * Math.sin(TAU * 4 * t / T - y * 0.003) + 15 * Math.sin(TAU * 9 * t / T - y * 0.007 + 1)); };
     ctx.save();
     ctx.beginPath(); ctx.moveTo(-10, -10);
     for (let y = -10; y <= SILL_B - 20; y += 20) ctx.lineTo(right(y), y);
@@ -385,7 +417,7 @@ SCENES.tingkap = function (opts) {
     ctx.fillStyle = cg; ctx.fill(); ctx.clip();
     for (let i = 1; i <= 7; i++) {
       const f = i / 8; ctx.beginPath();
-      for (let y = -10; y <= SILL_B; y += 25) { const x = right(y) * f + 6 * Math.sin(TAU * 3 * t / T + i * 1.7 + y * 0.004); if (y < 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+      for (let y = -10; y <= SILL_B; y += 25) { const x = right(y) * f + 6 * Math.sin(TAU * 5 * t / T + i * 1.7 + y * 0.004); if (y < 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
       ctx.strokeStyle = i % 2 ? 'rgba(255,225,190,0.16)' : 'rgba(30,20,30,0.18)'; ctx.lineWidth = 7; ctx.stroke();
     }
     ctx.restore();
@@ -393,14 +425,14 @@ SCENES.tingkap = function (opts) {
     ctx.beginPath(); for (let y = 0; y <= SILL_B - 20; y += 20) { const x = right(y); if (y) ctx.lineTo(x, y); else ctx.moveTo(x, y); } ctx.stroke();
   }
   // leaves falling past the window outside
-  const FALL = [{ o: 0.05, x: 300 }, { o: 0.4, x: 640 }, { o: 0.72, x: 180 }];
+  const FALL = [{ o: 0.05, x: 300 }, { o: 0.25, x: 640 }, { o: 0.45, x: 180 }, { o: 0.62, x: 520 }, { o: 0.82, x: 720 }];
   function drawFalling(ctx, t) {
     FALL.forEach((f, i) => {
-      const p = ((t / T + f.o) % 1 + 1) % 1; if (p > 0.5) return;
-      const u = p / 0.5, y = 150 + u * 1800, x = f.x + 70 * Math.sin(TAU * 4 * t / T + i) + u * 120;
+      const p = ((2 * t / T + f.o) % 1 + 1) % 1; if (p > 0.6) return;
+      const u = p / 0.6, y = 150 + u * 1800, x = f.x + 80 * Math.sin(TAU * 8 * t / T + i) + u * 140;
       const a = P.smooth(0, 0.08, u) * (1 - P.smooth(0.88, 1, u));
-      ctx.save(); ctx.translate(x, y); ctx.rotate(0.9 * Math.sin(TAU * 4 * t / T + i + 0.8)); ctx.globalAlpha = 0.85 * a;
-      ctx.fillStyle = ['#2b4a3a', '#3b5a40', '#4a5e3a'][i];
+      ctx.save(); ctx.translate(x, y); ctx.rotate(0.9 * Math.sin(TAU * 8 * t / T + i + 0.8)); ctx.globalAlpha = 0.85 * a;
+      ctx.fillStyle = ['#2b4a3a', '#3b5a40', '#4a5e3a', '#33503a', '#45603f'][i];
       ctx.fill(P.leafPath(34, 9, 3));
       ctx.strokeStyle = 'rgba(160,185,220,0.4)'; ctx.lineWidth = 1.2; ctx.stroke(P.leafPath(34, 9, 3));
       ctx.restore(); ctx.globalAlpha = 1;
@@ -432,6 +464,7 @@ SCENES.tingkap = function (opts) {
     async init() {
       L.sky = paintSky(); L.moon = paintMoon(); L.back = paintBack(); L.front = paintFront(); L.cat = makeRig();
       L.stars = starData(); L.ff = fireflyData();
+      WISPS.forEach((c, i) => { c.img = makeWisp(300 + i, c.w, 130); });
       const onW = L.windows.filter((w) => w.on), offW = L.windows.filter((w) => !w.on);
       L.switchWin = onW[3]; L.switchWin2 = offW[0]; if (L.switchWin2) L.switchWin2.on = true;
       const darkPal = ['#0e2218', '#14301f', '#1a3a27', '#21452f'];
@@ -473,6 +506,7 @@ SCENES.tingkap = function (opts) {
       const hal = 0.9 + 0.1 * osc(t, 2);
       P.glow(ctx, MOON.x, MOON.y, 260, [170, 185, 240], 0.3 * hal);
       ctx.drawImage(L.moon, MOON.x - L.moon.width / 2, MOON.y - L.moon.height / 2);
+      drawWisps(ctx, t);
       ctx.drawImage(L.back, 0, 0);
       // lit windows of the distant house
       L.windows.forEach((w) => {
@@ -484,8 +518,16 @@ SCENES.tingkap = function (opts) {
         P.glow(ctx, w.x + w.w / 2, w.y + w.h / 2, 22, [255, 190, 100], 0.35 * a);
       });
       L.ff.forEach((f) => drawFirefly(ctx, f, t));
-      const sway = (b) => { const a = b.amp * (Math.sin(TAU * b.k * t / T + b.p) * 0.8 + 0.2 * Math.sin(TAU * (b.k * 3) * t / T + b.p * 2));
-        ctx.save(); ctx.translate(b.ax, b.ay); ctx.rotate(a); ctx.translate(-b.ax, -b.ay); ctx.drawImage(b.c, 0, 0); ctx.restore(); };
+      const sway = (b) => {
+        const gust = 1 + 0.9 * Math.pow(Math.max(0, Math.sin(TAU * 3 * t / T - b.ax * 0.001)), 3);
+        const a = gust * b.amp * (Math.sin(TAU * b.k * t / T + b.p) * 0.8 + 0.2 * Math.sin(TAU * (b.k * 3) * t / T + b.p * 2));
+        ctx.save(); ctx.translate(b.ax, b.ay); ctx.rotate(a); ctx.translate(-b.ax, -b.ay); ctx.drawImage(b.c, 0, 0);
+        b.leaves.forEach((l) => {
+          ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(l.ang + gust * l.f * Math.sin(TAU * l.k * t / T + l.p));
+          ctx.drawImage(l.c, -l.ox, -l.oy); ctx.restore();
+        });
+        ctx.restore();
+      };
       drawFalling(ctx, t);
       sway(L.mid);
       ctx.drawImage(L.front.c, 0, 0);
@@ -499,7 +541,7 @@ SCENES.tingkap = function (opts) {
       // cat
       const st = catState(t);
       st.tail = (c) => {
-        const tail = P.tailPath(-CAT.h * 0.2, -CAT.h * 0.035, CAT.h * 1.3, -1, st.tailCurl, TAU * 2 * t / T, 0.4);
+        const tail = P.tailPath(-CAT.h * 0.2, -CAT.h * 0.035, CAT.h * 1.3, -1, st.tailCurl, TAU * 3 * t / T, 0.4);
         c.fillStyle = '#100f16'; c.fill(tail.path);
         c.strokeStyle = 'rgba(210,140,90,0.45)'; c.lineWidth = 3; c.lineCap = 'round';
         c.beginPath(); tail.left.slice(3).forEach((q, i) => (i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]))); c.stroke();

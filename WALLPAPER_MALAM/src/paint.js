@@ -316,14 +316,14 @@
     if (s.tail) s.tail(ctx);
     const pa = s.paw;
     if (pa && pa.amt > 0.01) {
-      const up = -1.12 + (pa.wave || 0);
+      const up = (pa.up ?? -1.12) + (pa.wave || 0);
       const ang = pa.side === 1 ? Math.PI / 2 + (up - Math.PI / 2) * pa.amt : Math.PI / 2 + (Math.PI - up - Math.PI / 2) * pa.amt;
       ctx.save(); ctx.translate(pa.side * 0.2 * h * sx, -0.42 * h); ctx.rotate(ang);
       if (pa.side === -1) ctx.scale(1, -1);
       ctx.drawImage(rig.paw.c, -rig.paw.ox, -rig.paw.oy); ctx.restore();
     }
     const b = s.breath || 0, cr = s.crouch || 0;
-    ctx.scale(1 + 0.003 * b + 0.02 * cr, 1 + 0.008 * b - 0.04 * cr);
+    ctx.scale(1 + 0.003 * b + 0.02 * cr - 0.01 * (s.stretch || 0), 1 + 0.008 * b - 0.04 * cr + 0.035 * (s.stretch || 0));
     ctx.drawImage(rig.body, -rig.ox, -rig.oy);
     // head
     const lx = s.lx || 0, ly = s.ly || 0;
@@ -334,7 +334,7 @@
     ctx.translate(0, 0.62 * h);
     if (rig.style.whisker) {
       ctx.strokeStyle = rig.style.whisker; ctx.lineCap = 'round';
-      const tw = 0.02 * Math.sin(P.TAU * 17 * (s.t || 0) / 20); // loop-safe (T = 20 s)
+      const tw = 0.02 * Math.sin(P.TAU * 17 * (s.t || 0) / (s.T || 20)); // loop-safe
       [-1, 1].forEach((sd) => {
         const f = P.clamp(1 + sd * lx * 0.5, 0.45, 1.5);
         for (let k = 0; k < 3; k++) {
@@ -355,6 +355,35 @@
       ctx.drawImage(img, -rig.ox, -rig.oy); ctx.restore();
     });
     ctx.drawImage(rig.head, -rig.ox, -rig.oy);
+    // profile muzzle, yawning mouth and licking tongue (drawn when the head is turned)
+    const sn = s.snout || 0;
+    if (sn > 0.01) {
+      const sd = lx >= 0 ? 1 : -1, o = s.open || 0, tg = s.tongue || 0;
+      ctx.save(); ctx.translate(sd * 0.2 * h * sx, -0.695 * h); ctx.scale(sd * 1.2, 1.2);
+      ctx.globalAlpha = P.clamp(sn * 1.5, 0, 1);
+      if (o > 0.02) {
+        ctx.fillStyle = '#3e1520';
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0.082 * h, -0.012 * h - o * 0.032 * h); ctx.lineTo(0.074 * h, 0.012 * h + o * 0.05 * h); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#e08494';
+        ctx.beginPath(); ctx.ellipse(0.045 * h, 0.012 * h + o * 0.03 * h, 0.03 * h, 0.009 * h, 0.35 * o, 0, P.TAU); ctx.fill();
+        ctx.fillStyle = '#fbf7f0';
+        const tx = 0.068 * h, ty = -0.012 * h - o * 0.027 * h, by = 0.012 * h + o * 0.043 * h;
+        ctx.beginPath(); ctx.moveTo(tx - 0.006 * h, ty); ctx.lineTo(tx + 0.004 * h, ty); ctx.lineTo(tx - 0.001 * h, ty + 0.016 * h * o); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(tx - 0.008 * h, by); ctx.lineTo(tx + 0.002 * h, by); ctx.lineTo(tx - 0.003 * h, by - 0.012 * h * o); ctx.fill();
+      }
+      ctx.fillStyle = rig.style.snout || rig.style.base;
+      ctx.save(); ctx.rotate(-o * 0.38);
+      ctx.beginPath(); ctx.ellipse(0.035 * h, -0.012 * h, 0.05 * h, 0.026 * h, 0, 0, P.TAU); ctx.fill(); ctx.restore();
+      ctx.save(); ctx.rotate(o * 0.5);
+      ctx.beginPath(); ctx.ellipse(0.03 * h, 0.016 * h, 0.042 * h, 0.014 * h, 0, 0, P.TAU); ctx.fill(); ctx.restore();
+      if (rig.style.snoutRim) { ctx.strokeStyle = rig.style.snoutRim; ctx.lineWidth = 2; ctx.save(); ctx.rotate(-o * 0.38); ctx.beginPath(); ctx.ellipse(0.035 * h, -0.012 * h, 0.05 * h, 0.026 * h, 0, -2.6, 0.2); ctx.stroke(); ctx.restore(); }
+      ctx.fillStyle = '#2a1a1e'; ctx.beginPath(); ctx.arc(0.08 * h, -0.016 * h - o * 0.03 * h, 0.006 * h, 0, P.TAU); ctx.fill();
+      if (tg > 0.02) {
+        ctx.fillStyle = '#e8899a';
+        ctx.beginPath(); ctx.ellipse(0.07 * h + tg * 0.012 * h, 0.014 * h, 0.012 * h + tg * 0.016 * h, 0.008 * h, 0.3 - tg * 0.6, 0, P.TAU); ctx.fill();
+      }
+      ctx.restore();
+    }
     ctx.restore();
   };
 

@@ -189,7 +189,7 @@ SCENES.bukit = function (opts) {
         return col;
       },
       edge: (u) => (u > 0 ? '#f2f3f8' : '#b8c0da'),
-      whisker: 'rgba(235,240,252,0.5)',
+      whisker: 'rgba(235,240,252,0.5)', snout: '#e4e8f2', snoutRim: 'rgba(170,180,215,0.5)',
       pawRim: 'rgba(160,170,210,0.35)',
     });
   }
@@ -206,23 +206,33 @@ SCENES.bukit = function (opts) {
   const buddyA = (t) => P.keys(t, [[7.6, 0], [8.2, 1], [15.0, 1], [15.8, 0]]);
   function catState(t) {
     const head = [CAT.x, CAT.base - CAT.h * 0.74];
-    let lx = P.keys(t, [[0, 0.25], [4, 0.25], [5, 0.05], [6.9, 0.05], [7.5, -0.6], [8.5, -0.35], [9.3, 0], [16.4, 0], [18, 0.25], [20, 0.25]]);
-    let ly = P.keys(t, [[0, 0.35], [6.9, 0.3], [7.5, 0.9], [8.5, 0.6], [9.3, 0.1], [16.4, 0.1], [18, 0.35], [20, 0.35]]);
-    const w = P.keys(t, [[9.4, 0], [10.2, 1], [15.4, 1], [16.4, 0]]);
+    // 0.9-3.8 yawn toward the moon | 7-9 shooting star | 9.4-16.4 plays with firefly | 16.6-19.6 licks its paw
+    let lx = P.keys(t, [[0, 0.25], [0.9, 0.25], [1.4, 0.8], [3.2, 0.8], [3.8, 0.25], [4, 0.25], [5, 0.05], [6.9, 0.05], [7.5, -0.6], [8.5, -0.35], [9.3, 0],
+      [16.3, 0], [16.9, -0.6], [19.2, -0.6], [19.8, 0.25], [20, 0.25]]);
+    let ly = P.keys(t, [[0, 0.35], [0.9, 0.35], [1.4, 0.8], [3.2, 0.8], [3.8, 0.35], [6.9, 0.3], [7.5, 0.9], [8.5, 0.6], [9.3, 0.1],
+      [16.3, 0.1], [16.9, -0.4], [19.2, -0.4], [19.8, 0.35], [20, 0.35]]);
+    const w = P.keys(t, [[9.4, 0], [10.2, 1], [15.4, 1], [16.3, 0]]);
     if (w > 0) {
       const [bx, by] = buddyAt(t);
       lx += (P.clamp((bx - head[0]) / 260, -1, 1) - lx) * w;
       ly += (P.clamp((head[1] - by) / 420, -0.3, 1) - ly) * w;
     }
+    const yawn = P.keys(t, [[1.3, 0], [2.0, 1], [2.7, 1], [3.3, 0]]);
+    const lick = P.keys(t, [[16.8, 0], [17.25, 1], [19.0, 1], [19.4, 0]]);
+    const lickBeat = Math.max(0, Math.sin(TAU * 40 * t / T));
+    ly += lick * 0.1 * lickBeat;
+    const snout = Math.max(P.keys(t, [[0.9, 0], [1.4, 1], [3.2, 1], [3.8, 0]]), P.keys(t, [[16.4, 0], [16.9, 1], [19.2, 1], [19.8, 0]]));
     const exc = P.keys(t, [[9.8, 0], [10.8, 1], [14.6, 1], [16.2, 0]]);
     const wig = P.keys(t, [[11.6, 0], [11.9, 1], [12.5, 1], [12.75, 0]]);
-    const paw = P.keys(t, [[12.75, 0], [12.97, 1], [13.13, 0.78], [13.3, 1], [13.72, 0]]);
+    const swipe = P.keys(t, [[12.75, 0], [12.97, 1], [13.13, 0.78], [13.3, 1], [13.72, 0]]);
+    const paw = swipe > 0.001 ? { side: 1, amt: swipe, wave: 0.15 * Math.sin(TAU * 60 * t / T) * swipe }
+      : { side: -1, amt: lick, up: -1.36, wave: 0.09 * lickBeat * lick };
     return {
-      lx, ly, t,
-      earL: P.twitch(t, [4.5, 17.4]), earR: P.twitch(t, [1.6, 10.1, 13.9]),
-      alert: exc, crouch: 0.5 * wig + 0.2 * exc * (1 - paw), wiggle: wig * 7 * Math.sin(TAU * 40 * t / T),
-      lean: 0.07 * paw, breath: osc(t, 5) * (1 + exc * 0.6),
-      paw: { side: 1, amt: paw, wave: 0.15 * Math.sin(TAU * 60 * t / T) * paw },
+      lx, ly, t, T, snout, open: yawn, tongue: lick * lickBeat, stretch: yawn,
+      earL: Math.max(P.twitch(t, [4.5, 15.9]), 0.65 * yawn), earR: Math.max(P.twitch(t, [5.6, 10.1, 13.9]), 0.65 * yawn),
+      alert: exc, crouch: 0.5 * wig + 0.2 * exc * (1 - swipe), wiggle: wig * 7 * Math.sin(TAU * 40 * t / T),
+      lean: 0.07 * swipe - 0.03 * lick, breath: osc(t, 5) * (1 + exc * 0.6),
+      paw,
       tailCurl: 2.7 + 0.5 * osc(t, 2) + 0.15 * osc(t, 5, 1) + exc * 0.55 * osc(t, 30),
     };
   }
@@ -354,8 +364,8 @@ SCENES.bukit = function (opts) {
 
   function drawClouds(ctx, t) {
     L.clouds.forEach((c) => {
-      const p = ((t / T + c.o) % 1 + 1) % 1;
-      const x = c.x + c.s * T * (p - 0.5), a = P.smooth(0, 0.22, p) * (1 - P.smooth(0.78, 1, p));
+      const p = ((2 * t / T + c.o) % 1 + 1) % 1;
+      const x = c.x + c.s * 5 * (T / 2) * (p - 0.5), a = P.smooth(0, 0.2, p) * (1 - P.smooth(0.8, 1, p));
       ctx.globalAlpha = 0.92 * a;
       ctx.drawImage(c.img, x - c.img.width / 2, c.y - c.img.height * 0.6);
     });
