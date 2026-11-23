@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Jambangan Bunga ASCII</title>
+<style>
+  :root { --bg: #0b0c1e; }
+  html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  #hint { position: fixed; left: 0; right: 0; top: 10px; text-align: center; color: #6b6f9a;
+          font: 12px ui-monospace, Menlo, Consolas, monospace; pointer-events: none; transition: opacity 1s; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hint">seret untuk putar &middot; ketik dua kali untuk mekar semula</div>
+<script>
+/*
+  Jambangan bunga liar ASCII 3D yang bergerak — versi pelayar web.
+  Sama seperti bunga.py, tetapi dilukis pada <canvas>.
+  Tukar pesanan:  bunga.html?msg=untuk%20awak%20sayang
+*/
+"use strict";
+const MESSAGE = new URLSearchParams(location.search).get("msg") || "bunga ini khas untuk awak <3";
+const GROW_SECONDS = 7, SPIN_SPEED = 0.35, TILT = 0.26, SEED = 2026;
+const CAM = 7, Y_OFF = 0.70, BASE_Y = -1.30;
+const LIGHT = unit([-0.35, 0.55, -0.75]);
+
+const COL = {
+  pink: ["#ff87ff", "#d75faf"], rose: ["#ff5faf", "#d7005f"], red: ["#ff0000", "#af0000"],
+  purple: ["#af87ff", "#875faf"], lilac: ["#d7afff", "#af87af"], blue: ["#5fafff", "#0087d7"],
+  yellow: ["#ffff5f", "#d7af00"], orange: ["#ffaf5f", "#d75f00"], white: ["#ffffff", "#bcbcbc"],
+  gold: ["#ffd700", "#af8700"], brown: ["#af5f5f", "#875f00"], stem: ["#87d787", "#5f875f"],
+  leaf: ["#5fd75f", "#008700"], wrap: ["#ffffd7", "#d7d787"], ribbon: ["#ff5fd7", "#af005f"],
+};
+const K_SURF = 0, K_STEM = 1, K_LEAF = 2, K_WRAP = 3, K_DOT = 4, K_CENTER = 5;
+const RAMPS = { 0: ".:-=oO0@", 2: ".,-~=+", 3: ".,:;=+*#", 5: ".:*#@" };
+
+// ------------------------------------------------------------ matematik 3D
+function add(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+function mul(a, s) { return [a[0] * s, a[1] * s, a[2] * s]; }
+function unit(a) { const n = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / n, a[1] / n, a[2] / n]; }
+function cross(a, b) { return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; }
+function frameOf(axis) {
+  const helper = Math.abs(axis[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0];
+  const u = unit(cross(helper, axis));
+  return [u, cross(axis, u)];
+}
+function frange(a, b, step) {
+  const n = Math.max(1, Math.round((b - a) / step)), out = [];
+  for (let i = 0; i <= n; i++) out.push(a + (b - a) * i / n);
+  return out;
+}
+function bezier(a, c, b, s) { const m = 1 - s; return [0,1,2].map(i => m*m*a[i] + 2*m*s*c[i] + s*s*b[i]); }
+function bezierTan(a, c, b, s) { return unit([0,1,2].map(i => 2*(1-s)*(c[i]-a[i]) + 2*s*(b[i]-c[i]))); }
+function dist(a, b) { return Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]); }
+function rng(seed) {             // mulberry32: rawak yang boleh diulang
+  return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+
+// ---------------------------------------------------------------- pembina
+function buildScene(h) {
+  const R = rng(SEED), uni = (a, b) => a + (b - a) * R(), pick = s => s[Math.floor(R() * s.length)];
+  const pts = [];
+  const put = (p, n, kind, color, appear, phase = null, ch = " ") => {
+    const sway = phase === null ? 0 : 0.016 * Math.max(0, p[1] - BASE_Y) ** 2;
+    pts.push([p[0], p[1], p[2], n[0], n[1], n[2], kind, COL[color][0], COL[color][1], ch,
+              Math.min(appear, 0.99), sway, phase || 0]);
+  };
+  const stem = (a, c, b, t0, t1, phase, color = "stem") => {
+    const L = dist(a, c) + dist(c, b);
+    for (const s of frange(0, 1, h / L)) put(bezier(a, c, b, s), bezierTan(a, c, b, s), K_STEM, color, t0 + (t1 - t0) * s, phase);
+  };
+  const leaf = (base, out, length, width, appear, phase) => {
+    const ld = unit(add(out, [0, 0.9, 0])), side = unit(cross(ld, [0, 1, 0])), nrm = unit(cross(side, ld));
+    for (const a of frange(0, 1, h / length)) {
+      const hw = width * Math.sin(Math.PI * a) ** 0.8;
+      const centre = add(add(base, mul(ld, a * length)), [0, -0.3 * length * a * a, 0]);
+      for (const b of (hw > h * 0.5 ? frange(-hw, hw, h) : [0]))
+        put(add(add(centre, mul(side, b)), mul(nrm, Math.abs(b) * 0.6)), nrm, K_LEAF, "leaf", appear + 0.12 * a, phase);
+    }
+  };
+  const daisy = (c, axis, Rd, petals, pcol, ccol, appear, phase, centre = 0.28) => {
+    const [u, w] = frameOf(axis), rc = Rd * centre;
+    for (const r of frange(0, rc, h)) {
+      const n = Math.floor(2 * Math.PI * r / h) + 1;
+      for (let j = 0; j < n; j++) {
+        const th = 2 * Math.PI * j / n, rad = add(mul(u, Math.cos(th)), mul(w, Math.sin(th)));
+        const p = add(add(c, mul(rad, r)), mul(axis, rc * 0.6 * (1 - (r / rc) ** 2)));
+        put(p, unit(add(axis, mul(rad, r / rc))), K_CENTER, ccol, appear, phase);
+      }
+    }
+    const off = uni(0, Math.PI), half = Math.PI / petals * 0.85, r0 = rc * 0.7;
+    for (let k = 0; k < petals; k++) {
+      const a0 = off + 2 * Math.PI * k / petals;
+      for (const r of frange(r0, Rd, h * 0.8)) {
+        const s = (r - r0) / (Rd - r0);
+        const wid = half * Math.sin(Math.PI * (0.08 + 0.92 * s)) ** 0.5;
+        const n = Math.floor(r * wid / h * 1.2);
+        for (let j = -n; j <= n; j++) {
+          const th = a0 + (n ? wid * j / n : 0), rad = add(mul(u, Math.cos(th)), mul(w, Math.sin(th)));
+          put(add(add(c, mul(rad, r)), mul(axis, Rd * 0.3 * s * s)), unit(add(axis, mul(rad, -0.6 * s))),
+              K_SURF, pcol, appear + 0.25 * s, phase);
+        }
+      }
+    }
+  };
+  const tulip = (c, axis, Rt, col, appear, phase) => {
+    const [u, w] = frameOf(axis), H = Rt * 1.5, off = uni(0, Math.PI);
+    for (const v of frange(0, 1, h / H)) {
+      const r = Rt * (0.25 + 0.75 * Math.sin(Math.PI * (0.1 + 0.6 * v)));
+      const n = Math.floor(2 * Math.PI * r / h) + 3;
+      for (let j = 0; j < n; j++) {
+        const th = 2 * Math.PI * j / n;
+        if (v > 0.78 + 0.22 * Math.abs(Math.cos(1.5 * (th - off)))) continue;
+        const rad = add(mul(u, Math.cos(th)), mul(w, Math.sin(th)));
+        put(add(add(c, mul(rad, r)), mul(axis, v * H)), unit(add(rad, mul(axis, -0.3))), K_SURF, col, appear + 0.2 * v, phase);
+      }
+    }
+  };
+  const lavender = (c, axis, L, col, appear, phase) => {
+    const [u, w] = frameOf(axis), steps = Math.max(4, Math.floor(L / (h * 1.6)));
+    for (let i = 0; i <= steps; i++) {
+      const v = i / steps, r = 0.055 * (1 - 0.55 * v);
+      for (let j = 0; j < 6; j++) {
+        const th = 2 * Math.PI * j / 6 + v * 7, rad = add(mul(u, Math.cos(th)), mul(w, Math.sin(th)));
+        put(add(add(c, mul(axis, v * L)), mul(rad, r)), rad, K_DOT, col, appear + 0.2 * v, phase, pick("oO0"));
+      }
+    }
+  };
+  const babysBreath = (c, axis, appear, phase) => {
+    const nb = 5 + Math.floor(R() * 4);
+    for (let b = 0; b < nb; b++) {
+      const d = unit(add(axis, [uni(-0.9, 0.9), uni(-0.3, 0.6), uni(-0.9, 0.9)]));
+      const end = add(c, mul(d, uni(0.08, 0.2)));
+      stem(c, add(c, mul(d, 0.05)), end, appear, appear + 0.05, phase);
+      const nd = 2 + Math.floor(R() * 3);
+      for (let k = 0; k < nd; k++)
+        put(add(end, [uni(-0.04, 0.04), uni(-0.02, 0.04), uni(-0.04, 0.04)]), d, K_DOT, "white", appear + 0.1, phase, pick("oo.*"));
+    }
+  };
+  const wrapping = () => {
+    const y0 = -1.75, y1 = -0.72, r0 = 0.07, r1 = 0.62, H = y1 - y0, slope = (r1 - r0) / H, opening = Math.PI / 2;
+    for (const v of frange(0, 1.07, h / (H * 1.15))) {
+      const y = y0 + v * H, r = r0 + (r1 - r0) * v, n = Math.floor(2 * Math.PI * r / h) + 4;
+      for (let j = 0; j < n; j++) {
+        const th = 2 * Math.PI * j / n;
+        const gap = Math.abs((((th - opening + Math.PI) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) - Math.PI);
+        if (gap < 0.65 * v || y > y1 + 0.07 * Math.sin(6 * th)) continue;
+        put([Math.cos(th) * r, y, Math.sin(th) * r], unit([Math.cos(th), -slope, Math.sin(th)]), K_WRAP, "wrap", 0.15 * v);
+      }
+    }
+    const yr = -1.38, rr = r0 + (r1 - r0) * (yr - y0) / H + 0.015;
+    for (const y of frange(yr - 0.04, yr + 0.04, h)) {
+      const n = Math.floor(2 * Math.PI * rr / h) + 4;
+      for (let j = 0; j < n; j++) { const th = 2 * Math.PI * j / n, rad = [Math.cos(th), 0, Math.sin(th)];
+        put([rad[0] * rr, y, rad[2] * rr], rad, K_SURF, "ribbon", 0.2); }
+    }
+    const front = -Math.PI / 2, rad = [Math.cos(front), 0, Math.sin(front)], tan = [-Math.sin(front), 0, Math.cos(front)];
+    const kn = mul(rad, rr + 0.02), knot = [kn[0], yr, kn[2]], nl = Math.floor(2 * Math.PI * 0.08 / h) + 6;
+    for (const side of [-1, 1]) {
+      for (let k = 0; k < nl; k++) { const a = 2 * Math.PI * k / nl;
+        const p = add(knot, add(mul(tan, side * (0.08 + 0.08 * Math.cos(a))), [0, 0.05 * Math.sin(a), 0]));
+        put(add(p, mul(rad, 0.03)), rad, K_SURF, "ribbon", 0.22); }
+      for (const s of frange(0, 1, h / 0.25)) {
+        const p = add(knot, add(mul(tan, side * 0.07 * s), [0, -0.25 * s, 0]));
+        put(add(p, mul(rad, 0.03)), rad, K_SURF, "ribbon", 0.22); }
+    }
+    for (let k = 0; k < 7; k++) { const a = 2 * Math.PI * k / 7;
+      for (const y of frange(-2.05, BASE_Y, h)) put([0.035 * Math.cos(a), y, 0.035 * Math.sin(a)], [0, 1, 0], K_STEM, "stem", 0.05); }
+  };
+
+  const FLOWERS = [
+    ["sunflower", "yellow", "brown"], ["daisy", "pink", "gold"], ["tulip", "red"], ["lavender", "purple"],
+    ["daisy", "white", "yellow"], ["daisy", "orange", "brown"], ["tulip", "rose"], ["aster", "purple", "gold"],
+    ["daisy", "pink", "gold"], ["lavender", "blue"], ["tulip", "yellow"], ["daisy", "white", "gold"],
+    ["aster", "lilac", "yellow"], ["daisy", "red", "gold"],
+  ];
+  const base = [0, BASE_Y, 0], golden = Math.PI * (3 - Math.sqrt(5));
+  wrapping();
+  const stalk = (el, az, d0, tHead) => {
+    const d = [Math.sin(el) * Math.cos(az), Math.cos(el), Math.sin(el) * Math.sin(az)];
+    const head = add(base, mul(d, d0)), sb = add(base, [uni(-0.04, 0.04), 0, uni(-0.04, 0.04)]);
+    const ctrl = [sb[0] + d[0] * d0 * 0.3, sb[1] + d[1] * d0 * 0.65, sb[2] + d[2] * d0 * 0.3];
+    const phase = uni(0, 2 * Math.PI);
+    stem(sb, ctrl, head, 0.03 + 0.12 * R(), tHead, phase);
+    return { d, head, axis: unit(add(d, [0, 0.6, 0])), phase, curve: [sb, ctrl, head] };
+  };
+  const n = 16;
+  for (let i = 0; i < n; i++) {
+    const f = i / (n - 1), el = (3 + 60 * Math.sqrt(f)) * Math.PI / 180;
+    const az = i * golden + uni(-0.2, 0.2), tHead = 0.5 + 0.2 * R();
+    const s = stalk(el, az, uni(2.0, 2.3) - 0.25 * f, tHead);
+    if (R() < 0.55) {
+      const sp = uni(0.35, 0.6), out = el > 0.2 ? unit([s.d[0], 0, s.d[2]]) : [1, 0, 0];
+      leaf(bezier(...s.curve, sp), out, uni(0.28, 0.4), 0.07, tHead * sp + 0.05, s.phase);
+    }
+    const [kind, c1, c2] = FLOWERS[i % FLOWERS.length];
+    if (kind === "sunflower") daisy(s.head, s.axis, 0.27, 16, c1, c2, tHead, s.phase, 0.45);
+    else if (kind === "daisy") daisy(s.head, s.axis, uni(0.19, 0.24), pick([8, 10, 12]), c1, c2, tHead, s.phase);
+    else if (kind === "aster") daisy(s.head, s.axis, uni(0.17, 0.2), 14, c1, c2, tHead, s.phase, 0.32);
+    else if (kind === "tulip") tulip(s.head, s.axis, uni(0.12, 0.14), c1, tHead, s.phase);
+    else lavender(s.head, s.axis, uni(0.3, 0.4), c1, tHead, s.phase);
+  }
+  for (let i = 0; i < 8; i++) {
+    const el = uni(15, 62) * Math.PI / 180, az = uni(0, 2 * Math.PI), tHead = 0.6 + 0.25 * R();
+    const s = stalk(el, az, uni(1.6, 2.0), tHead);
+    babysBreath(s.head, s.axis, tHead, s.phase);
+  }
+  return pts;
+}
+
+// ---------------------------------------------------------------- lukisan
+const cv = document.getElementById("c"), ctx = cv.getContext("2d");
+const FONT = 'ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace';
+let view, scene, stars, petals, ext, ASP;
+let t0 = performance.now(), last = t0, dragAngle = 0, dragging = null;
+
+function extents(sc) {
+  const ct = Math.cos(TILT), st = Math.sin(TILT);
+  let xmax = 0, ymin = 1e9, ymax = -1e9;
+  for (let a = 0; a < 360; a += 15) {
+    const ca = Math.cos(a * Math.PI / 180), sa = Math.sin(a * Math.PI / 180);
+    for (let i = 0; i < sc.length; i += 7) {
+      const p = sc[i], y = p[1] + Y_OFF, x1 = p[0] * ca + p[2] * sa, z1 = p[2] * ca - p[0] * sa;
+      const y2 = y * ct + z1 * st, z2 = z1 * ct - y * st, k = CAM / (CAM + z2);
+      xmax = Math.max(xmax, Math.abs(x1 * k)); ymin = Math.min(ymin, y2 * k); ymax = Math.max(ymax, y2 * k);
+    }
+  }
+  return [xmax + 0.05, ymin - 0.05, ymax + 0.08];
+}
+
+function setup() {
+  const dpr = Math.min(2, window.devicePixelRatio || 1), W = innerWidth, H = innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // saiz fon: sasarkan ~100 lajur di skrin lebar, ~90 di telefon
+  const fs = Math.max(5, Math.min(16, Math.min(W / (W > H ? 120 : 92) / 0.6, H / 60 / 1.15)));
+  ctx.font = `${fs}px ${FONT}`;
+  const cw = ctx.measureText("M").width, lh = fs * 1.15;
+  ASP = lh / cw;
+  const cols = Math.floor(W / cw), rows = Math.floor(H / lh);
+  if (!ext) ext = extents(buildScene(0.05));
+  const [xmax, ymin, ymax] = ext, usable = rows - 2;
+  const S = Math.min((usable - 1) / (ymax - ymin), (cols - 2) / (2 * xmax * ASP));
+  view = { cols, rows, S, cx: cols / 2, cy: (usable - (ymax - ymin) * S) / 2 + ymax * S, cw, lh, fs,
+           ox: (W - cols * cw) / 2, oy: (H - rows * lh) / 2 };
+  scene = buildScene(Math.max(0.012, 0.32 / S));
+  stars = Array.from({ length: Math.floor(cols * rows / 45) }, () =>
+    [Math.floor(Math.random() * cols), Math.floor(Math.random() * (rows - 2)), Math.random() * 6.3, 0.6 + Math.random() * 1.6]);
+  petals = Array.from({ length: Math.max(6, Math.floor(cols / 12)) }, () =>
+    [Math.random() * (cols - 1), -Math.random() * rows, 1.5 + Math.random() * 2, Math.random() * 6.3,
+     "*o',"[Math.floor(Math.random() * 4)], ["#ff87ff", "#ff5faf", "#ffffff", "#ffafff"][Math.floor(Math.random() * 4)]]);
+}
+
+function frame(now) {
+  const t = (now - t0) / 1000, dt = Math.min(0.1, (now - last) / 1000);
+  last = now;
+  const x = Math.min(1, t / GROW_SECONDS), g = x * x * (3 - 2 * x);
+  const { cols, rows, S, cx, cy } = view, size = cols * rows;
+  const zbuf = new Float32Array(size).fill(1e9), chars = new Array(size).fill(" "), colors = new Array(size);
+  const ang = t * SPIN_SPEED + dragAngle, ca = Math.cos(ang), sa = Math.sin(ang);
+  const ct = Math.cos(TILT), st = Math.sin(TILT), [lx, ly, lz] = LIGHT, kS = S * ASP;
+
+  for (let q = 0; q < scene.length; q++) {
+    const P = scene[q];
+    if (P[10] > g) continue;
+    let x0 = P[0], z0 = P[2];
+    const sway = P[11];
+    if (sway) { x0 += sway * Math.sin(t * 1.3 + P[12]); z0 += sway * Math.cos(t * 1.05 + P[12] * 1.7); }
+    const x1 = x0 * ca + z0 * sa, z1 = z0 * ca - x0 * sa, y1 = P[1] + Y_OFF;
+    const y2 = y1 * ct + z1 * st, z2 = z1 * ct - y1 * st, k = CAM / (CAM + z2);
+    const sx = Math.round(cx + x1 * k * kS), sy = Math.round(cy - y2 * k * S);
+    if (sx < 0 || sx >= cols || sy < 0 || sy >= rows - 2) continue;
+    const i = sy * cols + sx;
+    if (z2 >= zbuf[i]) continue;
+    zbuf[i] = z2;
+    const nx = P[3], ny = P[4], nz = P[5], kind = P[6];
+    const nx1 = nx * ca + nz * sa, nz1 = nz * ca - nx * sa, ny2 = ny * ct + nz1 * st;
+    let ch = P[9], col;
+    if (kind === K_STEM) {
+      const deg = ((Math.atan2(ny2, nx1) * 180 / Math.PI) % 180 + 180) % 180;
+      ch = deg < 22.5 || deg >= 157.5 ? "-" : deg < 67.5 ? "/" : deg < 112.5 ? "|" : "\\";
+      col = z2 < 0.2 ? P[7] : P[8];
+    } else {
+      const nz2 = nz1 * ct - ny * st;
+      if (kind === K_DOT) col = nz2 < 0.3 ? P[7] : P[8];
+      else {
+        const lum = 0.15 + 0.85 * Math.abs(nx1 * lx + ny2 * ly + nz2 * lz), ramp = RAMPS[kind];
+        ch = ramp[Math.min(ramp.length - 1, Math.floor(lum * ramp.length))];
+        col = lum > 0.4 ? P[7] : P[8];
+      }
+    }
+    chars[i] = ch; colors[i] = col;
+  }
+
+  for (const [sx, sy, ph, sp] of stars) {             // bintang berkelip
+    const i = sy * cols + sx;
+    if (chars[i] !== " ") continue;
+    const b = Math.sin(t * sp + ph);
+    if (b > 0.3) { chars[i] = b > 0.9 ? "*" : b > 0.7 ? "+" : "."; colors[i] = b > 0.7 ? "#ffffaf" : "#808080"; }
+  }
+  if (g >= 1) for (const p of petals) {               // kelopak gugur
+    p[1] += p[2] * dt; p[0] += Math.sin(t * 1.4 + p[3]) * dt * 1.5;
+    if (p[1] >= rows - 2) { p[0] = Math.random() * (cols - 1); p[1] = -1; }
+    const sx = Math.floor(p[0]), sy = Math.floor(p[1]);
+    if (sx >= 0 && sx < cols && sy >= 0 && sy < rows - 2) { chars[sy * cols + sx] = p[4]; colors[sy * cols + sx] = p[5]; }
+  }
+
+  ctx.fillStyle = "#0b0c1e";
+  ctx.fillRect(0, 0, innerWidth, innerHeight);
+  ctx.textBaseline = "top";
+  const { cw, lh, ox, oy } = view;
+  let cur = null;
+  for (let i = 0; i < size; i++) {
+    const ch = chars[i];
+    if (ch === " ") continue;
+    if (colors[i] !== cur) { cur = colors[i]; ctx.fillStyle = cur; }
+    ctx.fillText(ch, ox + (i % cols) * cw, oy + Math.floor(i / cols) * lh);
+  }
+
+  const tMsg = GROW_SECONDS * 0.85;                   // pesanan ditaip
+  if (t > tMsg) {
+    const shown = MESSAGE.slice(0, Math.floor((t - tMsg) * 14));
+    const fs = Math.min(20, Math.max(13, view.fs * 1.4));
+    ctx.font = `${fs}px ${FONT}`;
+    const mw = ctx.measureText(MESSAGE).width, wave = ["#ff87ff", "#ffafff", "#ffd7ff", "#ffffff", "#ffd7ff", "#ffafff"];
+    let x = (innerWidth - mw) / 2;
+    const y = oy + (rows - 1.6) * lh;
+    for (let j = 0; j < shown.length; j++) {
+      ctx.fillStyle = wave[(j + Math.floor(t * 8)) % wave.length];
+      ctx.fillText(shown[j], x, y);
+      x += ctx.measureText(shown[j]).width;
+    }
+    ctx.font = `${view.fs}px ${FONT}`;
+  }
+  requestAnimationFrame(frame);
+}
+
+// seret untuk putar, ketik dua kali untuk mekar semula
+cv.addEventListener("pointerdown", e => { dragging = e.clientX; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener("pointermove", e => { if (dragging !== null) { dragAngle += (e.clientX - dragging) * 0.01; dragging = e.clientX; } });
+cv.addEventListener("pointerup", () => { dragging = null; });
+cv.addEventListener("dblclick", () => { t0 = performance.now(); });
+setTimeout(() => { document.getElementById("hint").style.opacity = 0; }, 5000);
+let rt;
+addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(setup, 150); });
+
+setup();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
