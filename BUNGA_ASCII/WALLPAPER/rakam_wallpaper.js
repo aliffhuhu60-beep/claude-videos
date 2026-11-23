@@ -1,4 +1,5 @@
-// node record.js <html> <out.mp4> <width> <height> <fps> <seconds> [testTimes]
+// node rakam_wallpaper.js <html> <out.mp4> <width> <height> <fps> <seconds> [testTimes]
+// gelung = <seconds> (cth. 15 untuk skrin kunci Samsung)
 const { chromium } = require('playwright');
 const { spawn } = require('child_process');
 const [html, out, W, H, FPS, SEC, test] = process.argv.slice(2);
@@ -6,7 +7,7 @@ const [html, out, W, H, FPS, SEC, test] = process.argv.slice(2);
   const b = await chromium.launch({ args: ['--force-color-profile=srgb'] });
   const p = await (await b.newContext({ viewport: { width: +W, height: +H }, deviceScaleFactor: 1 })).newPage();
   p.on('pageerror', e => console.error('PAGE ERROR', e.message));
-  await p.goto('file://' + html + '?wallpaper&capture');
+  await p.goto('file://' + html + '?wallpaper&capture&loop=' + SEC);
   await p.waitForFunction(() => window.renderAt);
   const shot = async t => { await p.evaluate(t => window.renderAt(t), t); return p.screenshot({ type: 'png' }); };
   if (test) {

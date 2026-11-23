@@ -22,12 +22,13 @@
   Geometri sama seperti bunga.py, dilukis pada <canvas> dengan warna gradien & kesan glow.
   Tukar pesanan:  bunga.html?msg=untuk%20awak%20sayang
   Mod wallpaper (tiada tulisan, gerakan berulang setiap 20 s):  bunga.html?wallpaper
+  Gelung 15 s (skrin kunci Samsung):  bunga.html?wallpaper&loop=15
 */
 "use strict";
 const MESSAGE = new URLSearchParams(location.search).get("msg") || "bunga ini khas untuk awak <3";
 const QS = new URLSearchParams(location.search);
 const WALL = QS.has("wallpaper"), CAPTURE = QS.has("capture");
-const LOOP = 20;                               // semua gerakan berulang tepat setiap 20 saat
+const LOOP = +QS.get("loop") || 20;            // semua gerakan berulang tepat setiap LOOP saat (?loop=15)
 const TAU = 2 * Math.PI, W_ = TAU / LOOP;
 const GROW_SECONDS = 7, SPIN_SPEED = W_, TILT = 0.40, SEED = 2026;
 const CAM = 7, Y_OFF = 0.70, BASE_Y = -1.30, LEVELS = 14;
