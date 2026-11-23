@@ -185,11 +185,10 @@ SCENES.bukit = function (opts) {
       base: '#d9dfec', jit: 7,
       color: (u, v) => {
         let col = P.mix(P.hex('#aab4d2'), P.hex('#f7f7fb'), P.clamp(0.5 + u * 1.6 + v * 0.25, 0, 1));
-        if (v > 0.6 && v < 0.64) col = P.mix(col, P.hex('#b5bdd8'), 0.4);
         return col;
       },
       edge: (u) => (u > 0 ? '#f2f3f8' : '#b8c0da'),
-      whisker: 'rgba(235,240,252,0.5)', snout: '#e4e8f2', snoutRim: 'rgba(170,180,215,0.5)',
+      whisker: 'rgba(235,240,252,0.5)',
       pawRim: 'rgba(160,170,210,0.35)',
     });
   }
@@ -206,33 +205,34 @@ SCENES.bukit = function (opts) {
   const buddyA = (t) => P.keys(t, [[7.6, 0], [8.2, 1], [15.0, 1], [15.8, 0]]);
   function catState(t) {
     const head = [CAT.x, CAT.base - CAT.h * 0.74];
-    // 0.9-3.8 yawn toward the moon | 7-9 shooting star | 9.4-16.4 plays with firefly | 16.6-19.6 licks its paw
-    let lx = P.keys(t, [[0, 0.25], [0.9, 0.25], [1.4, 0.8], [3.2, 0.8], [3.8, 0.25], [4, 0.25], [5, 0.05], [6.9, 0.05], [7.5, -0.6], [8.5, -0.35], [9.3, 0],
-      [16.3, 0], [16.9, -0.6], [19.2, -0.6], [19.8, 0.25], [20, 0.25]]);
-    let ly = P.keys(t, [[0, 0.35], [0.9, 0.35], [1.4, 0.8], [3.2, 0.8], [3.8, 0.35], [6.9, 0.3], [7.5, 0.9], [8.5, 0.6], [9.3, 0.1],
-      [16.3, 0.1], [16.9, -0.4], [19.2, -0.4], [19.8, 0.35], [20, 0.35]]);
+    // 0.8-3.8 hears something: ear swivels, head turns & cocks | 7-9 shooting star | 9.4-16.3 plays with firefly
+    // 16.5-17.4 head shake | 17.8-19.4 sniffs the breeze
+    let lx = P.keys(t, [[0, 0.25], [1.1, 0.25], [1.6, 0.7], [3.1, 0.7], [3.8, 0.25], [4, 0.25], [5, 0.05], [6.9, 0.05], [7.5, -0.6], [8.5, -0.35], [9.3, 0],
+      [16.3, 0], [17.6, 0], [18.1, 0.15], [19.3, 0.15], [19.9, 0.25], [20, 0.25]]);
+    let ly = P.keys(t, [[0, 0.35], [1.1, 0.35], [1.6, 0.2], [3.1, 0.2], [3.8, 0.35], [6.9, 0.3], [7.5, 0.9], [8.5, 0.6], [9.3, 0.1],
+      [16.3, 0.1], [17.5, 0.2], [18.0, 0.6], [19.3, 0.6], [19.9, 0.35], [20, 0.35]]);
+    let tilt = P.keys(t, [[1.7, 0], [2.1, 0.3], [2.6, 0.3], [2.85, -0.16], [3.2, -0.16], [3.7, 0]]);
     const w = P.keys(t, [[9.4, 0], [10.2, 1], [15.4, 1], [16.3, 0]]);
     if (w > 0) {
       const [bx, by] = buddyAt(t);
       lx += (P.clamp((bx - head[0]) / 260, -1, 1) - lx) * w;
       ly += (P.clamp((head[1] - by) / 420, -0.3, 1) - ly) * w;
     }
-    const yawn = P.keys(t, [[1.3, 0], [2.0, 1], [2.7, 1], [3.3, 0]]);
-    const lick = P.keys(t, [[16.8, 0], [17.25, 1], [19.0, 1], [19.4, 0]]);
-    const lickBeat = Math.max(0, Math.sin(TAU * 40 * t / T));
-    ly += lick * 0.1 * lickBeat;
-    const snout = Math.max(P.keys(t, [[0.9, 0], [1.4, 1], [3.2, 1], [3.8, 0]]), P.keys(t, [[16.4, 0], [16.9, 1], [19.2, 1], [19.8, 0]]));
+    const shake = P.keys(t, [[16.5, 0], [16.6, 1], [17.0, 1], [17.35, 0]]), sb = Math.sin(TAU * 100 * t / T);
+    lx += shake * 0.4 * sb; tilt += shake * 0.12 * Math.sin(TAU * 100 * t / T + 1);
+    const sniffE = P.keys(t, [[17.9, 0], [18.2, 1], [19.0, 1], [19.3, 0]]), sniff = sniffE * Math.sin(TAU * 80 * t / T);
+    ly += sniffE * 0.05 * Math.max(0, sniff);
     const exc = P.keys(t, [[9.8, 0], [10.8, 1], [14.6, 1], [16.2, 0]]);
     const wig = P.keys(t, [[11.6, 0], [11.9, 1], [12.5, 1], [12.75, 0]]);
     const swipe = P.keys(t, [[12.75, 0], [12.97, 1], [13.13, 0.78], [13.3, 1], [13.72, 0]]);
-    const paw = swipe > 0.001 ? { side: 1, amt: swipe, wave: 0.15 * Math.sin(TAU * 60 * t / T) * swipe }
-      : { side: -1, amt: lick, up: -1.36, wave: 0.09 * lickBeat * lick };
+    const flap = shake * Math.abs(sb) * 0.8;
     return {
-      lx, ly, t, T, snout, open: yawn, tongue: lick * lickBeat, stretch: yawn,
-      earL: Math.max(P.twitch(t, [4.5, 15.9]), 0.65 * yawn), earR: Math.max(P.twitch(t, [5.6, 10.1, 13.9]), 0.65 * yawn),
-      alert: exc, crouch: 0.5 * wig + 0.2 * exc * (1 - swipe), wiggle: wig * 7 * Math.sin(TAU * 40 * t / T),
-      lean: 0.07 * swipe - 0.03 * lick, breath: osc(t, 5) * (1 + exc * 0.6),
-      paw,
+      lx, ly, tilt, t, T, sniff,
+      earL: Math.max(P.twitch(t, [4.5, 15.9]), P.keys(t, [[1.9, 0], [2.2, 0.5], [2.9, 0.5], [3.2, 0]]), flap),
+      earR: Math.max(P.twitch(t, [5.6, 10.1, 13.9]), P.keys(t, [[0.75, 0], [0.95, 0.75], [1.6, 0.75], [1.9, 0]]), flap),
+      alert: Math.max(exc, P.keys(t, [[0.9, 0], [1.3, 0.8], [3.2, 0.8], [3.8, 0]])), crouch: 0.5 * wig + 0.2 * exc * (1 - swipe), wiggle: wig * 7 * Math.sin(TAU * 40 * t / T),
+      lean: 0.07 * swipe, breath: osc(t, 5) * (1 + exc * 0.6),
+      paw: { side: 1, amt: swipe, wave: 0.15 * Math.sin(TAU * 60 * t / T) * swipe },
       tailCurl: 2.7 + 0.5 * osc(t, 2) + 0.15 * osc(t, 5, 1) + exc * 0.55 * osc(t, 30),
     };
   }

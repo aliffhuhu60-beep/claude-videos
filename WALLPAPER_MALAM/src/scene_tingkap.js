@@ -331,7 +331,7 @@ SCENES.tingkap = function (opts) {
       base: '#0c0b11', jit: 4,
       color: (u, v, R) => P.pick(R, [P.hex('#141320'), P.hex('#1b1a27'), P.hex('#0f0e16'), P.hex('#22212f')]),
       edge: (u) => (u > 0 ? '#4a5378' : '#3a2522'),
-      whisker: 'rgba(235,238,248,0.8)', snout: '#15141d', snoutRim: 'rgba(140,160,220,0.7)',
+      whisker: 'rgba(235,238,248,0.8)',
       pawRim: 'rgba(130,150,210,0.45)', toe: 'rgba(120,135,190,0.45)',
       rim: (g, path, d) => {
         const { ox, oy, h, cw } = d;
@@ -355,35 +355,55 @@ SCENES.tingkap = function (opts) {
   const mothAt = (t) => { const [x, y] = P.pathAt(t, MOTH); return [x + 12 * Math.sin(TAU * 40 * t / T), y + 9 * Math.sin(TAU * 52 * t / T + 2)]; };
   const mothA = (t) => P.keys(t, [[1.4, 0], [2.0, 1], [14.6, 1], [15.4, 0]]);
   const mothS = (t) => P.keys(t, [[10.5, 1], [15.4, 0.45]]); // shrinks as it flies far into the garden
+  // a bat flits across the moonlit sky
+  const BAT = [[18.4, -60, 430], [19.2, 280, 320], [19.8, 540, 300], [20.4, 790, 200], [21.0, 1150, 130]];
+  const batAt = (t) => { const [x, y] = P.pathAt(t, BAT); return [x, y + 14 * Math.sin(TAU * 45 * t / T)]; };
+  function drawBat(ctx, t) {
+    if (t < 18.4 || t > 21.0) return;
+    const [x, y] = batAt(t), f = Math.sin(TAU * 180 * t / T), s = 1.7;
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.fillStyle = '#080b17';
+    [-1, 1].forEach((d) => {
+      ctx.beginPath(); ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(d * 10, -10 * f - 4, d * 22, -14 * f);
+      ctx.quadraticCurveTo(d * 17, -4 * f + 2, d * 13, -2 * f + 4);
+      ctx.quadraticCurveTo(d * 8, 0, d * 2, 4); ctx.closePath(); ctx.fill();
+    });
+    ctx.beginPath(); ctx.ellipse(0, 1, 3.5, 6, 0, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-3, -4); ctx.lineTo(-2.5, -9); ctx.lineTo(-0.5, -5); ctx.lineTo(0.5, -5); ctx.lineTo(2.5, -9); ctx.lineTo(3, -4); ctx.fill();
+    ctx.restore();
+  }
   function catState(t) {
     const head = [CAT.x, CAT.base - CAT.h * 0.74];
-    // 1.8-15 watches & swats the moth | 15.6-18 shooting star | 18.4-22.6 licks its paw | 24.2-27.2 yawns
-    let lx = P.keys(t, [[0, -0.1], [15.3, -0.1], [15.9, -0.15], [16.6, 0.1], [17.2, 0.15], [18.0, -0.1], [18.4, -0.1], [18.9, 0.6], [22.0, 0.6], [22.6, -0.1],
-      [24.2, -0.1], [24.7, -0.8], [26.4, -0.8], [27.2, -0.1], [30, -0.1]]);
-    let ly = P.keys(t, [[0, 0.15], [15.3, 0.15], [15.9, 0.95], [17.2, 0.8], [18.0, 0.15], [18.4, 0.15], [18.9, -0.4], [22.0, -0.4], [22.6, 0.15],
-      [24.2, 0.15], [24.7, 0.8], [26.4, 0.8], [27.2, 0.15], [30, 0.15]]);
-    const w = P.keys(t, [[1.8, 0], [2.6, 1], [14.3, 1], [15.1, 0]]);
-    if (w > 0) {
-      const [mx, my] = mothAt(t);
+    // 1.8-15 watches & swats the moth | 15.6-18 shooting star | 18.4-21 follows a bat, then cocks its head
+    // 24-24.9 head shake | 25.3-27.2 sniffs the breeze
+    let lx = P.keys(t, [[0, -0.1], [15.3, -0.1], [15.9, -0.15], [16.6, 0.1], [17.2, 0.15], [18.0, -0.1], [21.0, 0.3], [22.6, 0.3], [23.2, -0.1],
+      [25.0, -0.1], [25.5, -0.25], [27.0, -0.25], [27.6, -0.1], [30, -0.1]]);
+    let ly = P.keys(t, [[0, 0.15], [15.3, 0.15], [15.9, 0.95], [17.2, 0.8], [18.0, 0.15], [21.0, 0.6], [22.6, 0.55], [23.2, 0.15],
+      [25.0, 0.15], [25.5, 0.6], [27.0, 0.6], [27.6, 0.15], [30, 0.15]]);
+    let tilt = P.keys(t, [[21.0, 0], [21.4, 0.28], [21.9, 0.28], [22.2, -0.14], [22.6, -0.14], [23.1, 0]]);
+    const track = (w, at) => {
+      if (w <= 0) return;
+      const [mx, my] = at(t);
       lx += (P.clamp((mx - head[0]) / 300, -1, 1) - lx) * w;
       ly += (P.clamp((head[1] - my) / 520, -0.3, 1) - ly) * w;
-    }
-    const lick = P.keys(t, [[18.5, 0], [19.0, 1], [21.8, 1], [22.3, 0]]);
-    const lickBeat = Math.max(0, Math.sin(TAU * 60 * t / T));
-    ly += lick * 0.1 * lickBeat;
-    const yawn = P.keys(t, [[24.6, 0], [25.3, 1], [26.0, 1], [26.6, 0]]);
-    const snout = Math.max(P.keys(t, [[18.4, 0], [18.9, 1], [22.0, 1], [22.6, 0]]), P.keys(t, [[24.2, 0], [24.7, 1], [26.4, 1], [27.2, 0]]));
+    };
+    track(P.keys(t, [[1.8, 0], [2.6, 1], [14.3, 1], [15.1, 0]]), mothAt);
+    track(P.keys(t, [[18.3, 0], [18.8, 1], [20.5, 1], [21.0, 0]]), batAt);
+    const shake = P.keys(t, [[24.0, 0], [24.1, 1], [24.5, 1], [24.85, 0]]), sb = Math.sin(TAU * 150 * t / T);
+    lx += shake * 0.4 * sb; tilt += shake * 0.12 * Math.sin(TAU * 150 * t / T + 1);
+    const sniffE = P.keys(t, [[25.5, 0], [25.8, 1], [26.7, 1], [27.0, 0]]), sniff = sniffE * Math.sin(TAU * 120 * t / T);
+    ly += sniffE * 0.05 * Math.max(0, sniff);
     const exc = P.keys(t, [[2.5, 0], [4, 0.6], [8, 1], [11, 1], [14, 0.4], [15, 0]]);
     const wig = P.keys(t, [[7.9, 0], [8.2, 1], [8.8, 1], [9.05, 0]]);
     const swipe = P.keys(t, [[9.0, 0], [9.22, 1], [9.38, 0.78], [9.55, 1], [10.0, 0]]);
-    const paw = swipe > 0.001 ? { side: -1, amt: swipe, wave: 0.15 * Math.sin(TAU * 90 * t / T) * swipe }
-      : { side: 1, amt: lick, up: -1.36, wave: 0.09 * lickBeat * lick };
+    const flap = shake * Math.abs(sb) * 0.8;
     return {
-      lx, ly, t, T, snout, open: yawn, tongue: lick * lickBeat, stretch: yawn,
-      earL: Math.max(P.twitch(t, [0.8, 6.6, 12.0]), 0.65 * yawn), earR: Math.max(P.twitch(t, [4.2, 23.0, 28.6]), 0.65 * yawn),
-      alert: exc, crouch: 0.5 * wig + 0.2 * exc * (1 - swipe), wiggle: wig * 8 * Math.sin(TAU * 60 * t / T),
-      lean: -0.07 * swipe + 0.03 * lick, breath: osc(t, 8) * (1 + exc * 0.6),
-      paw,
+      lx, ly, tilt, t, T, sniff,
+      earL: Math.max(P.twitch(t, [0.8, 6.6, 12.0]), flap),
+      earR: Math.max(P.twitch(t, [4.2, 28.6]), P.keys(t, [[20.9, 0], [21.2, 0.6], [22.3, 0.6], [22.6, 0]]), flap),
+      alert: Math.max(exc, P.keys(t, [[18.3, 0], [18.8, 0.8], [22.6, 0.8], [23.2, 0]])), crouch: 0.5 * wig + 0.2 * exc * (1 - swipe), wiggle: wig * 8 * Math.sin(TAU * 60 * t / T),
+      lean: -0.07 * swipe, breath: osc(t, 8) * (1 + exc * 0.6),
+      paw: { side: -1, amt: swipe, wave: 0.15 * Math.sin(TAU * 90 * t / T) * swipe },
       tailCurl: 2.5 + 0.55 * osc(t, 3, 0.6) + 0.15 * osc(t, 7) + exc * 0.6 * osc(t, 45),
     };
   }
@@ -507,6 +527,7 @@ SCENES.tingkap = function (opts) {
       P.glow(ctx, MOON.x, MOON.y, 260, [170, 185, 240], 0.3 * hal);
       ctx.drawImage(L.moon, MOON.x - L.moon.width / 2, MOON.y - L.moon.height / 2);
       drawWisps(ctx, t);
+      drawBat(ctx, t);
       ctx.drawImage(L.back, 0, 0);
       // lit windows of the distant house
       L.windows.forEach((w) => {

@@ -265,7 +265,7 @@
       p.closePath();
       return p;
     };
-    const paint = (path, count, angleFn) => {
+    const paint = (path, count, angleFn, rimTop) => {
       const c = P.canvas(cw, ch), g = c.getContext('2d');
       g.fillStyle = style.base; g.fill(path);
       P.fillStrokes(g, R, {
@@ -273,7 +273,7 @@
         color: (x, y, R) => style.color((x - ox) / (h * sx), (oy - y) / h, R),
         angle: angleFn || ((x, y, R) => -Math.PI / 2 + (x - ox) / h * 0.9 + (R() - 0.5) * 0.5), len: [8, 22].map((v) => v * h / 315), w: [3, 7], a: [0.4, 0.78],
       });
-      if (style.rim) style.rim(g, path, { ox, oy, h, cw, ch });
+      if (style.rim) { g.save(); if (rimTop) { g.beginPath(); g.rect(0, 0, cw, rimTop); g.clip(); } style.rim(g, path, { ox, oy, h, cw, ch }); g.restore(); }
       g.lineWidth = 8;
       const n = Math.round(count / 14);
       for (let i = 0, tries = 0; i < n && tries < 30000; tries++) {
@@ -287,7 +287,15 @@
     const area = h * h / (315 * 315);
     const rig = { h, sx, ox, oy, style };
     rig.body = paint(body, Math.round(1800 * area));
-    rig.head = paint(head, Math.round(700 * area), (x, y, R) => -Math.PI / 2 + (x - ox) / h * 2.2 + (R() - 0.5) * 0.6);
+    rig.head = paint(head, Math.round(700 * area), (x, y, R) => -Math.PI / 2 + (x - ox) / h * 2.2 + (R() - 0.5) * 0.6, Y(-0.65));
+    { // feather the bottom of the head so it melts into the neck when it turns or tilts
+      const m = P.canvas(cw, ch), mg = m.getContext('2d'), fg = mg.createLinearGradient(0, Y(-0.615), 0, Y(-0.57));
+      fg.addColorStop(0, 'rgba(0,0,0,0)'); fg.addColorStop(1, 'rgba(0,0,0,1)');
+      mg.fillStyle = fg; mg.fillRect(X(-0.12), Y(-0.615), X(0.12) - X(-0.12), h * 0.1);
+      const hg = rig.head.getContext('2d');
+      hg.globalCompositeOperation = 'destination-out'; hg.filter = `blur(${Math.round(h * 0.02)}px)`; hg.drawImage(m, 0, 0);
+      hg.filter = 'none'; hg.globalCompositeOperation = 'source-over';
+    }
     rig.earL = paint(ear(-1), Math.round(90 * area)); rig.earR = paint(ear(1), Math.round(90 * area));
     // front paw, painted along +x from its shoulder pivot
     const pl = 0.37 * h, pw = 0.052 * h, pcw = Math.round(pl + 0.2 * h), pch = Math.round(0.2 * h), pox = 0.08 * h, poy = pch / 2;
@@ -308,7 +316,7 @@
     return rig;
   };
 
-  // s: { lx, ly, earL, earR, alert, paw:{side, amt, wave}, lean, breath, crouch, wiggle, t, tail(ctx) }
+  // s: { lx, ly, tilt, earL, earR, alert, sniff, paw:{side, amt, wave}, lean, breath, crouch, wiggle, t, T, tail(ctx) }
   P.drawCat = function (ctx, rig, x, base, s) {
     const h = rig.h, sx = rig.sx;
     ctx.save();
@@ -323,18 +331,18 @@
       ctx.drawImage(rig.paw.c, -rig.paw.ox, -rig.paw.oy); ctx.restore();
     }
     const b = s.breath || 0, cr = s.crouch || 0;
-    ctx.scale(1 + 0.003 * b + 0.02 * cr - 0.01 * (s.stretch || 0), 1 + 0.008 * b - 0.04 * cr + 0.035 * (s.stretch || 0));
+    ctx.scale(1 + 0.003 * b + 0.02 * cr, 1 + 0.008 * b - 0.04 * cr);
     ctx.drawImage(rig.body, -rig.ox, -rig.oy);
     // head
     const lx = s.lx || 0, ly = s.ly || 0;
     ctx.translate(0, -0.62 * h);
-    ctx.rotate(lx * 0.17);
+    ctx.rotate(lx * 0.17 + (s.tilt || 0));
     ctx.translate(lx * 0.045 * h * sx, ly * 0.018 * h);
     ctx.scale(1 - Math.abs(lx) * 0.04, 1 - ly * 0.035);
     ctx.translate(0, 0.62 * h);
     if (rig.style.whisker) {
       ctx.strokeStyle = rig.style.whisker; ctx.lineCap = 'round';
-      const tw = 0.02 * Math.sin(P.TAU * 17 * (s.t || 0) / (s.T || 20)); // loop-safe
+      const tw = 0.02 * Math.sin(P.TAU * 17 * (s.t || 0) / (s.T || 20)) + 0.035 * (s.sniff || 0); // loop-safe
       [-1, 1].forEach((sd) => {
         const f = P.clamp(1 + sd * lx * 0.5, 0.45, 1.5);
         for (let k = 0; k < 3; k++) {
@@ -355,35 +363,6 @@
       ctx.drawImage(img, -rig.ox, -rig.oy); ctx.restore();
     });
     ctx.drawImage(rig.head, -rig.ox, -rig.oy);
-    // profile muzzle, yawning mouth and licking tongue (drawn when the head is turned)
-    const sn = s.snout || 0;
-    if (sn > 0.01) {
-      const sd = lx >= 0 ? 1 : -1, o = s.open || 0, tg = s.tongue || 0;
-      ctx.save(); ctx.translate(sd * 0.2 * h * sx, -0.695 * h); ctx.scale(sd * 1.2, 1.2);
-      ctx.globalAlpha = P.clamp(sn * 1.5, 0, 1);
-      if (o > 0.02) {
-        ctx.fillStyle = '#3e1520';
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0.082 * h, -0.012 * h - o * 0.032 * h); ctx.lineTo(0.074 * h, 0.012 * h + o * 0.05 * h); ctx.closePath(); ctx.fill();
-        ctx.fillStyle = '#e08494';
-        ctx.beginPath(); ctx.ellipse(0.045 * h, 0.012 * h + o * 0.03 * h, 0.03 * h, 0.009 * h, 0.35 * o, 0, P.TAU); ctx.fill();
-        ctx.fillStyle = '#fbf7f0';
-        const tx = 0.068 * h, ty = -0.012 * h - o * 0.027 * h, by = 0.012 * h + o * 0.043 * h;
-        ctx.beginPath(); ctx.moveTo(tx - 0.006 * h, ty); ctx.lineTo(tx + 0.004 * h, ty); ctx.lineTo(tx - 0.001 * h, ty + 0.016 * h * o); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(tx - 0.008 * h, by); ctx.lineTo(tx + 0.002 * h, by); ctx.lineTo(tx - 0.003 * h, by - 0.012 * h * o); ctx.fill();
-      }
-      ctx.fillStyle = rig.style.snout || rig.style.base;
-      ctx.save(); ctx.rotate(-o * 0.38);
-      ctx.beginPath(); ctx.ellipse(0.035 * h, -0.012 * h, 0.05 * h, 0.026 * h, 0, 0, P.TAU); ctx.fill(); ctx.restore();
-      ctx.save(); ctx.rotate(o * 0.5);
-      ctx.beginPath(); ctx.ellipse(0.03 * h, 0.016 * h, 0.042 * h, 0.014 * h, 0, 0, P.TAU); ctx.fill(); ctx.restore();
-      if (rig.style.snoutRim) { ctx.strokeStyle = rig.style.snoutRim; ctx.lineWidth = 2; ctx.save(); ctx.rotate(-o * 0.38); ctx.beginPath(); ctx.ellipse(0.035 * h, -0.012 * h, 0.05 * h, 0.026 * h, 0, -2.6, 0.2); ctx.stroke(); ctx.restore(); }
-      ctx.fillStyle = '#2a1a1e'; ctx.beginPath(); ctx.arc(0.08 * h, -0.016 * h - o * 0.03 * h, 0.006 * h, 0, P.TAU); ctx.fill();
-      if (tg > 0.02) {
-        ctx.fillStyle = '#e8899a';
-        ctx.beginPath(); ctx.ellipse(0.07 * h + tg * 0.012 * h, 0.014 * h, 0.012 * h + tg * 0.016 * h, 0.008 * h, 0.3 - tg * 0.6, 0, P.TAU); ctx.fill();
-      }
-      ctx.restore();
-    }
     ctx.restore();
   };
 

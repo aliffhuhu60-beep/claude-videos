@@ -5,8 +5,8 @@ Dilukis semula sepenuhnya dengan kod (tiada piksel dari gambar asal, jadi tiada 
 
 | Fail | Isi |
 |---|---|
-| `output/wallpaper_malam_1_kucing_bukit.mp4` (20 s) | Kucing putih di bukit. **Menguap** ke arah bulan (mulut terbuka, taring, telinga ke belakang, badan meregang), mengibas telinga, menoleh ikut tahi bintang, bermain dengan kelip-kelip (mengekori, menggoyang punggung, menampar 2 kali), kemudian **menjilat kaki**. Awan bergerak jelas merentas langit, angin bergelombang di rumput, benih dandelion terapung |
-| `output/wallpaper_malam_2_kucing_tingkap.mp4` (30 s) | Kucing hitam di tingkap. Mengekori & menampar rama-rama malam, mendongak lihat tahi bintang, **menjilat kaki**, kemudian **menguap**. Setiap helai daun bergetar ditiup angin (dengan tiupan kuat sekali-sekala), daun gugur di luar, awan nipis bergerak di langit, langsir beralun, lampu rumah jauh padam/menyala, kelip-kelip |
+| `output/wallpaper_malam_1_kucing_bukit.mp4` (20 s) | Kucing putih di bukit. Telinga berpusing bila terdengar bunyi, kepala menoleh & dicondongkan (ingin tahu), menoleh ikut tahi bintang, bermain dengan kelip-kelip (mengekori, menggoyang punggung, menampar 2 kali), menggeleng kepala, kemudian menghidu angin. Awan bergerak merentas langit, angin bergelombang di rumput, benih dandelion terapung |
+| `output/wallpaper_malam_2_kucing_tingkap.mp4` (30 s) | Kucing hitam di tingkap. Mengekori & menampar rama-rama malam, mendongak lihat tahi bintang, mengekori kelawar yang terbang melintasi bulan lalu mencondongkan kepala, menggeleng kepala, menghidu angin. Setiap helai daun bergetar ditiup angin, daun gugur, awan nipis bergerak, langsir beralun, lampu rumah jauh padam/menyala, kelip-kelip |
 | `output/*_still.png` | Versi gambar statik (untuk wallpaper biasa) |
 
 Spesifikasi: 1080 × 2400 (nisbah 20:9), 30 fps, 20 s / 30 s, gelung lancar (seamless loop), H.264.
