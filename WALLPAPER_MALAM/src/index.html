@@ -1,0 +1,27 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: 'Gaegu'; font-weight: 700; src: url('fonts/Gaegu-Bold.woff2') format('woff2'); }
+html,body{margin:0;background:#000;overflow:hidden}
+canvas{display:block}
+</style>
+<script src="paint.js"></script>
+<script src="scene_bukit.js"></script>
+<script src="scene_tingkap.js"></script>
+</head><body><canvas id="c"></canvas>
+<script>
+(async () => {
+  const q = new URLSearchParams(location.search);
+  await document.fonts.load("700 60px Gaegu");
+  const scene = SCENES[q.get('scene')]({ text: q.get('text') !== '0' });
+  const cv = document.getElementById('c'); cv.width = scene.W; cv.height = scene.H;
+  const ctx = cv.getContext('2d');
+  const t0 = performance.now();
+  await scene.init();
+  window.initMs = performance.now() - t0;
+  window.renderFrame = (t) => scene.frame(ctx, t);
+  window.sceneT = scene.T;
+  scene.frame(ctx, 0);
+  window.ready = true;
+})().catch(e => { window.err = String(e.stack || e); });
+</script></body></html>
