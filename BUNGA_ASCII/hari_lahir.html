@@ -6,7 +6,28 @@
 <meta name="theme-color" content="#070818">
 <title>Selamat Hari Lahir</title>
 <style>
-  html, body { margin: 0; height: 100%; background: #070818; overflow: hidden; }
+  /* satu rupa: langit malam; skrin hadiah di tengah, animasi kanvas penuh skrin */
+  :root { --bg: #070818; --ink: #ffe8f3; --accent: #ff6fb5; --accent-ink: #2a0a1c; --muted: #8a86b8;
+          --serif: Georgia, "Palatino Linotype", "Book Antiqua", "DejaVu Serif", serif;
+          --mono: ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace; color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); overflow: hidden; }
+  #gift { position: fixed; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center;
+          justify-content: center; gap: 1.1rem; text-align: center; background: var(--bg);
+          padding-block: env(safe-area-inset-top, 0px) env(safe-area-inset-bottom, 0px);
+          padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+          transition: opacity .7s ease; }
+  #gift.out { opacity: 0; pointer-events: none; }
+  #box { margin: 0; font: 700 clamp(11px, 3.6vw, 20px)/1.15 var(--mono); color: var(--accent);
+         text-shadow: 0 0 12px rgba(255, 111, 181, .55); animation: bob 2.4s ease-in-out infinite; }
+  #giftFor { margin: 0; font: italic clamp(20px, 6vw, 32px) var(--serif); color: var(--ink); }
+  #giftFor:empty { display: none; }
+  #lead { margin: 0; font: clamp(15px, 4.2vw, 19px) var(--serif); color: var(--muted); }
+  #open { font: 600 clamp(15px, 4.2vw, 18px) var(--serif); color: var(--accent-ink); background: var(--accent);
+          border: 0; border-radius: 999px; padding: .8em 2em; cursor: pointer; box-shadow: 0 0 24px rgba(255, 111, 181, .45); }
+  #open:hover { filter: brightness(1.08); }
+  #open:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  @keyframes bob { 50% { transform: translateY(-6px); } }
+  @media (prefers-reduced-motion: reduce) { #box { animation: none; } }
   canvas { display: block; position: fixed; inset: 0; width: 100vw; height: 100vh; touch-action: none; }
   #hint { position: fixed; left: 0; right: 0; top: max(10px, env(safe-area-inset-top)); text-align: center;
           color: #8a86b8; font: 12px ui-monospace, Menlo, Consolas, monospace; pointer-events: none;
@@ -15,7 +36,22 @@
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="hint">seret untuk putar &middot; ketik dua kali untuk main semula</div>
+<div id="hint" style="opacity:0">seret untuk putar &middot; ketik dua kali untuk main semula</div>
+<div id="gift">
+<pre id="box" aria-hidden="true">        __     __
+       /  \   /  \
+       \   \ /   /
+  ______\___V___/______
+  |         |         |
+  |_________|_________|
+   |        |        |
+   |        |        |
+   |        |        |
+   |________|________|</pre>
+  <p id="giftFor"></p>
+  <p id="lead">Ada sesuatu untuk awak</p>
+  <button id="open" type="button">Buka hadiah</button>
+</div>
 <script>
 /*
   Selamat Hari Lahir — kek ASCII 3D, lilin menyala, tulisan "Selamat Hari Lahir",
@@ -31,7 +67,9 @@
 const MESSAGE = new URLSearchParams(location.search).get("msg") || "bunga ini khas untuk awak <3";
 const QS = new URLSearchParams(location.search);
 const WALL = false, CAPTURE = QS.has("capture");
-const NAMA = (QS.get("nama") || "").trim(), MSG_ON = QS.has("msg");
+// nama: ?nama=Aisyah atau #Aisyah (pautan kongsi hanya membawa #)
+const HASH_NAMA = decodeURIComponent(location.hash.slice(1)).replace(/[-_]+/g, " ").trim();
+const NAMA = ((QS.get("nama") || "").trim() || HASH_NAMA).slice(0, 24), MSG_ON = QS.has("msg");
 // ayat lembut yang muncul bersama bunga (bukan gaya tulisan "Selamat Hari Lahir")
 const AYAT = (QS.get("ayat") || "Semoga setiap harimu|mekar seindah bunga ini").split("|").map(l => l.trim()).filter(Boolean);
 // garis masa (saat)
@@ -517,7 +555,7 @@ function setup() {
 }
 
 function frame(now, tFixed) {
-  const t = tFixed !== undefined ? tFixed : (now - t0) / 1000;
+  const t = tFixed !== undefined ? tFixed : started ? (now - t0) / 1000 : 0;
   const clamp = v => Math.max(0, Math.min(1, v)), smooth = v => { v = clamp(v); return v * v * (3 - 2 * v); };
   const g = smooth((t - T.flower0) / GROW_SECONDS);            // bunga tumbuh
   const gc = smooth((t - T.cake0) / T.cakeBuild);              // kek dibina
@@ -741,9 +779,21 @@ function frame(now, tFixed) {
 cv.addEventListener("pointerdown", e => { dragging = e.clientX; cv.setPointerCapture(e.pointerId); });
 cv.addEventListener("pointermove", e => { if (dragging !== null) { dragAngle += (e.clientX - dragging) * 0.01; dragging = e.clientX; } });
 cv.addEventListener("pointerup", () => { dragging = null; });
-cv.addEventListener("dblclick", () => { t0 = performance.now(); });
-if (CAPTURE) document.getElementById("hint").style.display = "none";
-setTimeout(() => { document.getElementById("hint").style.opacity = 0; }, 5000);
+cv.addEventListener("dblclick", () => { if (started) t0 = performance.now(); });
+
+// skrin hadiah: animasi bermula bila penerima menekan "Buka hadiah"
+let started = CAPTURE || QS.has("terus");
+const gift = document.getElementById("gift"), hint = document.getElementById("hint");
+document.getElementById("giftFor").textContent = NAMA ? `Untuk ${NAMA}` : "";
+if (started) gift.hidden = true;
+document.getElementById("open").addEventListener("click", () => {
+  started = true; t0 = performance.now();
+  gift.classList.add("out");
+  setTimeout(() => { gift.hidden = true; }, 750);
+  hint.style.opacity = 1;
+  setTimeout(() => { hint.style.opacity = 0; }, 5000);
+});
+if (CAPTURE) hint.style.display = "none";
 let rt;
 addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(setup, 150); });
 
