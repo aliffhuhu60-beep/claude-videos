@@ -180,33 +180,51 @@ SCENES.bukit = function (opts) {
     return c;
   }
 
-  function paintCat() {
-    const h = CAT.h, cw = Math.round(h * 0.9), ch = Math.round(h * 1.1), c = P.canvas(cw, ch), g = c.getContext('2d');
-    const ox = cw / 2, oy = ch - 12;
-    const path = P.catPath(ox, oy, h);
-    g.fillStyle = '#d9dfec'; g.fill(path);
-    P.fillStrokes(g, R, {
-      path, x0: 0, y0: 0, x1: cw, y1: ch, count: 2400, jit: 7,
-      color: (x, y) => {
-        const u = (x - ox) / (h * 0.34), v = (oy - y) / h;
-        let col = P.mix(P.hex('#aab4d2'), P.hex('#f7f7fb'), P.clamp(0.5 + u * 0.55 + v * 0.25, 0, 1));
-        if (v > 0.6 && v < 0.64) col = P.mix(col, P.hex('#b5bdd8'), 0.4); // neck crease
+  function makeRig() {
+    return P.makeCatRig(R, CAT.h, 1, {
+      base: '#d9dfec', jit: 7,
+      color: (u, v) => {
+        let col = P.mix(P.hex('#aab4d2'), P.hex('#f7f7fb'), P.clamp(0.5 + u * 1.6 + v * 0.25, 0, 1));
+        if (v > 0.6 && v < 0.64) col = P.mix(col, P.hex('#b5bdd8'), 0.4);
         return col;
       },
-      angle: (x, y, R) => -Math.PI / 2 + (x - ox) / h * 0.9 + (R() - 0.5) * 0.5, len: [8, 22], w: [3, 7], a: [0.4, 0.75],
+      edge: (u) => (u > 0 ? '#f2f3f8' : '#b8c0da'),
+      whisker: 'rgba(235,240,252,0.5)',
+      pawRim: 'rgba(160,170,210,0.35)',
     });
-    // fuzzy outline
-    g.save(); g.clip(path);
-    g.strokeStyle = 'rgba(150,160,200,0.35)'; g.lineWidth = 5; g.stroke(path);
-    g.restore();
-    g.lineWidth = 8;
-    for (let i = 0, tries = 0; i < 160 && tries < 20000; tries++) {
-      const x = P.rand(R, 0, cw), y = P.rand(R, 0, ch);
-      if (!g.isPointInStroke(path, x, y)) continue;
-      i++;
-      P.stroke(g, R, x, y, -Math.PI / 2 + (R() - 0.5) * 1.4, P.rand(R, 5, 10), 2, x > ox ? '#f2f3f8' : '#b8c0da', 0.5);
+  }
+
+  // ---- the cat's little story (20 s loop) ----
+  const BUDDY = [ // firefly that comes to play: [t, x, y]
+    [7.6, 60, 1560], [8.6, 230, 1640], [9.6, 450, 1720], [10.6, 660, 1670], [11.5, 860, 1740], [12.2, 905, 1715],
+    [12.8, 880, 1740], [13.2, 905, 1720], [13.55, 970, 1640], [14.2, 1010, 1450], [15.0, 980, 1270], [15.8, 1040, 1100],
+  ];
+  const buddyAt = (t) => {
+    const [x, y] = P.pathAt(t, BUDDY);
+    return [x + 14 * Math.sin(TAU * 31 * t / T), y + 10 * Math.sin(TAU * 23 * t / T + 1)];
+  };
+  const buddyA = (t) => P.keys(t, [[7.6, 0], [8.2, 1], [15.0, 1], [15.8, 0]]);
+  function catState(t) {
+    const head = [CAT.x, CAT.base - CAT.h * 0.74];
+    let lx = P.keys(t, [[0, 0.25], [4, 0.25], [5, 0.05], [6.9, 0.05], [7.5, -0.6], [8.5, -0.35], [9.3, 0], [16.4, 0], [18, 0.25], [20, 0.25]]);
+    let ly = P.keys(t, [[0, 0.35], [6.9, 0.3], [7.5, 0.9], [8.5, 0.6], [9.3, 0.1], [16.4, 0.1], [18, 0.35], [20, 0.35]]);
+    const w = P.keys(t, [[9.4, 0], [10.2, 1], [15.4, 1], [16.4, 0]]);
+    if (w > 0) {
+      const [bx, by] = buddyAt(t);
+      lx += (P.clamp((bx - head[0]) / 260, -1, 1) - lx) * w;
+      ly += (P.clamp((head[1] - by) / 420, -0.3, 1) - ly) * w;
     }
-    return { c, ox, oy };
+    const exc = P.keys(t, [[9.8, 0], [10.8, 1], [14.6, 1], [16.2, 0]]);
+    const wig = P.keys(t, [[11.6, 0], [11.9, 1], [12.5, 1], [12.75, 0]]);
+    const paw = P.keys(t, [[12.75, 0], [12.97, 1], [13.13, 0.78], [13.3, 1], [13.72, 0]]);
+    return {
+      lx, ly, t,
+      earL: P.twitch(t, [4.5, 17.4]), earR: P.twitch(t, [1.6, 10.1, 13.9]),
+      alert: exc, crouch: 0.5 * wig + 0.2 * exc * (1 - paw), wiggle: wig * 7 * Math.sin(TAU * 40 * t / T),
+      lean: 0.07 * paw, breath: osc(t, 5) * (1 + exc * 0.6),
+      paw: { side: 1, amt: paw, wave: 0.15 * Math.sin(TAU * 60 * t / T) * paw },
+      tailCurl: 2.7 + 0.5 * osc(t, 2) + 0.15 * osc(t, 5, 1) + exc * 0.55 * osc(t, 30),
+    };
   }
 
   function grassData() {
@@ -228,7 +246,8 @@ SCENES.bukit = function (opts) {
   }
 
   function swayAt(x, t, p) {
-    return 0.18 * Math.sin(TAU * 3 * t / T - x * 0.006 + p * 0.25) + 0.06 * Math.sin(TAU * 7 * t / T + p);
+    const gust = 1 + 0.9 * Math.pow(Math.max(0, Math.sin(TAU * 2 * t / T - x * 0.002)), 4);
+    return gust * 0.18 * Math.sin(TAU * 3 * t / T - x * 0.006 + p * 0.25) + 0.06 * Math.sin(TAU * 7 * t / T + p);
   }
 
   function drawBlade(ctx, b, t) {
@@ -244,6 +263,19 @@ SCENES.bukit = function (opts) {
       ctx.strokeStyle = 'rgba(120,150,170,0.28)'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(b.x + b.w * 0.3, b.y - 2); ctx.quadraticCurveTo(b.x + s * b.h * 0.3, b.y - b.h * 0.55, tx, ty); ctx.stroke();
     }
+  }
+
+  const SEEDS = Array.from({ length: 9 }, (_, i) => ({ o: i / 9, y: 1500 + (i * 137) % 700, a: 30 + (i * 53) % 50, k: 2 + (i % 3), r: 2 + (i % 3) * 0.6 }));
+  function drawSeeds(ctx, t) {
+    SEEDS.forEach((s) => {
+      const p = ((t / T + s.o) % 1 + 1) % 1, x = -60 + p * (W + 120), y = s.y - p * 260 + s.a * Math.sin(TAU * s.k * t / T + s.o * 9);
+      const a = P.smooth(0, 0.1, p) * (1 - P.smooth(0.9, 1, p)) * 0.7;
+      P.glow(ctx, x, y, 14, [220, 228, 255], 0.35 * a);
+      ctx.strokeStyle = `rgba(240,244,255,${0.8 * a})`; ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let k = 0; k < 8; k++) { const an = k / 8 * TAU + TAU * 2 * t / T; ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(an) * s.r * 2.5, y + Math.sin(an) * s.r * 2.5); }
+      ctx.stroke();
+    });
   }
 
   function fireflyData() {
@@ -333,7 +365,7 @@ SCENES.bukit = function (opts) {
   return {
     W, H, T,
     async init() {
-      L.sky = paintSky(); L.moon = paintMoon(); L.land = paintLand(); L.cat = paintCat();
+      L.sky = paintSky(); L.moon = paintMoon(); L.land = paintLand(); L.cat = makeRig();
       L.clouds = cloudData(); L.stars = starData(); L.grass = grassData(); L.ff = fireflyData();
       L.text = opts.text === false ? null : P.textLayer(W, H, ['The stars', 'have nowhere', 'they need to be.'], 540, 1290, 84, 62, '#f6efdc', 'rgba(255,236,190,0.55)');
       L.vig = P.vignette(W, H, 0.55); L.grain = P.grain(W, H, 3, 34);
@@ -351,15 +383,15 @@ SCENES.bukit = function (opts) {
       drawClouds(ctx, t);
       ctx.drawImage(L.land, 0, 0);
       L.ff.filter((f) => !f.front).forEach((f) => drawFirefly(ctx, f, t));
-      // cat: tail first, then breathing body
-      const curl = 2.7 + 0.5 * osc(t, 2) + 0.15 * osc(t, 5, 1);
-      const tail = P.tailPath(CAT.x + CAT.h * 0.2, CAT.base - CAT.h * 0.035, CAT.h * 1.35, 1, curl, TAU * 2 * t / T, 0.38);
-      ctx.fillStyle = '#ccd3e5'; ctx.fill(tail.path);
-      ctx.strokeStyle = 'rgba(250,250,255,0.7)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
-      ctx.beginPath(); tail.left.slice(4).forEach((q, i) => (i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]))); ctx.stroke();
-      const br = 1 + 0.008 * osc(t, 5);
-      ctx.save(); ctx.translate(CAT.x, CAT.base); ctx.scale(1 + 0.003 * osc(t, 5), br);
-      ctx.drawImage(L.cat.c, -L.cat.ox, -L.cat.oy); ctx.restore();
+      // cat with its little story
+      const st = catState(t);
+      st.tail = (c) => {
+        const tail = P.tailPath(CAT.h * 0.2, -CAT.h * 0.035, CAT.h * 1.35, 1, st.tailCurl, TAU * 2 * t / T, 0.38);
+        c.fillStyle = '#ccd3e5'; c.fill(tail.path);
+        c.strokeStyle = 'rgba(250,250,255,0.7)'; c.lineWidth = 3; c.lineCap = 'round';
+        c.beginPath(); tail.left.slice(4).forEach((q, i) => (i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]))); c.stroke();
+      };
+      P.drawCat(ctx, L.cat, CAT.x, CAT.base, st);
       // moon glow around the cat
       P.glow(ctx, CAT.x + 20, CAT.base - CAT.h * 0.55, 220, [190, 205, 255], 0.08);
       L.grass.blades.forEach((b) => drawBlade(ctx, b, t));
@@ -372,6 +404,13 @@ SCENES.bukit = function (opts) {
         ctx.fillStyle = '#e8d48a'; ctx.beginPath(); ctx.arc(tx, ty, f.r * 0.32, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
       });
       L.ff.filter((f) => f.front).forEach((f) => drawFirefly(ctx, f, t));
+      const ba = buddyA(t);
+      if (ba > 0) {
+        const [bx, by] = buddyAt(t), pulse = 0.75 + 0.25 * Math.sin(TAU * 25 * t / T);
+        P.glow(ctx, bx, by, 46, [215, 245, 120], 0.55 * ba * pulse);
+        ctx.fillStyle = `rgba(255,253,215,${ba})`; ctx.beginPath(); ctx.arc(bx, by, 4, 0, TAU); ctx.fill();
+      }
+      drawSeeds(ctx, t);
       if (L.text) ctx.drawImage(L.text, 0, 0);
       ctx.drawImage(L.vig, 0, 0);
       ctx.globalCompositeOperation = 'soft-light'; ctx.globalAlpha = 0.55;

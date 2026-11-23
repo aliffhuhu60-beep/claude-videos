@@ -211,5 +211,152 @@
     return p;
   };
 
+  // ---------- animation helpers ----------
+  // Smooth keyframes: [[t, v], ...] sorted by t.
+  P.keys = function (t, k) {
+    if (t <= k[0][0]) return k[0][1];
+    for (let i = 1; i < k.length; i++) {
+      if (t <= k[i][0]) { const a = k[i - 1], b = k[i], u = (t - a[0]) / (b[0] - a[0]); return a[1] + (b[1] - a[1]) * u * u * (3 - 2 * u); }
+    }
+    return k[k.length - 1][1];
+  };
+  // Catmull-Rom path through [[t, x, y], ...]
+  P.pathAt = function (t, k) {
+    if (t <= k[0][0]) return [k[0][1], k[0][2]];
+    if (t >= k[k.length - 1][0]) { const l = k[k.length - 1]; return [l[1], l[2]]; }
+    let i = 1; while (t > k[i][0]) i++;
+    const p0 = k[Math.max(0, i - 2)], p1 = k[i - 1], p2 = k[i], p3 = k[Math.min(k.length - 1, i + 1)];
+    const u = (t - p1[0]) / (p2[0] - p1[0]), u2 = u * u, u3 = u2 * u;
+    const cr = (a, b, c, d) => 0.5 * ((2 * b) + (-a + c) * u + (2 * a - 5 * b + 4 * c - d) * u2 + (-a + 3 * b - 3 * c + d) * u3);
+    return [cr(p0[1], p1[1], p2[1], p3[1]), cr(p0[2], p1[2], p2[2], p3[2])];
+  };
+  // Quick double ear-flick starting at each time in `times`.
+  P.twitch = function (t, times) {
+    let e = 0;
+    times.forEach((t0) => { const d = t - t0; if (d > 0 && d < 0.5) e = Math.max(e, Math.abs(Math.sin(P.TAU * d / 0.5))); });
+    return e;
+  };
+
+  // ---------- articulated cat (seen from behind) ----------
+  P.makeCatRig = function (R, h, sx, style) {
+    const cw = Math.round(1.3 * h * sx), ch = Math.round(1.12 * h), ox = cw / 2, oy = ch - 0.06 * h;
+    const X = (u) => ox + u * h * sx, Y = (v) => oy + v * h;
+    const body = new Path2D();
+    body.moveTo(X(0), Y(0)); body.lineTo(X(0.25), Y(-0.008));
+    body.bezierCurveTo(X(0.335), Y(-0.03), X(0.345), Y(-0.2), X(0.275), Y(-0.33));
+    body.bezierCurveTo(X(0.22), Y(-0.45), X(0.15), Y(-0.55), X(0.14), Y(-0.63));
+    body.quadraticCurveTo(X(0), Y(-0.67), X(-0.14), Y(-0.63));
+    body.bezierCurveTo(X(-0.15), Y(-0.55), X(-0.22), Y(-0.45), X(-0.275), Y(-0.33));
+    body.bezierCurveTo(X(-0.345), Y(-0.2), X(-0.335), Y(-0.03), X(-0.25), Y(-0.008));
+    body.closePath();
+    const head = new Path2D();
+    head.moveTo(X(0.13), Y(-0.6));
+    head.bezierCurveTo(X(0.205), Y(-0.64), X(0.218), Y(-0.76), X(0.172), Y(-0.815));
+    head.bezierCurveTo(X(0.14), Y(-0.86), X(0.1), Y(-0.886), X(0), Y(-0.888));
+    head.bezierCurveTo(X(-0.1), Y(-0.886), X(-0.14), Y(-0.86), X(-0.172), Y(-0.815));
+    head.bezierCurveTo(X(-0.218), Y(-0.76), X(-0.205), Y(-0.64), X(-0.13), Y(-0.6));
+    head.quadraticCurveTo(X(0), Y(-0.575), X(0.13), Y(-0.6));
+    head.closePath();
+    const ear = (s) => {
+      const p = new Path2D();
+      p.moveTo(X(s * 0.06), Y(-0.85));
+      p.quadraticCurveTo(X(s * 0.14), Y(-0.93), X(s * 0.19), Y(-0.985));
+      p.quadraticCurveTo(X(s * 0.208), Y(-0.9), X(s * 0.19), Y(-0.78));
+      p.closePath();
+      return p;
+    };
+    const paint = (path, count, angleFn) => {
+      const c = P.canvas(cw, ch), g = c.getContext('2d');
+      g.fillStyle = style.base; g.fill(path);
+      P.fillStrokes(g, R, {
+        path, x0: 0, y0: 0, x1: cw, y1: ch, count, jit: style.jit || 6,
+        color: (x, y, R) => style.color((x - ox) / (h * sx), (oy - y) / h, R),
+        angle: angleFn || ((x, y, R) => -Math.PI / 2 + (x - ox) / h * 0.9 + (R() - 0.5) * 0.5), len: [8, 22].map((v) => v * h / 315), w: [3, 7], a: [0.4, 0.78],
+      });
+      if (style.rim) style.rim(g, path, { ox, oy, h, cw, ch });
+      g.lineWidth = 8;
+      const n = Math.round(count / 14);
+      for (let i = 0, tries = 0; i < n && tries < 30000; tries++) {
+        const x = P.rand(R, 0, cw), y = P.rand(R, 0, ch);
+        if (!g.isPointInStroke(path, x, y)) continue;
+        i++;
+        P.stroke(g, R, x, y, -Math.PI / 2 + (R() - 0.5) * 1.4, P.rand(R, 5, 10), 2, style.edge((x - ox) / (h * sx)), 0.5);
+      }
+      return c;
+    };
+    const area = h * h / (315 * 315);
+    const rig = { h, sx, ox, oy, style };
+    rig.body = paint(body, Math.round(1800 * area));
+    rig.head = paint(head, Math.round(700 * area), (x, y, R) => -Math.PI / 2 + (x - ox) / h * 2.2 + (R() - 0.5) * 0.6);
+    rig.earL = paint(ear(-1), Math.round(90 * area)); rig.earR = paint(ear(1), Math.round(90 * area));
+    // front paw, painted along +x from its shoulder pivot
+    const pl = 0.37 * h, pw = 0.052 * h, pcw = Math.round(pl + 0.2 * h), pch = Math.round(0.2 * h), pox = 0.08 * h, poy = pch / 2;
+    const paw = new Path2D();
+    paw.moveTo(pox - 0.05 * h, poy - pw);
+    paw.lineTo(pox + pl - 0.06 * h, poy - pw * 1.05);
+    paw.arc(pox + pl - 0.06 * h, poy, pw * 1.12, -Math.PI / 2, Math.PI / 2);
+    paw.lineTo(pox - 0.05 * h, poy + pw);
+    paw.closePath();
+    const pc = P.canvas(pcw, pch), pg = pc.getContext('2d');
+    pg.fillStyle = style.base; pg.fill(paw);
+    P.fillStrokes(pg, R, { path: paw, x0: 0, y0: 0, x1: pcw, y1: pch, count: Math.round(160 * area), jit: style.jit || 6,
+      color: (x, y, R) => style.color(0.25, 0.45 + (poy - y) / h, R), angle: (x, y, R) => (R() - 0.5) * 0.4, len: [8, 18], w: [3, 6], a: [0.4, 0.75] });
+    pg.strokeStyle = style.toe || 'rgba(60,70,100,0.35)'; pg.lineWidth = 1.6; pg.lineCap = 'round';
+    [-0.35, 0.35].forEach((f) => { pg.beginPath(); pg.moveTo(pox + pl - 0.03 * h, poy + f * pw); pg.lineTo(pox + pl + 0.035 * h, poy + f * pw * 0.9); pg.stroke(); });
+    if (style.pawRim) { pg.save(); pg.clip(paw); pg.filter = 'blur(3px)'; pg.strokeStyle = style.pawRim; pg.lineWidth = 8; pg.stroke(paw); pg.restore(); }
+    rig.paw = { c: pc, ox: pox, oy: poy };
+    return rig;
+  };
+
+  // s: { lx, ly, earL, earR, alert, paw:{side, amt, wave}, lean, breath, crouch, wiggle, t, tail(ctx) }
+  P.drawCat = function (ctx, rig, x, base, s) {
+    const h = rig.h, sx = rig.sx;
+    ctx.save();
+    ctx.translate(x + (s.wiggle || 0), base); ctx.rotate(s.lean || 0);
+    if (s.tail) s.tail(ctx);
+    const pa = s.paw;
+    if (pa && pa.amt > 0.01) {
+      const up = -1.12 + (pa.wave || 0);
+      const ang = pa.side === 1 ? Math.PI / 2 + (up - Math.PI / 2) * pa.amt : Math.PI / 2 + (Math.PI - up - Math.PI / 2) * pa.amt;
+      ctx.save(); ctx.translate(pa.side * 0.2 * h * sx, -0.42 * h); ctx.rotate(ang);
+      if (pa.side === -1) ctx.scale(1, -1);
+      ctx.drawImage(rig.paw.c, -rig.paw.ox, -rig.paw.oy); ctx.restore();
+    }
+    const b = s.breath || 0, cr = s.crouch || 0;
+    ctx.scale(1 + 0.003 * b + 0.02 * cr, 1 + 0.008 * b - 0.04 * cr);
+    ctx.drawImage(rig.body, -rig.ox, -rig.oy);
+    // head
+    const lx = s.lx || 0, ly = s.ly || 0;
+    ctx.translate(0, -0.62 * h);
+    ctx.rotate(lx * 0.17);
+    ctx.translate(lx * 0.045 * h * sx, ly * 0.018 * h);
+    ctx.scale(1 - Math.abs(lx) * 0.04, 1 - ly * 0.035);
+    ctx.translate(0, 0.62 * h);
+    if (rig.style.whisker) {
+      ctx.strokeStyle = rig.style.whisker; ctx.lineCap = 'round';
+      const tw = 0.02 * Math.sin(P.TAU * 17 * (s.t || 0) / 20); // loop-safe (T = 20 s)
+      [-1, 1].forEach((sd) => {
+        const f = P.clamp(1 + sd * lx * 0.5, 0.45, 1.5);
+        for (let k = 0; k < 3; k++) {
+          const wx = sd * 0.185 * h * sx, wy = -h * (0.70 - k * 0.022);
+          ctx.lineWidth = (1.6 - k * 0.2) * h / 480;
+          ctx.beginPath(); ctx.moveTo(wx, wy);
+          ctx.quadraticCurveTo(wx + sd * h * 0.1 * f, wy - h * (0.014 + tw) + k * 4, wx + sd * h * (0.19 - k * 0.015) * f, wy + h * (0.008 + k * 0.02 + tw));
+          ctx.stroke();
+        }
+      });
+    }
+    [[-1, rig.earL, s.earL || 0], [1, rig.earR, s.earR || 0]].forEach(([sd, img, e]) => {
+      const px = sd * 0.13 * h * sx, py = -0.83 * h;
+      ctx.save(); ctx.translate(px, py);
+      ctx.rotate(sd * (0.5 * e - 0.12 * (s.alert || 0)));
+      ctx.scale(1 - 0.28 * Math.max(0, sd * lx), 1 - 0.1 * e);
+      ctx.translate(-px, -py);
+      ctx.drawImage(img, -rig.ox, -rig.oy); ctx.restore();
+    });
+    ctx.drawImage(rig.head, -rig.ox, -rig.oy);
+    ctx.restore();
+  };
+
   window.P = P;
 })();

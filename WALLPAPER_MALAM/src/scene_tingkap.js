@@ -305,41 +305,106 @@ SCENES.tingkap = function (opts) {
     return { c, sill, wallP, face };
   }
 
-  function paintCat() {
-    const h = CAT.h, cw = Math.round(h * 1.3), ch = Math.round(h * 1.08), c = P.canvas(cw, ch), g = c.getContext('2d');
-    const ox = cw / 2, oy = ch - 10;
-    const path = P.catPath(ox, oy, h, 1.04);
-    // whiskers (behind the head silhouette edge, sticking out)
-    g.strokeStyle = 'rgba(235,238,248,0.8)'; g.lineCap = 'round';
-    [-1, 1].forEach((s) => {
-      for (let k = 0; k < 3; k++) {
-        const sx = ox + s * h * 0.18, sy = oy - h * (0.70 - k * 0.022);
-        g.lineWidth = 1.6 - k * 0.2;
-        g.beginPath(); g.moveTo(sx, sy); g.quadraticCurveTo(sx + s * h * 0.11, sy - h * 0.012 + k * 4, sx + s * h * (0.2 - k * 0.015), sy + h * (0.006 + k * 0.02)); g.stroke();
-      }
+  function makeRig() {
+    return P.makeCatRig(R, CAT.h, 1.04, {
+      base: '#0c0b11', jit: 4,
+      color: (u, v, R) => P.pick(R, [P.hex('#141320'), P.hex('#1b1a27'), P.hex('#0f0e16'), P.hex('#22212f')]),
+      edge: (u) => (u > 0 ? '#4a5378' : '#3a2522'),
+      whisker: 'rgba(235,238,248,0.8)',
+      pawRim: 'rgba(130,150,210,0.45)', toe: 'rgba(120,135,190,0.45)',
+      rim: (g, path, d) => {
+        const { ox, oy, h, cw } = d;
+        g.save(); g.clip(path); g.filter = 'blur(4px)';
+        const rg = g.createLinearGradient(ox - h * 0.35, 0, ox + h * 0.35, 0);
+        rg.addColorStop(0, 'rgba(210,130,80,0.55)'); rg.addColorStop(0.35, 'rgba(120,80,60,0)'); rg.addColorStop(0.6, 'rgba(110,130,190,0)'); rg.addColorStop(1, 'rgba(150,170,230,0.95)');
+        g.strokeStyle = rg; g.lineWidth = 16; g.stroke(path);
+        g.filter = 'blur(5px)'; g.strokeStyle = 'rgba(130,150,215,0.3)'; g.lineWidth = 9;
+        g.save(); g.clip(new Path2D(`M0 0 H${cw} V${oy - h * 0.6} H0 Z`)); g.stroke(path); g.restore();
+        g.restore();
+      },
     });
-    g.fillStyle = '#0c0b11'; g.fill(path);
-    P.fillStrokes(g, R, { path, x0: 0, y0: 0, x1: cw, y1: ch, count: 2800, jit: 4,
-      color: (x, y, R) => P.pick(R, [P.hex('#141320'), P.hex('#1b1a27'), P.hex('#0f0e16'), P.hex('#22212f')]),
-      angle: (x, y, R) => -Math.PI / 2 + (x - ox) / h * 0.9 + (R() - 0.5) * 0.5, len: [10, 26], w: [3, 7], a: [0.4, 0.8] });
-    // rim lights: cool moonlight on the right/top, warm lamp on the left
-    g.save(); g.clip(path); g.filter = 'blur(4px)';
-    const rg = g.createLinearGradient(ox - h * 0.35, 0, ox + h * 0.35, 0);
-    rg.addColorStop(0, 'rgba(210,130,80,0.55)'); rg.addColorStop(0.35, 'rgba(120,80,60,0)'); rg.addColorStop(0.6, 'rgba(110,130,190,0)'); rg.addColorStop(1, 'rgba(150,170,230,0.95)');
-    g.strokeStyle = rg; g.lineWidth = 16; g.stroke(path);
-    g.filter = 'blur(5px)'; g.strokeStyle = 'rgba(130,150,215,0.35)'; g.lineWidth = 10; g.save(); g.clip(new Path2D(`M0 0 H${cw} V${oy - h * 0.6} H0 Z`)); g.stroke(path); g.restore();
-    g.filter = 'blur(10px)'; g.fillStyle = 'rgba(120,140,200,0.18)';
-    g.beginPath(); g.ellipse(ox + h * 0.02, oy - h * 0.86, h * 0.17, h * 0.05, 0, 0, TAU); g.fill();
-    g.restore();
-    // fuzzy fur edge
-    g.lineWidth = 8;
-    for (let i = 0, tries = 0; i < 220 && tries < 30000; tries++) {
-      const x = P.rand(R, 0, cw), y = P.rand(R, 0, ch);
-      if (!g.isPointInStroke(path, x, y)) continue;
-      i++;
-      P.stroke(g, R, x, y, -Math.PI / 2 + (R() - 0.5) * 1.4, P.rand(R, 5, 11), 2, x > ox ? '#4a5378' : '#3a2522', 0.55);
+  }
+
+  // ---- story: a moth drifts in, the cat watches, pounces, the moth escapes to the garden ----
+  const MOTH = [
+    [1.4, 1130, 980], [2.6, 900, 1180], [3.8, 700, 1420], [5.0, 520, 1520], [6.2, 400, 1600], [7.3, 520, 1680],
+    [8.3, 455, 1640], [9.0, 410, 1700], [9.5, 395, 1690], [10.0, 360, 1560], [11.0, 300, 1330], [12.2, 470, 1120],
+    [13.3, 640, 900], [14.4, 720, 700], [15.4, 690, 560],
+  ];
+  const mothAt = (t) => { const [x, y] = P.pathAt(t, MOTH); return [x + 12 * Math.sin(TAU * 27 * t / T), y + 9 * Math.sin(TAU * 35 * t / T + 2)]; };
+  const mothA = (t) => P.keys(t, [[1.4, 0], [2.0, 1], [14.6, 1], [15.4, 0]]);
+  const mothS = (t) => P.keys(t, [[10.5, 1], [15.4, 0.45]]); // shrinks as it flies far into the garden
+  function catState(t) {
+    const head = [CAT.x, CAT.base - CAT.h * 0.74];
+    let lx = P.keys(t, [[0, -0.1], [15.3, -0.1], [15.9, -0.15], [16.6, 0.1], [17.6, 0.15], [18.6, -0.1], [20, -0.1]]);
+    let ly = P.keys(t, [[0, 0.15], [15.3, 0.15], [15.9, 0.95], [17.6, 0.8], [18.6, 0.15], [20, 0.15]]);
+    const w = P.keys(t, [[1.8, 0], [2.6, 1], [14.3, 1], [15.1, 0]]);
+    if (w > 0) {
+      const [mx, my] = mothAt(t);
+      lx += (P.clamp((mx - head[0]) / 300, -1, 1) - lx) * w;
+      ly += (P.clamp((head[1] - my) / 520, -0.3, 1) - ly) * w;
     }
-    return { c, ox, oy };
+    const exc = P.keys(t, [[2.5, 0], [4, 0.6], [8, 1], [11, 1], [14, 0.4], [15, 0]]);
+    const wig = P.keys(t, [[7.9, 0], [8.2, 1], [8.8, 1], [9.05, 0]]);
+    const paw = P.keys(t, [[9.0, 0], [9.22, 1], [9.38, 0.78], [9.55, 1], [10.0, 0]]);
+    return {
+      lx, ly, t,
+      earL: P.twitch(t, [0.8, 6.6, 12.0]), earR: P.twitch(t, [4.2, 18.8]),
+      alert: exc, crouch: 0.5 * wig + 0.2 * exc * (1 - paw), wiggle: wig * 8 * Math.sin(TAU * 40 * t / T),
+      lean: -0.07 * paw, breath: osc(t, 5) * (1 + exc * 0.6),
+      paw: { side: -1, amt: paw, wave: 0.15 * Math.sin(TAU * 60 * t / T) * paw },
+      tailCurl: 2.5 + 0.55 * osc(t, 2, 0.6) + 0.15 * osc(t, 5) + exc * 0.6 * osc(t, 30),
+    };
+  }
+  function drawMoth(ctx, t) {
+    const a = mothA(t); if (a <= 0) return;
+    const [x, y] = mothAt(t), sc = mothS(t), flap = 0.35 + 0.65 * Math.abs(Math.sin(TAU * 120 * t / T));
+    P.glow(ctx, x, y, 60 * sc, [255, 230, 190], 0.25 * a);
+    ctx.save(); ctx.translate(x, y); ctx.scale(sc * 1.5, sc * 1.5); ctx.rotate(0.15 * Math.sin(TAU * 9 * t / T));
+    ctx.globalAlpha = a;
+    [-1, 1].forEach((s) => {
+      ctx.fillStyle = '#e9dcc6';
+      ctx.beginPath(); ctx.ellipse(s * 11 * flap, -4, 13 * flap, 9, s * 0.5, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#cdbfa8';
+      ctx.beginPath(); ctx.ellipse(s * 8 * flap, 7, 9 * flap, 6, -s * 0.4, 0, TAU); ctx.fill();
+    });
+    ctx.fillStyle = '#8a7a66'; ctx.beginPath(); ctx.ellipse(0, 1, 3, 9, 0, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(120,100,80,0.8)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-1, -8); ctx.lineTo(-6, -16); ctx.moveTo(1, -8); ctx.lineTo(6, -16); ctx.stroke();
+    ctx.restore(); ctx.globalAlpha = 1;
+  }
+  // sheer curtain breathing in the night breeze
+  function drawCurtain(ctx, t) {
+    const right = (y) => { const f = y / SILL_B; return 120 + 40 * f + f * (38 * Math.sin(TAU * 2 * t / T - y * 0.003) + 14 * Math.sin(TAU * 5 * t / T - y * 0.007 + 1)); };
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(-10, -10);
+    for (let y = -10; y <= SILL_B - 20; y += 20) ctx.lineTo(right(y), y);
+    ctx.lineTo(-10, SILL_B - 20); ctx.closePath();
+    const cg = ctx.createLinearGradient(0, 0, 0, SILL_B);
+    cg.addColorStop(0, 'rgba(90,90,120,0.16)'); cg.addColorStop(0.6, 'rgba(180,150,140,0.2)'); cg.addColorStop(1, 'rgba(255,210,170,0.3)');
+    ctx.fillStyle = cg; ctx.fill(); ctx.clip();
+    for (let i = 1; i <= 7; i++) {
+      const f = i / 8; ctx.beginPath();
+      for (let y = -10; y <= SILL_B; y += 25) { const x = right(y) * f + 6 * Math.sin(TAU * 3 * t / T + i * 1.7 + y * 0.004); if (y < 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+      ctx.strokeStyle = i % 2 ? 'rgba(255,225,190,0.16)' : 'rgba(30,20,30,0.18)'; ctx.lineWidth = 7; ctx.stroke();
+    }
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(255,220,180,0.3)'; ctx.lineWidth = 2;
+    ctx.beginPath(); for (let y = 0; y <= SILL_B - 20; y += 20) { const x = right(y); if (y) ctx.lineTo(x, y); else ctx.moveTo(x, y); } ctx.stroke();
+  }
+  // leaves falling past the window outside
+  const FALL = [{ o: 0.05, x: 300 }, { o: 0.4, x: 640 }, { o: 0.72, x: 180 }];
+  function drawFalling(ctx, t) {
+    FALL.forEach((f, i) => {
+      const p = ((t / T + f.o) % 1 + 1) % 1; if (p > 0.5) return;
+      const u = p / 0.5, y = 150 + u * 1800, x = f.x + 70 * Math.sin(TAU * 4 * t / T + i) + u * 120;
+      const a = P.smooth(0, 0.08, u) * (1 - P.smooth(0.88, 1, u));
+      ctx.save(); ctx.translate(x, y); ctx.rotate(0.9 * Math.sin(TAU * 4 * t / T + i + 0.8)); ctx.globalAlpha = 0.85 * a;
+      ctx.fillStyle = ['#2b4a3a', '#3b5a40', '#4a5e3a'][i];
+      ctx.fill(P.leafPath(34, 9, 3));
+      ctx.strokeStyle = 'rgba(160,185,220,0.4)'; ctx.lineWidth = 1.2; ctx.stroke(P.leafPath(34, 9, 3));
+      ctx.restore(); ctx.globalAlpha = 1;
+    });
   }
 
   function fireflyData() {
@@ -365,8 +430,10 @@ SCENES.tingkap = function (opts) {
   return {
     W, H, T,
     async init() {
-      L.sky = paintSky(); L.moon = paintMoon(); L.back = paintBack(); L.front = paintFront(); L.cat = paintCat();
+      L.sky = paintSky(); L.moon = paintMoon(); L.back = paintBack(); L.front = paintFront(); L.cat = makeRig();
       L.stars = starData(); L.ff = fireflyData();
+      const onW = L.windows.filter((w) => w.on), offW = L.windows.filter((w) => !w.on);
+      L.switchWin = onW[3]; L.switchWin2 = offW[0]; if (L.switchWin2) L.switchWin2.on = true;
       const darkPal = ['#0e2218', '#14301f', '#1a3a27', '#21452f'];
       L.mid = makeBranch(31, { pts: [[60, 1560], [170, 1470], [280, 1390], [390, 1330], [470, 1300]], n: 26, len: [60, 95], stemW: 6, pal: darkPal, hi: '#3f6b5a', rim: 'rgba(150,180,220,0.35)', amp: 0.018, k: 2, droop: 0.3 });
       L.fg = [
@@ -394,8 +461,8 @@ SCENES.tingkap = function (opts) {
         }
       });
       // shooting star
-      if (t > 12.4 && t < 13.4) {
-        const u = (t - 12.4) / 1.0, e = 1 - Math.pow(1 - u, 2), a = Math.sin(Math.PI * u);
+      if (t > 15.9 && t < 16.9) {
+        const u = (t - 15.9) / 1.0, e = 1 - Math.pow(1 - u, 2), a = Math.sin(Math.PI * u);
         const sx = 330, sy = 90, ex = 700, ey = 260, hx = sx + (ex - sx) * e, hy = sy + (ey - sy) * e, dl = Math.hypot(ex - sx, ey - sy), tl = 150 * a;
         const lg = ctx.createLinearGradient(hx - (ex - sx) / dl * tl, hy - (ey - sy) / dl * tl, hx, hy);
         lg.addColorStop(0, 'rgba(220,230,255,0)'); lg.addColorStop(1, `rgba(255,255,255,${0.9 * a})`);
@@ -410,15 +477,19 @@ SCENES.tingkap = function (opts) {
       // lit windows of the distant house
       L.windows.forEach((w) => {
         if (!w.on) return;
-        const a = 0.82 + 0.12 * Math.sin(TAU * w.k * t / T + w.p) + 0.06 * Math.sin(TAU * 9 * t / T + w.p * 3);
+        let a = 0.82 + 0.12 * Math.sin(TAU * w.k * t / T + w.p) + 0.06 * Math.sin(TAU * 9 * t / T + w.p * 3);
+        if (w === L.switchWin) a *= P.keys(t, [[5.8, 1], [6.1, 0], [13.6, 0], [13.9, 1]]);
+        if (w === L.switchWin2) a *= P.keys(t, [[2.0, 0], [2.3, 1], [17.6, 1], [17.9, 0]]);
         ctx.fillStyle = `rgba(255,205,120,${a})`; ctx.fillRect(w.x, w.y, w.w, w.h);
         P.glow(ctx, w.x + w.w / 2, w.y + w.h / 2, 22, [255, 190, 100], 0.35 * a);
       });
       L.ff.forEach((f) => drawFirefly(ctx, f, t));
       const sway = (b) => { const a = b.amp * (Math.sin(TAU * b.k * t / T + b.p) * 0.8 + 0.2 * Math.sin(TAU * (b.k * 3) * t / T + b.p * 2));
         ctx.save(); ctx.translate(b.ax, b.ay); ctx.rotate(a); ctx.translate(-b.ax, -b.ay); ctx.drawImage(b.c, 0, 0); ctx.restore(); };
+      drawFalling(ctx, t);
       sway(L.mid);
       ctx.drawImage(L.front.c, 0, 0);
+      drawCurtain(ctx, t);
       // flickering lamp glow on the interior
       const fl = 0.85 + 0.06 * osc(t, 7) + 0.05 * osc(t, 13, 1.3) + 0.04 * osc(t, 29, 2.1);
       ctx.save(); ctx.clip(L.interior); ctx.globalCompositeOperation = 'screen';
@@ -426,13 +497,15 @@ SCENES.tingkap = function (opts) {
       lg.addColorStop(0, `rgba(255,170,90,${0.42 * fl})`); lg.addColorStop(0.5, `rgba(255,150,80,${0.14 * fl})`); lg.addColorStop(1, 'rgba(255,150,80,0)');
       ctx.fillStyle = lg; ctx.fillRect(0, 0, W, H); ctx.restore();
       // cat
-      const curl = 2.5 + 0.55 * osc(t, 2, 0.6) + 0.15 * osc(t, 5);
-      const tail = P.tailPath(CAT.x - CAT.h * 0.2, CAT.base - CAT.h * 0.035, CAT.h * 1.3, -1, curl, TAU * 2 * t / T, 0.4);
-      ctx.fillStyle = '#100f16'; ctx.fill(tail.path);
-      ctx.strokeStyle = 'rgba(210,140,90,0.45)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
-      ctx.beginPath(); tail.left.slice(3).forEach((q, i) => (i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]))); ctx.stroke();
-      ctx.save(); ctx.translate(CAT.x, CAT.base); ctx.scale(1 + 0.003 * osc(t, 5), 1 + 0.008 * osc(t, 5));
-      ctx.drawImage(L.cat.c, -L.cat.ox, -L.cat.oy); ctx.restore();
+      const st = catState(t);
+      st.tail = (c) => {
+        const tail = P.tailPath(-CAT.h * 0.2, -CAT.h * 0.035, CAT.h * 1.3, -1, st.tailCurl, TAU * 2 * t / T, 0.4);
+        c.fillStyle = '#100f16'; c.fill(tail.path);
+        c.strokeStyle = 'rgba(210,140,90,0.45)'; c.lineWidth = 3; c.lineCap = 'round';
+        c.beginPath(); tail.left.slice(3).forEach((q, i) => (i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]))); c.stroke();
+      };
+      P.drawCat(ctx, L.cat, CAT.x, CAT.base, st);
+      drawMoth(ctx, t);
       L.fg.forEach(sway);
       if (L.text) ctx.drawImage(L.text, 0, 0);
       ctx.drawImage(L.vig, 0, 0);
