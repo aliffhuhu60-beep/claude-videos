@@ -331,6 +331,7 @@
       ctx.drawImage(rig.paw.c, -rig.paw.ox, -rig.paw.oy); ctx.restore();
     }
     const b = s.breath || 0, cr = s.crouch || 0;
+    ctx.save();
     ctx.scale(1 + 0.003 * b + 0.02 * cr, 1 + 0.008 * b - 0.04 * cr);
     ctx.drawImage(rig.body, -rig.ox, -rig.oy);
     // head
@@ -364,6 +365,65 @@
     });
     ctx.drawImage(rig.head, -rig.ox, -rig.oy);
     ctx.restore();
+    if (s.front) s.front(ctx); // e.g. a tail lying on the ground in front of the body
+    ctx.restore();
+  };
+
+  // ---------- natural furry tail lying on the ground, curling round to one side ----------
+  // pal: { base, light, shade, edge } ; strokes are fixed so the fur does not shimmer.
+  P.makeTail = function (seed, pal) {
+    const Rt = P.rng(seed), fur = [], fluff = [];
+    for (let i = 0; i < 220; i++) {
+      const o = P.rand(Rt, -0.95, 0.95);
+      fur.push({ s: Math.pow(Rt(), 0.9) * 0.97, o, l: P.rand(Rt, 0.04, 0.085), w: P.rand(Rt, 1.4, 3), j: (Rt() - 0.5) * 0.35, c: Rt(), a: P.rand(Rt, 0.35, 0.8) });
+    }
+    for (let i = 0; i < 70; i++) fluff.push({ s: Rt() * 0.98, side: Rt() < 0.5 ? -1 : 1, l: P.rand(Rt, 0.02, 0.04), j: (Rt() - 0.5) * 0.9, a: P.rand(Rt, 0.3, 0.6) });
+    return { fur, fluff, pal };
+  };
+  // dir: 1 = curls to the right, -1 = left. lift: how much the tip rises (rad). phase: slow wave. flick: 0..1 fast tip twitch
+  P.drawTail = function (ctx, tail, h, dir, lift, phase, flick = 0, len = 0.5) {
+    const n = 36, Lseg = len * h / n, pts = [];
+    let x = dir * 0.1 * h, y = -0.075 * h, th = dir === 1 ? 0.45 : Math.PI - 0.45; // starts hidden behind the haunch, dips to the ground
+    const wts = []; let sum = 0;
+    for (let i = 1; i <= n; i++) { const s = i / n, w = Math.pow(Math.max(0, s - 0.4), 1.3); wts.push(w); sum += w; }
+    pts.push([x, y, th]);
+    for (let i = 1; i <= n; i++) {
+      const s = i / n;
+      th += -dir * (s < 0.3 ? 0.016 : 0.003) - dir * lift * wts[i - 1] / sum + dir * s * s * (0.05 * Math.sin(phase - s * 4) + 0.12 * flick * Math.sin(phase * 7 - s * 6)) / 6;
+      x += Math.cos(th) * Lseg; y += Math.sin(th) * Lseg;
+      pts.push([x, y, th]);
+    }
+    const hwAt = (s) => { let w = h * (0.056 - 0.018 * s); if (s > 0.86) w *= Math.sqrt(Math.max(0, 1 - Math.pow((s - 0.86) / 0.14, 2))) * 0.6 + 0.4 * (1 - (s - 0.86) / 0.14); return w; };
+    const at = (s) => { const f = s * n, i = Math.min(n - 1, Math.floor(f)), u = f - i, a = pts[i], b = pts[i + 1]; return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; };
+    const left = [], right = [];
+    pts.forEach(([px, py, a], i) => { const hw = hwAt(i / n); left.push([px + Math.cos(a - Math.PI / 2) * hw, py + Math.sin(a - Math.PI / 2) * hw]); right.push([px + Math.cos(a + Math.PI / 2) * hw, py + Math.sin(a + Math.PI / 2) * hw]); });
+    const tip = pts[n], path = new Path2D();
+    left.forEach((q, i) => (i ? path.lineTo(q[0], q[1]) : path.moveTo(q[0], q[1])));
+    path.quadraticCurveTo(tip[0] + Math.cos(tip[2]) * h * 0.03, tip[1] + Math.sin(tip[2]) * h * 0.03, right[n][0], right[n][1]);
+    for (let i = n; i >= 0; i--) path.lineTo(right[i][0], right[i][1]);
+    path.closePath();
+    // soft contact shadow
+    ctx.save(); ctx.translate(0, h * 0.018); ctx.filter = `blur(${Math.round(h * 0.012)}px)`; ctx.fillStyle = 'rgba(10,8,12,0.28)'; ctx.fill(path); ctx.restore();
+    const p = tail.pal;
+    ctx.fillStyle = p.base; ctx.fill(path);
+    ctx.save(); ctx.clip(path); ctx.lineCap = 'round';
+    tail.fur.forEach((f) => {
+      const [cx, cy, a] = at(f.s), hw = hwAt(f.s), nx = Math.cos(a - Math.PI / 2), ny = Math.sin(a - Math.PI / 2);
+      const px = cx + nx * f.o * hw, py = cy + ny * f.o * hw, up = -f.o * dir; // upper edge faces the moon
+      const col = up > 0.3 ? (f.c < 0.7 ? p.light : p.base) : up < -0.4 ? (f.c < 0.7 ? p.shade : p.base) : (f.c < 0.5 ? p.base : f.c < 0.8 ? p.light : p.shade);
+      const L = f.l * h, aa = a + f.j;
+      ctx.strokeStyle = col; ctx.globalAlpha = f.a; ctx.lineWidth = f.w;
+      ctx.beginPath(); ctx.moveTo(px - Math.cos(aa) * L * 0.5, py - Math.sin(aa) * L * 0.5); ctx.lineTo(px + Math.cos(aa) * L * 0.5, py + Math.sin(aa) * L * 0.5); ctx.stroke();
+    });
+    ctx.restore();
+    ctx.lineCap = 'round';
+    tail.fluff.forEach((f) => {
+      const [cx, cy, a] = at(f.s), hw = hwAt(f.s), na = a + f.side * Math.PI / 2;
+      const px = cx + Math.cos(na) * hw * 0.95, py = cy + Math.sin(na) * hw * 0.95, aa = a + f.j * f.side + f.side * 0.4;
+      ctx.strokeStyle = f.side * -dir > 0 ? p.light : p.edge; ctx.globalAlpha = f.a; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + Math.cos(aa) * f.l * h, py + Math.sin(aa) * f.l * h); ctx.stroke();
+    });
+    ctx.globalAlpha = 1;
   };
 
   window.P = P;

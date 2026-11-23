@@ -224,16 +224,14 @@ SCENES.bukit = function (opts) {
     ly += sniffE * 0.05 * Math.max(0, sniff);
     const exc = P.keys(t, [[9.8, 0], [10.8, 1], [14.6, 1], [16.2, 0]]);
     const wig = P.keys(t, [[11.6, 0], [11.9, 1], [12.5, 1], [12.75, 0]]);
-    const swipe = P.keys(t, [[12.75, 0], [12.97, 1], [13.13, 0.78], [13.3, 1], [13.72, 0]]);
     const flap = shake * Math.abs(sb) * 0.8;
     return {
       lx, ly, tilt, t, T, sniff,
       earL: Math.max(P.twitch(t, [4.5, 15.9]), P.keys(t, [[1.9, 0], [2.2, 0.5], [2.9, 0.5], [3.2, 0]]), flap),
       earR: Math.max(P.twitch(t, [5.6, 10.1, 13.9]), P.keys(t, [[0.75, 0], [0.95, 0.75], [1.6, 0.75], [1.9, 0]]), flap),
-      alert: Math.max(exc, P.keys(t, [[0.9, 0], [1.3, 0.8], [3.2, 0.8], [3.8, 0]])), crouch: 0.5 * wig + 0.2 * exc * (1 - swipe), wiggle: wig * 7 * Math.sin(TAU * 40 * t / T),
-      lean: 0.07 * swipe, breath: osc(t, 5) * (1 + exc * 0.6),
-      paw: { side: 1, amt: swipe, wave: 0.15 * Math.sin(TAU * 60 * t / T) * swipe },
-      tailCurl: 2.7 + 0.5 * osc(t, 2) + 0.15 * osc(t, 5, 1) + exc * 0.55 * osc(t, 30),
+      alert: Math.max(exc, P.keys(t, [[0.9, 0], [1.3, 0.8], [3.2, 0.8], [3.8, 0]])), crouch: 0.5 * wig + 0.2 * exc, wiggle: wig * 7 * Math.sin(TAU * 40 * t / T),
+      breath: osc(t, 5) * (1 + exc * 0.6),
+      tailLift: 1.35 + 0.25 * osc(t, 2) + 0.08 * osc(t, 5, 1), tailFlick: exc,
     };
   }
 
@@ -376,6 +374,7 @@ SCENES.bukit = function (opts) {
     W, H, T,
     async init() {
       L.sky = paintSky(); L.moon = paintMoon(); L.land = paintLand(); L.cat = makeRig();
+      L.tail = P.makeTail(71, { base: '#d3d9e7', light: '#f5f6fb', shade: '#a6afca', edge: '#bcc4dc' });
       L.clouds = cloudData(); L.stars = starData(); L.grass = grassData(); L.ff = fireflyData();
       L.text = opts.text === false ? null : P.textLayer(W, H, ['The stars', 'have nowhere', 'they need to be.'], 540, 1290, 84, 62, '#f6efdc', 'rgba(255,236,190,0.55)');
       L.vig = P.vignette(W, H, 0.55); L.grain = P.grain(W, H, 3, 34);
@@ -395,12 +394,7 @@ SCENES.bukit = function (opts) {
       L.ff.filter((f) => !f.front).forEach((f) => drawFirefly(ctx, f, t));
       // cat with its little story
       const st = catState(t);
-      st.tail = (c) => {
-        const tail = P.tailPath(CAT.h * 0.2, -CAT.h * 0.035, CAT.h * 1.35, 1, st.tailCurl, TAU * 2 * t / T, 0.38);
-        c.fillStyle = '#ccd3e5'; c.fill(tail.path);
-        c.strokeStyle = 'rgba(250,250,255,0.7)'; c.lineWidth = 3; c.lineCap = 'round';
-        c.beginPath(); tail.left.slice(4).forEach((q, i) => (i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]))); c.stroke();
-      };
+      st.tail = (c) => P.drawTail(c, L.tail, CAT.h, 1, st.tailLift, TAU * 2 * t / T, st.tailFlick);
       P.drawCat(ctx, L.cat, CAT.x, CAT.base, st);
       // moon glow around the cat
       P.glow(ctx, CAT.x + 20, CAT.base - CAT.h * 0.55, 220, [190, 205, 255], 0.08);

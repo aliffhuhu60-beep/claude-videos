@@ -395,16 +395,14 @@ SCENES.tingkap = function (opts) {
     ly += sniffE * 0.05 * Math.max(0, sniff);
     const exc = P.keys(t, [[2.5, 0], [4, 0.6], [8, 1], [11, 1], [14, 0.4], [15, 0]]);
     const wig = P.keys(t, [[7.9, 0], [8.2, 1], [8.8, 1], [9.05, 0]]);
-    const swipe = P.keys(t, [[9.0, 0], [9.22, 1], [9.38, 0.78], [9.55, 1], [10.0, 0]]);
     const flap = shake * Math.abs(sb) * 0.8;
     return {
       lx, ly, tilt, t, T, sniff,
       earL: Math.max(P.twitch(t, [0.8, 6.6, 12.0]), flap),
       earR: Math.max(P.twitch(t, [4.2, 28.6]), P.keys(t, [[20.9, 0], [21.2, 0.6], [22.3, 0.6], [22.6, 0]]), flap),
-      alert: Math.max(exc, P.keys(t, [[18.3, 0], [18.8, 0.8], [22.6, 0.8], [23.2, 0]])), crouch: 0.5 * wig + 0.2 * exc * (1 - swipe), wiggle: wig * 8 * Math.sin(TAU * 60 * t / T),
-      lean: -0.07 * swipe, breath: osc(t, 8) * (1 + exc * 0.6),
-      paw: { side: -1, amt: swipe, wave: 0.15 * Math.sin(TAU * 90 * t / T) * swipe },
-      tailCurl: 2.5 + 0.55 * osc(t, 3, 0.6) + 0.15 * osc(t, 7) + exc * 0.6 * osc(t, 45),
+      alert: Math.max(exc, P.keys(t, [[18.3, 0], [18.8, 0.8], [22.6, 0.8], [23.2, 0]])), crouch: 0.5 * wig + 0.2 * exc, wiggle: wig * 8 * Math.sin(TAU * 60 * t / T),
+      breath: osc(t, 8) * (1 + exc * 0.6),
+      tailLift: 1.35 + 0.25 * osc(t, 3, 0.6) + 0.08 * osc(t, 7), tailFlick: exc,
     };
   }
   function drawMoth(ctx, t) {
@@ -483,6 +481,7 @@ SCENES.tingkap = function (opts) {
     W, H, T,
     async init() {
       L.sky = paintSky(); L.moon = paintMoon(); L.back = paintBack(); L.front = paintFront(); L.cat = makeRig();
+      L.tail = P.makeTail(72, { base: '#100f17', light: '#3b4466', shade: '#07060b', edge: '#5a3a2e' });
       L.stars = starData(); L.ff = fireflyData();
       WISPS.forEach((c, i) => { c.img = makeWisp(300 + i, c.w, 130); });
       const onW = L.windows.filter((w) => w.on), offW = L.windows.filter((w) => !w.on);
@@ -561,12 +560,7 @@ SCENES.tingkap = function (opts) {
       ctx.fillStyle = lg; ctx.fillRect(0, 0, W, H); ctx.restore();
       // cat
       const st = catState(t);
-      st.tail = (c) => {
-        const tail = P.tailPath(-CAT.h * 0.2, -CAT.h * 0.035, CAT.h * 1.3, -1, st.tailCurl, TAU * 3 * t / T, 0.4);
-        c.fillStyle = '#100f16'; c.fill(tail.path);
-        c.strokeStyle = 'rgba(210,140,90,0.45)'; c.lineWidth = 3; c.lineCap = 'round';
-        c.beginPath(); tail.left.slice(3).forEach((q, i) => (i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]))); c.stroke();
-      };
+      st.tail = (c) => P.drawTail(c, L.tail, CAT.h, -1, st.tailLift, TAU * 3 * t / T, st.tailFlick);
       P.drawCat(ctx, L.cat, CAT.x, CAT.base, st);
       drawMoth(ctx, t);
       L.fg.forEach(sway);

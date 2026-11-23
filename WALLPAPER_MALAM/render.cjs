@@ -27,7 +27,7 @@ function serve() {
   const text = a5 !== '0';
   const srv = await serve();
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1080, height: 2400 }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: 2304, height: 2400 }, deviceScaleFactor: 1 });
   page.on('console', (m) => console.log('[page]', m.text()));
   await page.goto(`http://127.0.0.1:${srv.address().port}/index.html?scene=${scene}&text=${text ? 1 : 0}`);
   await page.waitForFunction(() => window.ready || window.err, null, { timeout: 300000 });
